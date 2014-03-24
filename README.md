@@ -1,9 +1,9 @@
 monica-js
 =========
 
-JavaScript port of MONICA model
+**JavaScript port of MONICA model**
 
-**Features not yet implemented or tested**:
+Features not yet implemented or tested:
 
   - emergenceMoistureControlOn
   - emergenceFloodingControlOn

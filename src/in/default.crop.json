@@ -1,0 +1,50 @@
+{
+  "crops": [
+    {
+      "name": "winter rye",
+      "genType": "",
+      "spec": "",
+      "sowingDate": "1991-10-01",
+      "rowWidth": 5.0,
+      "plantSpace": 5.0,
+      "plantDryWeight": 225.0,
+      "percNTRansplant": 0.0,
+      "finalHarvestDate": "1992-08-01",
+      "residuesRemoval": 85.0,
+      "tillageOps": [
+        {
+          "date": "1991-09-15",
+          "method": "Plough",
+          "depth": 15.0
+        }
+      ],
+      "irrigations": [
+        {
+          "date": "1992-06-01",
+          "method": "Sprinkler",
+          "eventType": "Fixed",
+          "threshold": 30.0,
+          "area": 1.0,
+          "amount": 11.0,
+          "NConc": 0.0
+        }
+      ],
+      "mineralFertilisers": [
+        {
+          "date": "1992-04-01",
+          "method": "Fixed",
+          "type": "AN",
+          "amount": 40
+        }
+      ],
+      "organicFertilisers": [
+        {
+          "date": "1992-05-01",
+          "method": "Fixed",
+          "type": "CAM",
+          "amount": 3000
+        }
+      ]
+    }
+  ]
+}

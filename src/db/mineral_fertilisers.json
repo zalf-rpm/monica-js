@@ -1,0 +1,166 @@
+{
+  "columns":[
+    "ID",
+    "type",
+    "name",
+    "no3",
+    "nh4",
+    "carbamid",
+    "eom_DMNr"
+  ],
+  "rows":[
+    {
+      "ID":1,
+      "type":"AN",
+      "name":"Ammonium Nitrate",
+      "no3":0.5,
+      "nh4":0.5,
+      "carbamid":0.0,
+      "eom_DMNr":9
+    },
+    {
+      "ID":2,
+      "type":"AP",
+      "name":"Ammonium Phosphate",
+      "no3":0.0,
+      "nh4":1.0,
+      "carbamid":0.0,
+      "eom_DMNr":0
+    },
+    {
+      "ID":3,
+      "type":"AS",
+      "name":"Ammonium Sulphate",
+      "no3":0.0,
+      "nh4":1.0,
+      "carbamid":0.0,
+      "eom_DMNr":0
+    },
+    {
+      "ID":4,
+      "type":"CP1",
+      "name":"Compound fertiliser (0%NO3, 100% NH4)",
+      "no3":0.0,
+      "nh4":1.0,
+      "carbamid":0.0,
+      "eom_DMNr":0
+    },
+    {
+      "ID":5,
+      "type":"CP2",
+      "name":"Compound fertiliser (35%N=3, 65%NH4)",
+      "no3":0.35,
+      "nh4":0.65,
+      "carbamid":0.0,
+      "eom_DMNr":0
+    },
+    {
+      "ID":6,
+      "type":"CP3",
+      "name":"Compound fertiliser (50%NO3, 50%NH4)",
+      "no3":0.5,
+      "nh4":0.5,
+      "carbamid":0.0,
+      "eom_DMNr":0
+    },
+    {
+      "ID":7,
+      "type":"PN",
+      "name":"Potassium Nitrate",
+      "no3":1.0,
+      "nh4":0.0,
+      "carbamid":0.0,
+      "eom_DMNr":0
+    },
+    {
+      "ID":8,
+      "type":"U",
+      "name":"Urea",
+      "no3":0.0,
+      "nh4":0.0,
+      "carbamid":1.0,
+      "eom_DMNr":0
+    },
+    {
+      "ID":9,
+      "type":"UAN",
+      "name":"Urea Ammonium Nitrate",
+      "no3":0.25,
+      "nh4":0.25,
+      "carbamid":0.5,
+      "eom_DMNr":0
+    },
+    {
+      "ID":10,
+      "type":"UAS",
+      "name":"Urea Ammonium Sulphate",
+      "no3":0.0,
+      "nh4":0.18,
+      "carbamid":0.82,
+      "eom_DMNr":0
+    },
+    {
+      "ID":11,
+      "type":"NPK",
+      "name":"NPK-D\u00fcnger",
+      "no3":0.34,
+      "nh4":0.66,
+      "carbamid":0.0,
+      "eom_DMNr":0
+    },
+    {
+      "ID":12,
+      "type":"UNI",
+      "name":"Urea (nitrification inhibitor)",
+      "no3":0.0,
+      "nh4":0.0,
+      "carbamid":1.0,
+      "eom_DMNr":0
+    },
+    {
+      "ID":13,
+      "type":"CF4",
+      "name":"Compound fertiliser (43%NO3, 57%NH4)",
+      "no3":0.435,
+      "nh4":0.565,
+      "carbamid":0.0,
+      "eom_DMNr":0
+    },
+    {
+      "ID":14,
+      "type":"NS",
+      "name":"Stickstoffd\u00fcngerl\u00f6sung mit Schwefel, Piasan 24 S",
+      "no3":0.20833,
+      "nh4":0.33,
+      "carbamid":0.5,
+      "eom_DMNr":0
+    },
+    {
+      "ID":15,
+      "type":"AHLS",
+      "name":"Ammoniumnitrat-Harnstoff-L\u00f6sung + Ammoniumthiosulfat, 27-3",
+      "no3":0.22,
+      "nh4":0.3,
+      "carbamid":0.48,
+      "eom_DMNr":0
+    },
+    {
+      "ID":16,
+      "type":"ALZON",
+      "name":"Alzon fl\u00fcssig-S",
+      "no3":0.20833,
+      "nh4":0.33,
+      "carbamid":0.45833,
+      "eom_DMNr":0
+    },
+    {
+      "ID":17,
+      "type":"ASH",
+      "name":"Ammonsulfat-Harnstoff, \\\"Piamon\\\"",
+      "no3":0.0,
+      "nh4":0.23,
+      "carbamid":0.77,
+      "eom_DMNr":0
+    }
+  ]
+}
