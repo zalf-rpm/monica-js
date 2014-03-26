@@ -298,7 +298,7 @@ var CropParameters = function () {
     s += endl;
 
     // initial organic biomass
-    s  + "pc_InitialOrganBiomass:" + endl;
+    s  += "pc_InitialOrganBiomass:" + endl;
     for (var i = 0; i < this.pc_InitialOrganBiomass.length; i++)
       s += this.pc_InitialOrganBiomass[i] + " ";
 
