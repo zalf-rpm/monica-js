@@ -35,9 +35,9 @@ fs.appendFileSync('./dist/' + filename, 'var data = ' + JSON.stringify(data, nul
 
 /* append JSON config files */
 var config = {
-    sim: JSON.parse(fs.readFileSync('./src/in/default.sim.json', { encoding: 'utf8' }))
-  , site: JSON.parse(fs.readFileSync('./src/in/default.site.json', { encoding: 'utf8' }))
-  , crop: JSON.parse(fs.readFileSync('./src/in/default.crop.json', { encoding: 'utf8' }))
+    sim: JSON.parse(fs.readFileSync('./project.json/default.sim.json', { encoding: 'utf8' }))
+  , site: JSON.parse(fs.readFileSync('./project.json/default.site.json', { encoding: 'utf8' }))
+  , crop: JSON.parse(fs.readFileSync('./project.json/default.crop.json', { encoding: 'utf8' }))
 };
 fs.appendFileSync('./dist/' + filename, 'var config = ' + JSON.stringify(config, null, 1) + ';\n');
 

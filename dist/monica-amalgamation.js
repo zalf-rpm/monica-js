@@ -59879,7 +59879,7 @@ var SoilLayer = function (vs_LayerThickness, sps, cpp) {
     var vs_VanGenuchtenN = exp(0.053
                                   - (0.9 * that.vs_SoilSandContent)
                                   - (1.3 * that.vs_SoilClayContent)
-          + (0.015 * (pow(that.vs_SoilSandContent, 2.0))));  // JS! 1.0 -> 0.015
+          + (1.5 * (pow(that.vs_SoilSandContent, 2.0))));
 
 
     /** Van Genuchten retention curve */
@@ -59958,7 +59958,7 @@ var SoilLayer = function (vs_LayerThickness, sps, cpp) {
       var vs_VanGenuchtenN = exp(0.053
             - 0.9 * that.vs_SoilSandContent
             - 1.3 * that.vs_SoilClayContent
-            + 0.015 * (pow(that.vs_SoilSandContent, 2.0))); // JS! 1.5 -> 0.015
+            + 1.5 * (pow(that.vs_SoilSandContent, 2.0)));
 
       //***** Van Genuchten retention curve to calculate volumetric water content at
       //***** moisture equivalent (Field capacity definition KA5)
