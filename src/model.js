@@ -47,6 +47,7 @@ var Model = function (env, da) {
     p_accuWaterStress = 0.0;
     p_accuHeatStress = 0.0;
     p_accuOxygenStress = 0.0;
+    var cps = null; // JS!
 
     _currentCrop = crop;
     if(_currentCrop.isValid()) {
