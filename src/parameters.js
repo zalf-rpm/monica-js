@@ -476,13 +476,19 @@ var SoilParameters = function () {
   this.vs_SoilSandContent = 0.4;
   this.vs_SoilClayContent = 0.05;
   this.vs_SoilpH = 6.9;
-  this._vs_SoilRawDensity = 0;
-  this._vs_SoilOrganicCarbon = -1;
-  this._vs_SoilOrganicMatter = -1;
+  this.vs_SoilStoneContent = -1; // JS! add initialization
+  this.vs_Lambda = -1; // JS! add initialization
+  this.vs_FieldCapacity = -1; // JS! add initialization
+  this.vs_Saturation = -1; // JS! add initialization
+  this.vs_PermanentWiltingPoint = -1; // JS! add initialization
+  this.vs_SoilTexture = ''; // JS! add initialization
   this.vs_SoilAmmonium = -1;
   this.vs_SoilNitrate = -1;
-  // TODO: neuer Parameter g cm-3
-  this._vs_BulkDensity = -1;
+
+  this._vs_SoilRawDensity = 0;
+  this._vs_SoilBulkDensity = 0;
+  this._vs_SoilOrganicCarbon = -1;
+  this._vs_SoilOrganicMatter = -1;
 
   this.isValid = function () {
 
@@ -609,18 +615,18 @@ var SoilParameters = function () {
    * @return bulk density [kg m-3]
    */
   this.vs_SoilBulkDensity = function () {
-    if (this._vs_BulkDensity <= 0)
+    if (this._vs_SoilBulkDensity <= 0)
       return (this._vs_SoilRawDensity + (0.009 * 100 * this.vs_SoilClayContent)) * 1000;
     else
-      return this._vs_BulkDensity * 1000;
+      return this._vs_SoilBulkDensity * 1000;
   };
 
   /**
    * @brief Setter for soil bulk density.
    * @param soilBulkDensity [g cm-3]
    */
-  this.set_vs_SoilBulkDensity = function (soilBulkDensity) {
-    this._vs_BulkDensity = soilBulkDensity;
+  this.set_vs_SoilBulkDensity = function (sbd) {
+    this._vs_SoilBulkDensity = sbd;
   };
 
   /**
@@ -633,6 +639,26 @@ var SoilParameters = function () {
   this.texture2lambda = function (sand, clay) {
     return conversion.texture2lambda(sand, clay);
   };
+
+  /**
+   * @brief Serializes soil parameters into a string.
+   * @return String of soil parameters
+   */
+  this.toString = function () {
+    var s = '', endl = '\n';
+    s += "vs_Soilph: " + vs_SoilpH + endl
+      + "vs_SoilOrganicCarbon: " + vs_SoilOrganicCarbon() + endl
+      + "vs_SoilOrganicMatter: " + vs_SoilOrganicMatter() + endl
+      + "vs_SoilRawDensity: " + vs_SoilRawDensity() + endl
+      + "vs_SoilBulkDensity: " + vs_SoilBulkDensity() + endl
+      + "vs_SoilSandContent: " + vs_SoilSandContent + endl
+      + "vs_SoilClayContent: " + vs_SoilClayContent + endl
+      + "vs_SoilSiltContent: " + vs_SoilSiltContent() + endl
+      + "vs_SoilStoneContent: " + vs_SoilStoneContent
+      + endl;
+
+    return s;
+  }
 
 };
 
