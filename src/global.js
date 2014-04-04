@@ -222,74 +222,74 @@ var Tools = {
     texture2KA5: function (sand, clay) {
 
       var silt = 1.0 - sand - clay
-        , soilTexture = ''
+        , soilType = ''
         ;
 
       if(silt < 0.1 && clay < 0.05)
-        soilTexture = "Ss";
+        soilType = "Ss";
       else if(silt < 0.25 && clay < 0.05)
-        soilTexture = "Su2";
+        soilType = "Su2";
       else if(silt < 0.25 && clay < 0.08)
-        soilTexture = "Sl2";
+        soilType = "Sl2";
       else if(silt < 0.40 && clay < 0.08)
-        soilTexture = "Su3";
+        soilType = "Su3";
       else if(silt < 0.50 && clay < 0.08)
-        soilTexture = "Su4";
+        soilType = "Su4";
       else if(silt < 0.8 && clay < 0.08)
-        soilTexture = "Us";
+        soilType = "Us";
       else if(silt >= 0.8 && clay < 0.08)
-        soilTexture = "Uu";
+        soilType = "Uu";
       else if(silt < 0.1 && clay < 0.17)
-        soilTexture = "St2";
+        soilType = "St2";
       else if(silt < 0.4 && clay < 0.12)
-        soilTexture = "Sl3";
+        soilType = "Sl3";
       else if(silt < 0.4 && clay < 0.17)
-        soilTexture = "Sl4";
+        soilType = "Sl4";
       else if(silt < 0.5 && clay < 0.17)
-        soilTexture = "Slu";
+        soilType = "Slu";
       else if(silt < 0.65 && clay < 0.17)
-        soilTexture = "Uls";
+        soilType = "Uls";
       else if(silt >= 0.65 && clay < 0.12)
-        soilTexture = "Ut2";
+        soilType = "Ut2";
       else if(silt >= 0.65 && clay < 0.17)
-        soilTexture = "Ut3";
+        soilType = "Ut3";
       else if(silt < 0.15 && clay < 0.25)
-        soilTexture = "St3";
+        soilType = "St3";
       else if(silt < 0.30 && clay < 0.25)
-        soilTexture = "Ls4";
+        soilType = "Ls4";
       else if(silt < 0.40 && clay < 0.25)
-        soilTexture = "Ls3";
+        soilType = "Ls3";
       else if(silt < 0.50 && clay < 0.25)
-        soilTexture = "Ls2";
+        soilType = "Ls2";
       else if(silt < 0.65 && clay < 0.30)
-        soilTexture = "Lu";
+        soilType = "Lu";
       else if(silt >= 0.65 && clay < 0.25)
-        soilTexture = "Ut4";
+        soilType = "Ut4";
       else if(silt < 0.15 && clay < 0.35)
-        soilTexture = "Ts4";
+        soilType = "Ts4";
       else if(silt < 0.30 && clay < 0.45)
-        soilTexture = "Lts";
+        soilType = "Lts";
       else if(silt < 0.50 && clay < 0.35)
-        soilTexture = "Lt2";
+        soilType = "Lt2";
       else if(silt < 0.65 && clay < 0.45)
-        soilTexture = "Tu3";
+        soilType = "Tu3";
       else if(silt >= 0.65 && clay >= 0.25)
-        soilTexture = "Tu4";
+        soilType = "Tu4";
       else if(silt < 0.15 && clay < 0.45)
-        soilTexture = "Ts3";
+        soilType = "Ts3";
       else if(silt < 0.50 && clay < 0.45)
-        soilTexture = "Lt3";
+        soilType = "Lt3";
       else if(silt < 0.15 && clay < 0.65)
-        soilTexture = "Ts2";
+        soilType = "Ts2";
       else if(silt < 0.30 && clay < 0.65)
-        soilTexture = "Tl";
+        soilType = "Tl";
       else if(silt >= 0.30 && clay < 0.65)
-        soilTexture = "Tu2";
+        soilType = "Tu2";
       else if(clay >= 0.65)
-        soilTexture = "Tt";
-      else soilTexture = "";
+        soilType = "Tt";
+      else soilType = "";
 
-      return soilTexture;
+      return soilType;
     }
 
   , KA52sand: function (soilType) {
