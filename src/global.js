@@ -221,75 +221,135 @@ var Tools = {
 
     texture2KA5: function (sand, clay) {
 
-      var silt = 1.0 - sand - clay
-        , soilTextureClass = ''
+      var textureClass = ''
+        , silt = 100 - (sand * 100 + clay * 100)
         ;
 
-      if(silt < 0.1 && clay < 0.05)
-        soilTextureClass = "Ss";
-      else if(silt < 0.25 && clay < 0.05)
-        soilTextureClass = "Su2";
-      else if(silt < 0.25 && clay < 0.08)
-        soilTextureClass = "Sl2";
-      else if(silt < 0.40 && clay < 0.08)
-        soilTextureClass = "Su3";
-      else if(silt < 0.50 && clay < 0.08)
-        soilTextureClass = "Su4";
-      else if(silt < 0.8 && clay < 0.08)
-        soilTextureClass = "Us";
-      else if(silt >= 0.8 && clay < 0.08)
-        soilTextureClass = "Uu";
-      else if(silt < 0.1 && clay < 0.17)
-        soilTextureClass = "St2";
-      else if(silt < 0.4 && clay < 0.12)
-        soilTextureClass = "Sl3";
-      else if(silt < 0.4 && clay < 0.17)
-        soilTextureClass = "Sl4";
-      else if(silt < 0.5 && clay < 0.17)
-        soilTextureClass = "Slu";
-      else if(silt < 0.65 && clay < 0.17)
-        soilTextureClass = "Uls";
-      else if(silt >= 0.65 && clay < 0.12)
-        soilTextureClass = "Ut2";
-      else if(silt >= 0.65 && clay < 0.17)
-        soilTextureClass = "Ut3";
-      else if(silt < 0.15 && clay < 0.25)
-        soilTextureClass = "St3";
-      else if(silt < 0.30 && clay < 0.25)
-        soilTextureClass = "Ls4";
-      else if(silt < 0.40 && clay < 0.25)
-        soilTextureClass = "Ls3";
-      else if(silt < 0.50 && clay < 0.25)
-        soilTextureClass = "Ls2";
-      else if(silt < 0.65 && clay < 0.30)
-        soilTextureClass = "Lu";
-      else if(silt >= 0.65 && clay < 0.25)
-        soilTextureClass = "Ut4";
-      else if(silt < 0.15 && clay < 0.35)
-        soilTextureClass = "Ts4";
-      else if(silt < 0.30 && clay < 0.45)
-        soilTextureClass = "Lts";
-      else if(silt < 0.50 && clay < 0.35)
-        soilTextureClass = "Lt2";
-      else if(silt < 0.65 && clay < 0.45)
-        soilTextureClass = "Tu3";
-      else if(silt >= 0.65 && clay >= 0.25)
-        soilTextureClass = "Tu4";
-      else if(silt < 0.15 && clay < 0.45)
-        soilTextureClass = "Ts3";
-      else if(silt < 0.50 && clay < 0.45)
-        soilTextureClass = "Lt3";
-      else if(silt < 0.15 && clay < 0.65)
-        soilTextureClass = "Ts2";
-      else if(silt < 0.30 && clay < 0.65)
-        soilTextureClass = "Tl";
-      else if(silt >= 0.30 && clay < 0.65)
-        soilTextureClass = "Tu2";
-      else if(clay >= 0.65)
-        soilTextureClass = "Tt";
-      else soilTextureClass = "";
+      if ((sand + clay + silt) != 100)
+        throw '(sand + clay + silt) != 100: ' + (sand + clay + silt);
 
-      return soilTextureClass;
+      if (clay <= 5) {
+
+        if (silt <= 10)
+          textureClass = 'Ss';
+        else if (silt <= 25)
+          textureClass = 'Su2';
+        else if (silt <= 40)
+          textureClass = 'Su3';
+        else if (silt <= 50)
+          textureClass = 'Su4';
+        else if (silt <= 80)
+          textureClass = 'Us';
+        else
+          textureClass = 'Uu';
+
+      } else if (clay <= 8) {
+        
+        if (silt <= 10)
+          textureClass = 'St2';
+        else if (silt <= 25)
+          textureClass = 'Sl2';
+        else if (silt <= 40)
+          textureClass = 'Su3';
+        else if (silt <= 50)
+          textureClass = 'Su4';
+        else if (silt <= 80)
+          textureClass = 'Us';
+        else
+          textureClass = 'Uu';
+
+      } else if (clay <= 12) {
+        
+        if (silt <= 10)
+          textureClass = 'St2';
+        else if (silt <= 40)
+          textureClass = 'Sl3';
+        else if (silt <= 50)
+          textureClass = 'Slu';
+        else if (silt <= 65)
+          textureClass = 'Uls';
+        else
+          textureClass = 'Ut2';
+      
+      } else if (clay <= 17) {
+        
+        if (silt <= 10)
+          textureClass = 'St2';
+        else if (silt <= 40)
+          textureClass = 'Sl4';
+        else if (silt <= 50)
+          textureClass = 'Slu';
+        else if (silt <= 65)
+          textureClass = 'Uls';
+        else
+          textureClass = 'Ut3';
+      
+      } else if (clay <= 25) {
+
+        if (silt <= 15)
+          textureClass = 'St3';
+        else if (silt <= 30)
+          textureClass = 'Ls4';
+        else if (silt <= 40)
+          textureClass = 'Ls3';
+        else if (silt <= 50)
+          textureClass = 'Ls2';
+        else if (silt <= 65)
+          textureClass = 'Lu';
+        else
+          textureClass = 'Ut4';
+      
+      } else if (clay <= 30) {
+
+        if (silt <= 15)
+          textureClass = 'Ts4';
+        else if (silt <= 30)
+          textureClass = 'Lts';
+        else if (silt <= 50)
+          textureClass = 'Lt2';
+        else if (silt <= 65)
+          textureClass = 'Lu';
+        else
+          textureClass = 'Tu4';
+
+      } else if (clay <= 35) {
+
+        if (silt <= 15)
+          textureClass = 'Ts4';
+        else if (silt <= 30)
+          textureClass = 'Lts';
+        else if (silt <= 50)
+          textureClass = 'Lt2';
+        else if (silt <= 65)
+          textureClass = 'Tu3';
+        else
+          textureClass = 'Tu4';    
+      
+      } else if (clay <= 45) {
+
+        if (silt <= 15)
+          textureClass = 'Ts3';
+        else if (silt <= 30)
+          textureClass = 'Lts';
+        else if (silt <= 50)
+          textureClass = 'Lt3';
+        else
+          textureClass = 'Tu3';
+
+      } else if (clay <= 65) {
+        
+        if (silt <= 15)
+          textureClass = 'Ts2';
+        else if (silt <= 30)
+          textureClass = 'Tl';
+        else
+          textureClass = 'Tu2';
+
+      } else {
+        textureClass = 'Tt'
+      }
+
+      return textureClass;
     }
 
   , KA52sand: function (soilTextureClass) {
