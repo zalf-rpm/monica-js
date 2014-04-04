@@ -222,175 +222,175 @@ var Tools = {
     texture2KA5: function (sand, clay) {
 
       var silt = 1.0 - sand - clay
-        , soilType = ''
+        , soilTextureClass = ''
         ;
 
       if(silt < 0.1 && clay < 0.05)
-        soilType = "Ss";
+        soilTextureClass = "Ss";
       else if(silt < 0.25 && clay < 0.05)
-        soilType = "Su2";
+        soilTextureClass = "Su2";
       else if(silt < 0.25 && clay < 0.08)
-        soilType = "Sl2";
+        soilTextureClass = "Sl2";
       else if(silt < 0.40 && clay < 0.08)
-        soilType = "Su3";
+        soilTextureClass = "Su3";
       else if(silt < 0.50 && clay < 0.08)
-        soilType = "Su4";
+        soilTextureClass = "Su4";
       else if(silt < 0.8 && clay < 0.08)
-        soilType = "Us";
+        soilTextureClass = "Us";
       else if(silt >= 0.8 && clay < 0.08)
-        soilType = "Uu";
+        soilTextureClass = "Uu";
       else if(silt < 0.1 && clay < 0.17)
-        soilType = "St2";
+        soilTextureClass = "St2";
       else if(silt < 0.4 && clay < 0.12)
-        soilType = "Sl3";
+        soilTextureClass = "Sl3";
       else if(silt < 0.4 && clay < 0.17)
-        soilType = "Sl4";
+        soilTextureClass = "Sl4";
       else if(silt < 0.5 && clay < 0.17)
-        soilType = "Slu";
+        soilTextureClass = "Slu";
       else if(silt < 0.65 && clay < 0.17)
-        soilType = "Uls";
+        soilTextureClass = "Uls";
       else if(silt >= 0.65 && clay < 0.12)
-        soilType = "Ut2";
+        soilTextureClass = "Ut2";
       else if(silt >= 0.65 && clay < 0.17)
-        soilType = "Ut3";
+        soilTextureClass = "Ut3";
       else if(silt < 0.15 && clay < 0.25)
-        soilType = "St3";
+        soilTextureClass = "St3";
       else if(silt < 0.30 && clay < 0.25)
-        soilType = "Ls4";
+        soilTextureClass = "Ls4";
       else if(silt < 0.40 && clay < 0.25)
-        soilType = "Ls3";
+        soilTextureClass = "Ls3";
       else if(silt < 0.50 && clay < 0.25)
-        soilType = "Ls2";
+        soilTextureClass = "Ls2";
       else if(silt < 0.65 && clay < 0.30)
-        soilType = "Lu";
+        soilTextureClass = "Lu";
       else if(silt >= 0.65 && clay < 0.25)
-        soilType = "Ut4";
+        soilTextureClass = "Ut4";
       else if(silt < 0.15 && clay < 0.35)
-        soilType = "Ts4";
+        soilTextureClass = "Ts4";
       else if(silt < 0.30 && clay < 0.45)
-        soilType = "Lts";
+        soilTextureClass = "Lts";
       else if(silt < 0.50 && clay < 0.35)
-        soilType = "Lt2";
+        soilTextureClass = "Lt2";
       else if(silt < 0.65 && clay < 0.45)
-        soilType = "Tu3";
+        soilTextureClass = "Tu3";
       else if(silt >= 0.65 && clay >= 0.25)
-        soilType = "Tu4";
+        soilTextureClass = "Tu4";
       else if(silt < 0.15 && clay < 0.45)
-        soilType = "Ts3";
+        soilTextureClass = "Ts3";
       else if(silt < 0.50 && clay < 0.45)
-        soilType = "Lt3";
+        soilTextureClass = "Lt3";
       else if(silt < 0.15 && clay < 0.65)
-        soilType = "Ts2";
+        soilTextureClass = "Ts2";
       else if(silt < 0.30 && clay < 0.65)
-        soilType = "Tl";
+        soilTextureClass = "Tl";
       else if(silt >= 0.30 && clay < 0.65)
-        soilType = "Tu2";
+        soilTextureClass = "Tu2";
       else if(clay >= 0.65)
-        soilType = "Tt";
-      else soilType = "";
+        soilTextureClass = "Tt";
+      else soilTextureClass = "";
 
-      return soilType;
+      return soilTextureClass;
     }
 
-  , KA52sand: function (soilType) {
+  , KA52sand: function (soilTextureClass) {
       
       var x = 0.0;
 
-      if(soilType == "fS")
+      if(soilTextureClass == "fS")
         x = 0.84;
-      else if(soilType == "fSms")
+      else if(soilTextureClass == "fSms")
         x = 0.86;
-      else if(soilType == "fSgs")
+      else if(soilTextureClass == "fSgs")
         x = 0.88;
-      else if(soilType == "gS")
+      else if(soilTextureClass == "gS")
         x = 0.93;
-      else if(soilType == "mSgs")
+      else if(soilTextureClass == "mSgs")
         x = 0.96;
-      else if(soilType == "mSfs")
+      else if(soilTextureClass == "mSfs")
         x = 0.93;
-      else if(soilType == "mS")
+      else if(soilTextureClass == "mS")
         x = 0.96;
-      else if(soilType == "Ss")
+      else if(soilTextureClass == "Ss")
         x = 0.93;
-      else if(soilType == "Sl2")
+      else if(soilTextureClass == "Sl2")
         x = 0.76;
-      else if(soilType == "Sl3")
+      else if(soilTextureClass == "Sl3")
         x = 0.65;
-      else if(soilType == "Sl4")
+      else if(soilTextureClass == "Sl4")
         x = 0.60;
-      else if(soilType == "Slu")
+      else if(soilTextureClass == "Slu")
         x = 0.43;
-      else if(soilType == "St2")
+      else if(soilTextureClass == "St2")
         x = 0.84;
-      else if(soilType == "St3")
+      else if(soilTextureClass == "St3")
         x = 0.71;
-      else if(soilType == "Su2")
+      else if(soilTextureClass == "Su2")
         x = 0.80;
-      else if(soilType == "Su3")
+      else if(soilTextureClass == "Su3")
         x = 0.63;
-      else if(soilType == "Su4")
+      else if(soilTextureClass == "Su4")
         x = 0.56;
-      else if(soilType == "Ls2")
+      else if(soilTextureClass == "Ls2")
         x = 0.34;
-      else if(soilType == "Ls3")
+      else if(soilTextureClass == "Ls3")
         x = 0.44;
-      else if(soilType == "Ls4")
+      else if(soilTextureClass == "Ls4")
         x = 0.56;
-      else if(soilType == "Lt2")
+      else if(soilTextureClass == "Lt2")
         x = 0.30;
-      else if(soilType == "Lt3")
+      else if(soilTextureClass == "Lt3")
         x = 0.20;
-      else if(soilType == "LtS")
+      else if(soilTextureClass == "LtS")
         x = 0.42;
-      else if(soilType == "Lu")
+      else if(soilTextureClass == "Lu")
         x = 0.19;
-      else if(soilType == "Uu")
+      else if(soilTextureClass == "Uu")
         x = 0.10;
-      else if(soilType == "Uls")
+      else if(soilTextureClass == "Uls")
         x = 0.30;
-      else if(soilType == "Us")
+      else if(soilTextureClass == "Us")
         x = 0.31;
-      else if(soilType == "Ut2")
+      else if(soilTextureClass == "Ut2")
         x = 0.13;
-      else if(soilType == "Ut3")
+      else if(soilTextureClass == "Ut3")
         x = 0.11;
-      else if(soilType == "Ut4")
+      else if(soilTextureClass == "Ut4")
         x = 0.09;
-      else if(soilType == "Utl")
+      else if(soilTextureClass == "Utl")
         x = 0.19;
-      else if(soilType == "Tt")
+      else if(soilTextureClass == "Tt")
         x = 0.17;
-      else if(soilType == "Tl")
+      else if(soilTextureClass == "Tl")
         x = 0.17;
-      else if(soilType == "Tu2")
+      else if(soilTextureClass == "Tu2")
         x = 0.12;
-      else if(soilType == "Tu3")
+      else if(soilTextureClass == "Tu3")
         x = 0.10;
-      else if(soilType == "Ts3")
+      else if(soilTextureClass == "Ts3")
         x = 0.52;
-      else if(soilType == "Ts2")
+      else if(soilTextureClass == "Ts2")
         x = 0.37;
-      else if(soilType == "Ts4")
+      else if(soilTextureClass == "Ts4")
         x = 0.62;
-      else if(soilType == "Tu4")
+      else if(soilTextureClass == "Tu4")
         x = 0.05;
-      else if(soilType == "L")
+      else if(soilTextureClass == "L")
         x = 0.35;
-      else if(soilType == "S")
+      else if(soilTextureClass == "S")
         x = 0.93;
-      else if(soilType == "U")
+      else if(soilTextureClass == "U")
         x = 0.10;
-      else if(soilType == "T")
+      else if(soilTextureClass == "T")
         x = 0.17;
-      else if(soilType == "HZ1")
+      else if(soilTextureClass == "HZ1")
         x = 0.30;
-      else if(soilType == "HZ2")
+      else if(soilTextureClass == "HZ2")
         x = 0.30;
-      else if(soilType == "HZ3")
+      else if(soilTextureClass == "HZ3")
         x = 0.30;
-      else if(soilType == "Hh")
+      else if(soilTextureClass == "Hh")
         x = 0.15;
-      else if(soilType == "Hn")
+      else if(soilTextureClass == "Hn")
         x = 0.15;
       else
         x = 0.66;
@@ -398,105 +398,105 @@ var Tools = {
       return x;
     }
 
-  , KA52clay: function (soilType) {
+  , KA52clay: function (soilTextureClass) {
       
       var x = 0.0;
 
-      if(soilType == "fS")
+      if(soilTextureClass == "fS")
         x = 0.02;
-      else if(soilType == "fSms")
+      else if(soilTextureClass == "fSms")
         x = 0.02;
-      else if(soilType == "fSgs")
+      else if(soilTextureClass == "fSgs")
         x = 0.02;
-      else if(soilType == "gS")
+      else if(soilTextureClass == "gS")
         x = 0.02;
-      else if(soilType == "mSgs")
+      else if(soilTextureClass == "mSgs")
         x = 0.02;
-      else if(soilType == "mSfs")
+      else if(soilTextureClass == "mSfs")
         x = 0.02;
-      else if(soilType == "mS")
+      else if(soilTextureClass == "mS")
         x = 0.02;
-      else if(soilType == "Ss")
+      else if(soilTextureClass == "Ss")
         x = 0.02;
-      else if(soilType == "Sl2")
+      else if(soilTextureClass == "Sl2")
         x = 0.06;
-      else if(soilType == "Sl3")
+      else if(soilTextureClass == "Sl3")
         x = 0.10;
-      else if(soilType == "Sl4")
+      else if(soilTextureClass == "Sl4")
         x = 0.14;
-      else if(soilType == "Slu")
+      else if(soilTextureClass == "Slu")
         x = 0.12;
-      else if(soilType == "St2")
+      else if(soilTextureClass == "St2")
         x = 0.11;
-      else if(soilType == "St3")
+      else if(soilTextureClass == "St3")
         x = 0.21;
-      else if(soilType == "Su2")
+      else if(soilTextureClass == "Su2")
         x = 0.02;
-      else if(soilType == "Su3")
+      else if(soilTextureClass == "Su3")
         x = 0.04;
-      else if(soilType == "Su4")
+      else if(soilTextureClass == "Su4")
         x = 0.04;
-      else if(soilType == "Ls2")
+      else if(soilTextureClass == "Ls2")
         x = 0.21;
-      else if(soilType == "Ls3")
+      else if(soilTextureClass == "Ls3")
         x = 0.21;
-      else if(soilType == "Ls4")
+      else if(soilTextureClass == "Ls4")
         x = 0.21;
-      else if(soilType == "Lt2")
+      else if(soilTextureClass == "Lt2")
         x = 0.30;
-      else if(soilType == "Lt3")
+      else if(soilTextureClass == "Lt3")
         x = 0.40;
-      else if(soilType == "Lts")
+      else if(soilTextureClass == "Lts")
         x = 0.35;
-      else if(soilType == "Lu")
+      else if(soilTextureClass == "Lu")
         x = 0.23;
-      else if(soilType == "Uu")
+      else if(soilTextureClass == "Uu")
         x = 0.04;
-      else if(soilType == "Uls")
+      else if(soilTextureClass == "Uls")
         x = 0.12;
-      else if(soilType == "Us")
+      else if(soilTextureClass == "Us")
         x = 0.04;
-      else if(soilType == "Ut2")
+      else if(soilTextureClass == "Ut2")
         x = 0.10;
-      else if(soilType == "Ut3")
+      else if(soilTextureClass == "Ut3")
         x = 0.14;
-      else if(soilType == "Ut4")
+      else if(soilTextureClass == "Ut4")
         x = 0.21;
-      else if(soilType == "Utl")
+      else if(soilTextureClass == "Utl")
         x = 0.23;
-      else if(soilType == "Tt")
+      else if(soilTextureClass == "Tt")
         x = 0.82;
-      else if(soilType == "Tl")
+      else if(soilTextureClass == "Tl")
         x = 0.55;
-      else if(soilType == "Tu2")
+      else if(soilTextureClass == "Tu2")
         x = 0.55;
-      else if(soilType == "Tu3")
+      else if(soilTextureClass == "Tu3")
         x = 0.37;
-      else if(soilType == "Ts3")
+      else if(soilTextureClass == "Ts3")
         x = 0.40;
-      else if(soilType == "Ts2")
+      else if(soilTextureClass == "Ts2")
         x = 0.55;
-      else if(soilType == "Ts4")
+      else if(soilTextureClass == "Ts4")
         x = 0.30;
-      else if(soilType == "Tu4")
+      else if(soilTextureClass == "Tu4")
         x = 0.30;
-      else if(soilType == "L")
+      else if(soilTextureClass == "L")
         x = 0.31;
-      else if(soilType == "S")
+      else if(soilTextureClass == "S")
         x = 0.02;
-      else if(soilType == "U")
+      else if(soilTextureClass == "U")
         x = 0.04;
-      else if(soilType == "T")
+      else if(soilTextureClass == "T")
         x = 0.82;
-      else if(soilType == "HZ1")
+      else if(soilTextureClass == "HZ1")
         x = 0.15;
-      else if(soilType == "HZ2")
+      else if(soilTextureClass == "HZ2")
         x = 0.15;
-      else if(soilType == "HZ3")
+      else if(soilTextureClass == "HZ3")
         x = 0.15;
-      else if(soilType == "Hh")
+      else if(soilTextureClass == "Hh")
         x = 0.1;
-      else if(soilType == "Hn")
+      else if(soilTextureClass == "Hn")
         x = 0.1;
 
       return x;
