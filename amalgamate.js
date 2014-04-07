@@ -3,6 +3,7 @@ var fs = require('fs')
   , files = [
         'debug'
       , 'global'
+      , 'tools'
       , 'parameters'
       , 'workstep'
       , 'productionprocess'
