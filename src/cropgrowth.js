@@ -1916,6 +1916,10 @@ var CropGrowth = function (sc, gps, cps, stps, cpp) {
     // Calculating rooting depth layer []
     vc_RootingDepth = int(floor(0.5 + (vc_RootingDepth_m / vs_LayerThickness))); // []
 
+    if (vc_RootingDepth > vs_NumberOfLayers) {
+      vc_RootingDepth = vs_NumberOfLayers;
+    }
+
     vc_RootingZone = int(floor(0.5 + ((1.3 * vc_RootingDepth_m) / vs_LayerThickness))); // []
 
     if (vc_RootingZone > vs_NumberOfLayers){
