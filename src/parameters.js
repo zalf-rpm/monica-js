@@ -485,8 +485,8 @@ var SoilParameters = function () {
   this.vs_SoilAmmonium = -1;
   this.vs_SoilNitrate = -1;
 
-  this._vs_SoilRawDensity = 0;
-  this._vs_SoilBulkDensity = 0;
+  this._vs_SoilRawDensity = -1;
+  this._vs_SoilBulkDensity = -1;
   this._vs_SoilOrganicCarbon = -1;
   this._vs_SoilOrganicMatter = -1;
 
@@ -536,12 +536,12 @@ var SoilParameters = function () {
         console.log("SoilParameters::Error: Invalid value for permanent wilting point: "+ this.vs_PermanentWiltingPoint);
         is_valid = false;
     }
-
+/*
     if (this._vs_SoilRawDensity<0) {
         console.log("SoilParameters::Error: Invalid soil raw density: "+ this._vs_SoilRawDensity);
         is_valid = false;
     }
-
+*/
     return is_valid;
   };
 
@@ -615,10 +615,11 @@ var SoilParameters = function () {
    * @return bulk density [kg m-3]
    */
   this.vs_SoilBulkDensity = function () {
-    if (this._vs_SoilBulkDensity <= 0)
-      return (this._vs_SoilRawDensity + (0.009 * 100 * this.vs_SoilClayContent)) * 1000;
-    else
-      return this._vs_SoilBulkDensity * 1000;
+    if (_vs_SoilRawDensity < 0)
+      return _vs_SoilBulkDensity;
+
+    return (_vs_SoilRawDensity + (0.009 * 100 * vs_SoilClayContent)) * 1000;
+    //return _vs_SoilBulkDensity * 1000;
   };
 
   /**

@@ -138,7 +138,7 @@ var Configuration = function (outPath) {
       var layer = new SoilParameters();
       layer.set_vs_SoilOrganicCarbon(horizonObj.Corg); //TODO: / 100 ?
       if (horizonObj.bulkDensity)
-        layer.set_vs_SoilBulkDensity(horizonObj.bulkDensity / 1000); // [kg m-3] -> [g cm-3]
+        layer.set_vs_SoilBulkDensity(horizonObj.bulkDensity);
       layer.vs_SoilSandContent = horizonObj.sand;
       layer.vs_SoilClayContent = horizonObj.clay;
       layer.vs_SoilStoneContent = horizonObj.sceleton; //TODO: / 100 ?
