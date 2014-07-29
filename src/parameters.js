@@ -615,10 +615,10 @@ var SoilParameters = function () {
    * @return bulk density [kg m-3]
    */
   this.vs_SoilBulkDensity = function () {
-    if (_vs_SoilRawDensity < 0)
-      return _vs_SoilBulkDensity;
+    if (this._vs_SoilRawDensity < 0)
+      return this._vs_SoilBulkDensity;
 
-    return (_vs_SoilRawDensity + (0.009 * 100 * vs_SoilClayContent)) * 1000;
+    return (this._vs_SoilRawDensity + (0.009 * 100 * this.vs_SoilClayContent)) * 1000;
     //return _vs_SoilBulkDensity * 1000;
   };
 

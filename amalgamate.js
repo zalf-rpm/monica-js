@@ -29,18 +29,19 @@ var fs = require('fs')
 /* wrap everything in function */
 fs.writeFileSync('./dist/' + filename, 'var monica = monica || {};\n(function () {\n\n');
 
+/* we now use monica.sqlite with emscripten sqlite port */
 /* append data (monica.sqlite) */
-eval(fs.readFileSync('./src/db.js', { encoding: 'utf8' }));
-var data = db('./src/');
-fs.appendFileSync('./dist/' + filename, 'var data = ' + JSON.stringify(data, null, 1) + ';\n');
+// eval(fs.readFileSync('./src/db.js', { encoding: 'utf8' }));
+// var data = db('./src/');
+// fs.appendFileSync('./dist/' + filename, 'var data = ' + JSON.stringify(data, null, 1) + ';\n');
 
-/* append JSON config files */
-var config = {
-    sim: JSON.parse(fs.readFileSync('./project.json/default.sim.json', { encoding: 'utf8' }))
-  , site: JSON.parse(fs.readFileSync('./project.json/default.site.json', { encoding: 'utf8' }))
-  , crop: JSON.parse(fs.readFileSync('./project.json/default.crop.json', { encoding: 'utf8' }))
+/* append JSON example config files */
+var example_config = {
+    sim: JSON.parse(fs.readFileSync('./project.json/example.sim.json', { encoding: 'utf8' }))
+  , site: JSON.parse(fs.readFileSync('./project.json/example.site.json', { encoding: 'utf8' }))
+  , crop: JSON.parse(fs.readFileSync('./project.json/example.crop.json', { encoding: 'utf8' }))
 };
-fs.appendFileSync('./dist/' + filename, 'var config = ' + JSON.stringify(config, null, 1) + ';\n');
+fs.appendFileSync('./dist/' + filename, 'var example_config = ' + JSON.stringify(example_config, null, 1) + ';\n');
 
 /* append MONICA JS files */
 for (var f = 0; f < files.length; f++) {

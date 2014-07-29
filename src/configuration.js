@@ -1,5 +1,7 @@
 
-var Configuration = function (outPath) {
+var Configuration = function (outPath, climate, doDebug) {
+
+  DEBUG = (doDebug === true) ? true : false;
 
   /* no output if null */ 
   var _outPath = outPath; 
@@ -126,42 +128,45 @@ var Configuration = function (outPath) {
       
       var horizonObj = horizonsArr[h];
 
-      var hLoBoundaryCm = 100 * horizonObj.lowerBoundary;
-      var hUpBoundaryCm = layers.length * lThicknessCm;
-      var hThicknessCm = max(0, hLoBoundaryCm - hUpBoundaryCm);
+      // var hLoBoundaryCm = 100 * horizonObj.lowerBoundary;
+      // var hUpBoundaryCm = layers.length * lThicknessCm;
+      // var hThicknessCm = max(0, hLoBoundaryCm - hUpBoundaryCm);
+      var hThicknessCm = horizonObj.thickness * 100;
       var lInHCount = int(round(hThicknessCm / lThicknessCm));
 
       /* fill all (maxNoOfLayers) layers if available horizons depth < lThicknessCm * maxNoOfLayers */
       if (h == (hs - 1) && (int(layers.length) + lInHCount) < maxNoOfLayers)
         lInHCount += maxNoOfLayers - layers.length - lInHCount;
 
-      var layer = new SoilParameters();
-      layer.set_vs_SoilOrganicCarbon(horizonObj.Corg); //TODO: / 100 ?
-      if (horizonObj.bulkDensity)
-        layer.set_vs_SoilBulkDensity(horizonObj.bulkDensity);
-      layer.vs_SoilSandContent = horizonObj.sand;
-      layer.vs_SoilClayContent = horizonObj.clay;
-      layer.vs_SoilStoneContent = horizonObj.sceleton; //TODO: / 100 ?
-      layer.vs_Lambda = Tools.texture2lambda(layer.vs_SoilSandContent, layer.vs_SoilClayContent);
-      // TODO: Wo wird textureClass verwendet?
-      layer.vs_SoilTexture = horizonObj.textureClass;
-      layer.vs_SoilpH = horizonObj.pH;
-      /* TODO: ? lambda = drainage_coeff ? */
-      layer.vs_Lambda = Tools.texture2lambda(layer.vs_SoilSandContent, layer.vs_SoilClayContent);
-      layer.vs_FieldCapacity = horizonObj.fieldCapacity;
-      /* TODO: name? */
-      layer.vs_Saturation = horizonObj.poreVolume;
-      layer.vs_PermanentWiltingPoint = horizonObj.permanentWiltingPoint;
-
-      /* TODO: hinter readJSON verschieben */ 
-      if (!layer.isValid()) {
-        ok = false;
-        console.log("Error in soil parameters.");
-      }
-
       for (var l = 0; l < lInHCount; l++) {
+
+        var layer = new SoilParameters();
+        layer.set_vs_SoilOrganicCarbon(horizonObj.Corg); //TODO: / 100 ?
+        if (horizonObj.bulkDensity)
+          layer.set_vs_SoilBulkDensity(horizonObj.bulkDensity);
+        layer.vs_SoilSandContent = horizonObj.sand;
+        layer.vs_SoilClayContent = horizonObj.clay;
+        layer.vs_SoilStoneContent = horizonObj.sceleton; //TODO: / 100 ?
+        layer.vs_Lambda = Tools.texture2lambda(layer.vs_SoilSandContent, layer.vs_SoilClayContent);
+        // TODO: Wo wird textureClass verwendet?
+        layer.vs_SoilTexture = horizonObj.textureClass;
+        layer.vs_SoilpH = horizonObj.pH;
+        /* TODO: ? lambda = drainage_coeff ? */
+        layer.vs_Lambda = Tools.texture2lambda(layer.vs_SoilSandContent, layer.vs_SoilClayContent);
+        layer.vs_FieldCapacity = horizonObj.fieldCapacity;
+        /* TODO: name? */
+        layer.vs_Saturation = horizonObj.poreVolume;
+        layer.vs_PermanentWiltingPoint = horizonObj.permanentWiltingPoint;
+
+        /* TODO: hinter readJSON verschieben */ 
+        if (!layer.isValid()) {
+          ok = false;
+          console.log("Error in soil parameters.");
+        }
+
         layers.push(layer);
         console.log("fetched layer " + layers.length + " in horizon " + h);
+
       }
 
       console.log("fetched horizon " + h);
@@ -174,31 +179,39 @@ var Configuration = function (outPath) {
     
     var ok = true;
     var cs = cropsArr.length;
+    
     console.log("fetching " + cs + " crops");
+
     for (var c = 0; c < cs; c++) {
 
       var cropObj = cropsArr[c];
       var cropId = -1;
 
-      var name = cropObj.name;
-      var genType = cropObj.genType;
-      var spec = cropObj.spec;
+      var nameAndGenType = cropObj.nameAndGenType;
 
-      for (var r = 0, rs = data.crop.rows.length; r < rs; r++) {
-        var row = data.crop.rows[r];
-        if (row.name === name && row.gen_type === genType && row.spec === spec)
-          cropId = row.id;
-      }
+      var res = db.exec(
+       "SELECT crop_id \
+        FROM view_crop \
+        WHERE name_and_gentype='" + nameAndGenType + "'"
+      );
 
-      if (cropId < 0) {
+      if (res[0].values.length != 1)
+        throw 'crop (' + nameAndGenType + ') not available in table crop';  
+
+      var columns = res[0].columns;
+      var row = res[0].values[0]; /* only one row */   
+
+      cropId = row[columns.indexOf('crop_id')];
+
+      if (cropId < 0 || isNaN(cropId)) {
         ok = false;
-        console.log("Invalid crop id: " + name + ', ' + genType + ', ' + spec);
+        console.log("Invalid crop id: " + nameAndGenType);
       }
 
       var sd = new Date(Date.parse(cropObj.sowingDate));
       var hd = new Date(Date.parse(cropObj.finalHarvestDate));
 
-      debug(name, 'name');
+      debug(nameAndGenType, 'nameAndGenType');
       debug(sd, 'sd');
       debug(hd, 'hd');
 
@@ -207,17 +220,17 @@ var Configuration = function (outPath) {
         console.log("Invalid sowing or harvest date");
       }
 
-      var crop = new Crop(cropId, name /*TODO: hermesCropId?*/);
+      var crop = new Crop(cropId, nameAndGenType /*TODO: hermesCropId?*/);
       crop.setSeedAndHarvestDate(sd, hd);
       crop.setCropParameters(getCropParameters(crop.id()));
       crop.setResidueParameters(getResidueParameters(crop.id()));
 
-      pps[c] = new ProductionProcess(name, crop);
+      pps[c] = new ProductionProcess(nameAndGenType, crop);
 
       /* tillage */
-      var tillArr = cropObj.tillageOps;
+      var tillArr = cropObj.tillageOperations;
       if (tillArr) { /* in case no tillage has been added */
-        if (!addTillageOps(pps[c], tillArr)) {
+        if (!addTillageOperations(pps[c], tillArr)) {
           ok = false;
           console.log("Error adding tillages");
         }
@@ -259,13 +272,13 @@ var Configuration = function (outPath) {
         }
       }
 
-      console.log("fetched crop " + c + ", name: " + name + ", id: " + cropId);
+      console.log("fetched crop " + c + ", nameAndGenType: " + nameAndGenType + ", id: " + cropId);
     }
 
     return ok;
   };
 
-  function addTillageOps(pp, tillArr) {
+  function addTillageOperations(pp, tillArr) {
 
     var ok = true;
     var ts = tillArr.length;
@@ -338,36 +351,55 @@ var Configuration = function (outPath) {
       }
 
       if (isOrganic)  {
+
         var orgId = -1;
-        for (var r = 0, rs = data.organic_fertilisers.rows.length; r < rs; r++) {
-          if (data.organic_fertilisers.rows[r].type === type) {
-            orgId = data.organic_fertilisers.rows[r].ID; 
-            pp.addApplication(new OrganicFertiliserApplication(fDate, getOrganicFertiliserParameters(orgId), amount, true));
-            break;
-          }
-        }
+
+        var res = db.exec(
+         "SELECT id \
+          FROM organic_fertiliser \
+          WHERE om_type='" + type + "'"
+        );
+
+        var columns = res[0].columns;
+        var row = res[0].values[0]; /* only one row */   
+
+        orgId = row[0]; 
+    
         if (orgId < 0) {
           console.log("Error: " + type + " not found.");
           ok = false;
         }
-      }
-      else { // not organic
+
+        pp.addApplication(new OrganicFertiliserApplication(fDate, getOrganicFertiliserParameters(orgId), amount, true));
+      
+      } else { // not organic
+
         var minId = -1;
-        for (var r = 0, rs = data.mineral_fertilisers.rows.length; r < rs; r++) {
-          if (data.mineral_fertilisers.rows[r].type === type) {
-            minId = data.mineral_fertilisers.rows[r].ID; 
-            pp.addApplication(new MineralFertiliserApplication(fDate, getMineralFertiliserParameters(minId), amount));
-            break;
-          }
-        }
+
+        var res = db.exec(
+         "SELECT id \
+          FROM mineral_fertilisers \
+          WHERE name='" + type + "'"
+        );
+
+        var columns = res[0].columns;
+        var row = res[0].values[0]; /* only one row */   
+
+        minId = row[0];
+        
         if (minId < 0) {
           console.log("Error: " + type + " not found.");
           ok = false;
         }
+        
+        pp.addApplication(new MineralFertiliserApplication(fDate, getMineralFertiliserParameters(minId), amount));
+      
       }
+
     }
      
     return ok;
+    
   };
 
 
@@ -457,92 +489,115 @@ var Configuration = function (outPath) {
 
   function createClimate(da, cpp, latitude, useLeapYears) {
 
-    var ok = true;
+    var ok = false;
 
-    var tmin = [];
-    var tavg = [];
-    var tmax = [];
-    var globrad = [];
-    var relhumid = [];
-    var wind = [];
-    var precip = [];
-    var sunhours = [];
+    if (climate) {
 
-    var date = new Date(da.startDate().getFullYear(), 0, 1);
+      da.addClimateData(Climate.tmin, new Float64Array(climate.tmin));
+      da.addClimateData(Climate.tmax, new Float64Array(climate.tmax));
+      da.addClimateData(Climate.tavg, new Float64Array(climate.tavg));
+      da.addClimateData(Climate.globrad, new Float64Array(climate.globrad)); /* MJ m-2 */
+      da.addClimateData(Climate.wind, new Float64Array(climate.wind));
+      da.addClimateData(Climate.precip, new Float64Array(climate.precip));
 
-    var idx_t_av = data.met.columns.indexOf('t_av');
-    var idx_t_min = data.met.columns.indexOf("t_min");
-    var idx_t_max = data.met.columns.indexOf("t_max");
-    var idx_t_s10 = data.met.columns.indexOf("t_s10");
-    var idx_t_s20 = data.met.columns.indexOf("t_s20");
-    var idx_vappd = data.met.columns.indexOf("vappd");
-    var idx_wind = data.met.columns.indexOf("wind");
-    var idx_sundu = data.met.columns.indexOf("sundu");
-    var idx_radia = data.met.columns.indexOf("radia");
-    var idx_prec = data.met.columns.indexOf("prec");
-    var idx_day = data.met.columns.indexOf("day");
-    var idx_year = data.met.columns.indexOf("year");
-    var idx_rf = data.met.columns.indexOf("rf");
+      if(climate.sunhours.length > 0)
+        da.addClimateData(Climate.sunhours, new Float64Array(climate.sunhours));
 
-    for (var y = da.startDate().getFullYear(), ys = da.endDate().getFullYear(); y <= ys; y++) {
+      if (climate.relhumid.length > 0)
+        da.addClimateData(Climate.relhumid, new Float64Array(climate.relhumid));
 
-      var daysCount = 0;
-      var allowedDays = ceil((new Date(y + 1, 0, 1) - new Date(y, 0, 1)) / (24 * 60 * 60 * 1000));
-
-      console.log("allowedDays: " + allowedDays + " " + y+ "\t" + useLeapYears + "\tlatitude:\t" + latitude);
-
-      for (var r = 0, rs = data.met.rows.length; r < rs; r++) {
-
-        var row = data.met.rows[r];
-        if (row[idx_year] != y)
-          continue;
-
-        if (row[idx_radia] >= 0) {
-          // use globrad
-          // HERMES weather files deliver global radiation as [J cm-2]
-          // Here, we push back [MJ m-2 d-1]
-          var globradMJpm2pd = row[idx_radia] * 100.0 * 100.0 / 1000000.0;
-          globrad.push(globradMJpm2pd);        
-        } else if (row[idx_sundu] >= 0.0) {
-          // invalid globrad use sunhours
-          // convert sunhours into globrad
-          // debug() << "Invalid globrad - use sunhours instead" << endl;
-          globrad.push(Tools.sunshine2globalRadiation(r + 1, sunhours, latitude, true));    
-          sunhours.push(row[idx_sundu]);
-        } else {
-          // error case
-          console.log("Error: No global radiation or sunhours specified for day " + date);
-          ok = false;
-        }
-
-        if (row[idx_rf] >= 0.0)
-          relhumid.push(row[idx_rf]);
-
-        tavg.push(row[idx_t_av]);
-        tmin.push(row[idx_t_min]);
-        tmax.push(row[idx_t_max]);
-        wind.push(row[idx_wind]);
-        precip.push(row[idx_prec]);
-
-        daysCount++;
-        date = new Date(date.getFullYear, date.getMonth(), date.getDate() + 1);
-      }
+      /* TODO: add additional checks */
+      ok = true;
     }
 
-    da.addClimateData(Climate.tmin, new Float64Array(tmin));
-    da.addClimateData(Climate.tmax, new Float64Array(tmax));
-    da.addClimateData(Climate.tavg, new Float64Array(tavg));
-    da.addClimateData(Climate.globrad, new Float64Array(globrad));
-    da.addClimateData(Climate.wind, new Float64Array(wind));
-    da.addClimateData(Climate.precip, new Float64Array(precip));
-
-    if(sunhours.length > 0)
-      da.addClimateData(Climate.sunhours, new Float64Array(sunhours));
-
-    if (relhumid.length > 0)
-      da.addClimateData(Climate.relhumid, new Float64Array(relhumid));
-
     return ok;
+
+    /* we dont use hermes MET files anymore */
+    // var tmin = [];
+    // var tavg = [];
+    // var tmax = [];
+    // var globrad = [];
+    // var relhumid = [];
+    // var wind = [];
+    // var precip = [];
+    // var sunhours = [];
+
+    // var date = new Date(da.startDate().getFullYear(), 0, 1);
+
+    // var idx_t_av = data.met.columns.indexOf('t_av');
+    // var idx_t_min = data.met.columns.indexOf("t_min");
+    // var idx_t_max = data.met.columns.indexOf("t_max");
+    // var idx_t_s10 = data.met.columns.indexOf("t_s10");
+    // var idx_t_s20 = data.met.columns.indexOf("t_s20");
+    // var idx_vappd = data.met.columns.indexOf("vappd");
+    // var idx_wind = data.met.columns.indexOf("wind");
+    // var idx_sundu = data.met.columns.indexOf("sundu");
+    // var idx_radia = data.met.columns.indexOf("radia");
+    // var idx_prec = data.met.columns.indexOf("prec");
+    // var idx_day = data.met.columns.indexOf("day");
+    // var idx_year = data.met.columns.indexOf("year");
+    // var idx_rf = data.met.columns.indexOf("rf");
+
+    // for (var y = da.startDate().getFullYear(), ys = da.endDate().getFullYear(); y <= ys; y++) {
+
+    //   var daysCount = 0;
+    //   var allowedDays = ceil((new Date(y + 1, 0, 1) - new Date(y, 0, 1)) / (24 * 60 * 60 * 1000));
+
+    //   console.log("allowedDays: " + allowedDays + " " + y+ "\t" + useLeapYears + "\tlatitude:\t" + latitude);
+
+    //   for (var r = 0, rs = data.met.rows.length; r < rs; r++) {
+
+    //     var row = data.met.rows[r];
+    //     if (row[idx_year] != y)
+    //       continue;
+
+    //     if (row[idx_radia] >= 0) {
+    //       // use globrad
+    //       // HERMES weather files deliver global radiation as [J cm-2]
+    //       // Here, we push back [MJ m-2 d-1]
+    //       var globradMJpm2pd = row[idx_radia] * 100.0 * 100.0 / 1000000.0;
+    //       globrad.push(globradMJpm2pd);        
+    //     } else if (row[idx_sundu] >= 0.0) {
+    //       // invalid globrad use sunhours
+    //       // convert sunhours into globrad
+    //       // debug() << "Invalid globrad - use sunhours instead" << endl;
+    //       globrad.push(Tools.sunshine2globalRadiation(r + 1, sunhours, latitude, true));    
+    //       sunhours.push(row[idx_sundu]);
+    //     } else {
+    //       // error case
+    //       console.log("Error: No global radiation or sunhours specified for day " + date);
+    //       ok = false;
+    //     }
+
+    //     if (row[idx_rf] >= 0.0)
+    //       relhumid.push(row[idx_rf]);
+
+    //     tavg.push(row[idx_t_av]);
+    //     tmin.push(row[idx_t_min]);
+    //     tmax.push(row[idx_t_max]);
+    //     wind.push(row[idx_wind]);
+    //     precip.push(row[idx_prec]);
+
+    //     daysCount++;
+    //     date = new Date(date.getFullYear, date.getMonth(), date.getDate() + 1);
+    //   }
+    // }
+
+    // da.addClimateData(Climate.tmin, new Float64Array(tmin));
+    // da.addClimateData(Climate.tmax, new Float64Array(tmax));
+    // da.addClimateData(Climate.tavg, new Float64Array(tavg));
+    // da.addClimateData(Climate.globrad, new Float64Array(globrad));
+    // da.addClimateData(Climate.wind, new Float64Array(wind));
+    // da.addClimateData(Climate.precip, new Float64Array(precip));
+
+    // if(sunhours.length > 0)
+    //   da.addClimateData(Climate.sunhours, new Float64Array(sunhours));
+
+    // if (relhumid.length > 0)
+    //   da.addClimateData(Climate.relhumid, new Float64Array(relhumid));
+
+    // return ok;
+
   };
 
   return {

@@ -11,8 +11,7 @@
   "groundwaterDepthMinMonth": null,
   "horizons": [
     {
-      "upperBoundary": 0.0,
-      "lowerBoundary": 0.3,
+      "thickness": 0.3,
       "Corg": 0.80,
       "textureClass": "Ls2",
       "sand": 0.15,
@@ -26,8 +25,7 @@
       "bulkDensity": 1400
     },
     {
-      "upperBoundary": 0.3,
-      "lowerBoundary": 0.4,
+      "thickness": 0.1,
       "Corg": 0.15,
       "textureClass": "Ls2",
       "sand": 0.15,
@@ -41,8 +39,7 @@
       "bulkDensity": 1400
     },
     {
-      "upperBoundary": 0.4,
-      "lowerBoundary": 2.0,
+      "thickness": 1.6,
       "Corg": 0.05,
       "textureClass": "Ls2",
       "sand": 0.15,

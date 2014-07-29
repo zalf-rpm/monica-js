@@ -208,7 +208,7 @@ var Cutting = function (at, crop, cropResult) {
   };
 };
 
-Cutting.prototypeObject.create(WorkStep);
+Cutting.prototype = Object.create(WorkStep);
 Cutting.prototype.constructor = Cutting;
 
 
@@ -243,7 +243,7 @@ var MineralFertiliserApplication = function (at, partition, amount) {
 
 };
 
-MineralFertiliserApplication.prototypeObject.create(WorkStep);
+MineralFertiliserApplication.prototype = Object.create(WorkStep);
 MineralFertiliserApplication.prototype.constructor = MineralFertiliserApplication;
 
 

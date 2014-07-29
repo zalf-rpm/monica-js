@@ -1,145 +1,227 @@
 /*
+  Database queries to load parameters form monica.sqlite. Assume db object is globally available.
+  Queries originally from monica-parameters.cpp.
 
   TODO: test
     - Monica::soilParametersFromHermesFile
     - Monica::soilCharacteristicsKA5 
+    - indexOf is case sensitive but sql not, sqlite.js returns the column as it is in the db (upper or lower case)
 */
 
 var getCropParameters = function (cropId) {
 
   var cps = new CropParameters();
 
-  for (var r = 0, rs = data.crop.rows.length; r < rs; r++) {
-    if (data.crop.rows[r].id === cropId) {
+  var res = db.exec(
+   "SELECT id, name, perennial, max_assimilation_rate, \
+    carboxylation_pathway, minimum_temperature_for_assimilation, \
+    crop_specific_max_rooting_depth, min_n_content, \
+    n_content_pn, n_content_b0, \
+    n_content_above_ground_biomass, n_content_root, initial_kc_factor, \
+    development_acceleration_by_nitrogen_stress, fixing_n, \
+    luxury_n_coeff, max_crop_height, residue_n_ratio, \
+    sampling_depth, target_n_sampling_depth, target_n30, \
+    default_radiation_use_efficiency, crop_height_P1, crop_height_P2, \
+    stage_at_max_height, max_stem_diameter, stage_at_max_diameter, \
+    heat_sum_irrigation_start, heat_sum_irrigation_end, \
+    max_N_uptake_p, root_distribution_p, plant_density, \
+    root_growth_lag, min_temperature_root_growth, initial_rooting_depth, \
+    root_penetration_rate, root_form_factor, specific_root_length, \
+    stage_after_cut, crit_temperature_heat_stress, \
+    lim_temperature_heat_stress, begin_sensitive_phase_heat_stress, \
+    end_sensitive_phase_heat_stress, drought_impact_on_fertility_factor, \
+    cutting_delay_days, field_condition_modifier, assimilate_reallocation \
+    FROM crop \
+    WHERE id = " + cropId
+  );
 
-      var row = data.crop.rows[r]; 
+  if (res[0].values.length != 1)
+    throw 'cropId (' + cropId + ') not available in table crop'; 
 
-      cps.pc_CropName = row.name;
-      cps.pc_MaxAssimilationRate = row.max_assimilation_rate;
-      cps.pc_CarboxylationPathway = row.carboxylation_pathway;
-      cps.pc_MinimumTemperatureForAssimilation = row.minimum_temperature_for_assimilation;
-      cps.pc_CropSpecificMaxRootingDepth = row.crop_specific_max_rooting_depth;
-      cps.pc_MinimumNConcentration = row.min_n_content;
-      cps.pc_NConcentrationPN = row.n_content_pn;
-      cps.pc_NConcentrationB0 = row.n_content_b0;
-      cps.pc_NConcentrationAbovegroundBiomass = row.n_content_above_ground_biomass;
-      cps.pc_NConcentrationRoot = row.n_content_root;
-      cps.pc_InitialKcFactor = row.initial_kc_factor;
-      cps.pc_DevelopmentAccelerationByNitrogenStress = row.development_acceleration_by_nitrogen_stress;
-      cps.pc_FixingN = row.fixing_n;
-      cps.pc_LuxuryNCoeff = row.luxury_n_coeff;
-      cps.pc_MaxCropHeight = row.max_crop_height;
-      cps.pc_ResidueNRatio = row.residue_n_ratio;
-      cps.pc_SamplingDepth = row.sampling_depth;
-      cps.pc_TargetNSamplingDepth = row.target_n_sampling_depth;
-      cps.pc_TargetN30 = row.target_n30;
-      cps.pc_DefaultRadiationUseEfficiency = row.default_radiation_use_efficiency;
-      cps.pc_CropHeightP1 = row.crop_height_P1;
-      cps.pc_CropHeightP2 = row.crop_height_P2;
-      cps.pc_StageAtMaxHeight = row.stage_at_max_height;
-      cps.pc_MaxCropDiameter = row.max_stem_diameter;
-      cps.pc_StageAtMaxDiameter = row.stage_at_max_diameter;
-      cps.pc_HeatSumIrrigationStart = row.heat_sum_irrigation_start;
-      cps.pc_HeatSumIrrigationEnd = row.heat_sum_irrigation_end;
-      cps.pc_MaxNUptakeParam = row.max_N_uptake_p;
-      cps.pc_RootDistributionParam = row.root_distribution_p;
-      cps.pc_PlantDensity = row.plant_density;
-      cps.pc_RootGrowthLag = row.root_growth_lag;
-      cps.pc_MinimumTemperatureRootGrowth = row.min_temperature_root_growth;
-      cps.pc_InitialRootingDepth = row.initial_rooting_depth;
-      cps.pc_RootPenetrationRate = row.root_penetration_rate;
-      cps.pc_RootFormFactor = row.root_form_factor;
-      cps.pc_SpecificRootLength = row.specific_root_length;
-      cps.pc_StageAfterCut = row.stage_after_cut;
-      cps.pc_CriticalTemperatureHeatStress = row.crit_temperature_heat_stress;
-      cps.pc_LimitingTemperatureHeatStress = row.lim_temperature_heat_stress;
-      cps.pc_BeginSensitivePhaseHeatStress = row.begin_sensitive_phase_heat_stress;
-      cps.pc_EndSensitivePhaseHeatStress = row.end_sensitive_phase_heat_stress;
-      cps.pc_DroughtImpactOnFertilityFactor = row.drought_impact_on_fertility_factor;
-      cps.pc_CuttingDelayDays = row.cutting_delay_days;
-      cps.pc_FieldConditionModifier = row.field_condition_modifier;
+  var columns = res[0].columns;
+  var row = res[0].values[0]; // only one row
 
-      break;
-    }
-  }
+  cps.pc_CropName = row[columns.indexOf('name')];
+  cps.pc_MaxAssimilationRate = row[columns.indexOf('max_assimilation_rate')];
+  cps.pc_CarboxylationPathway = row[columns.indexOf('carboxylation_pathway')];
+  cps.pc_MinimumTemperatureForAssimilation = row[columns.indexOf('minimum_temperature_for_assimilation')];
+  cps.pc_CropSpecificMaxRootingDepth = row[columns.indexOf('crop_specific_max_rooting_depth')];
+  cps.pc_MinimumNConcentration = row[columns.indexOf('min_n_content')];
+  cps.pc_NConcentrationPN = row[columns.indexOf('n_content_pn')];
+  cps.pc_NConcentrationB0 = row[columns.indexOf('n_content_b0')];
+  cps.pc_NConcentrationAbovegroundBiomass = row[columns.indexOf('n_content_above_ground_biomass')];
+  cps.pc_NConcentrationRoot = row[columns.indexOf('n_content_root')];
+  cps.pc_InitialKcFactor = row[columns.indexOf('initial_kc_factor')];
+  cps.pc_DevelopmentAccelerationByNitrogenStress = row[columns.indexOf('development_acceleration_by_nitrogen_stress')];
+  cps.pc_FixingN = row[columns.indexOf('fixing_n')];
+  cps.pc_LuxuryNCoeff = row[columns.indexOf('luxury_n_coeff')];
+  cps.pc_MaxCropHeight = row[columns.indexOf('max_crop_height')];
+  cps.pc_ResidueNRatio = row[columns.indexOf('residue_n_ratio')];
+  cps.pc_SamplingDepth = row[columns.indexOf('sampling_depth')];
+  cps.pc_TargetNSamplingDepth = row[columns.indexOf('target_n_sampling_depth')];
+  cps.pc_TargetN30 = row[columns.indexOf('target_n30')];
+  cps.pc_DefaultRadiationUseEfficiency = row[columns.indexOf('default_radiation_use_efficiency')];
+  cps.pc_CropHeightP1 = row[columns.indexOf('crop_height_P1')];
+  cps.pc_CropHeightP2 = row[columns.indexOf('crop_height_P2')];
+  cps.pc_StageAtMaxHeight = row[columns.indexOf('stage_at_max_height')];
+  cps.pc_MaxCropDiameter = row[columns.indexOf('max_stem_diameter')];
+  cps.pc_StageAtMaxDiameter = row[columns.indexOf('stage_at_max_diameter')];
+  cps.pc_HeatSumIrrigationStart = row[columns.indexOf('heat_sum_irrigation_start')];
+  cps.pc_HeatSumIrrigationEnd = row[columns.indexOf('heat_sum_irrigation_end')];
+  cps.pc_MaxNUptakeParam = row[columns.indexOf('max_N_uptake_p')];
+  cps.pc_RootDistributionParam = row[columns.indexOf('root_distribution_p')];
+  cps.pc_PlantDensity = row[columns.indexOf('plant_density')];
+  cps.pc_RootGrowthLag = row[columns.indexOf('root_growth_lag')];
+  cps.pc_MinimumTemperatureRootGrowth = row[columns.indexOf('min_temperature_root_growth')];
+  cps.pc_InitialRootingDepth = row[columns.indexOf('initial_rooting_depth')];
+  cps.pc_RootPenetrationRate = row[columns.indexOf('root_penetration_rate')];
+  cps.pc_RootFormFactor = row[columns.indexOf('root_form_factor')];
+  cps.pc_SpecificRootLength = row[columns.indexOf('specific_root_length')];
+  cps.pc_StageAfterCut = row[columns.indexOf('stage_after_cut')];
+  cps.pc_CriticalTemperatureHeatStress = row[columns.indexOf('crit_temperature_heat_stress')];
+  cps.pc_LimitingTemperatureHeatStress = row[columns.indexOf('lim_temperature_heat_stress')];
+  cps.pc_BeginSensitivePhaseHeatStress = row[columns.indexOf('begin_sensitive_phase_heat_stress')];
+  cps.pc_EndSensitivePhaseHeatStress = row[columns.indexOf('end_sensitive_phase_heat_stress')];
+  cps.pc_DroughtImpactOnFertilityFactor = row[columns.indexOf('drought_impact_on_fertility_factor')];
+  cps.pc_CuttingDelayDays = row[columns.indexOf('cutting_delay_days')];
+  cps.pc_FieldConditionModifier = row[columns.indexOf('field_condition_modifier')];
 
-  for (var r = 0, rs = data.organ.rows.length; r < rs; r++) {
-    if (data.organ.rows[r].crop_id === cropId) {
 
-      var row = data.organ.rows[r];  
+  var res = db.exec(
+   "SELECT o.crop_id, o.id, o.initial_organ_biomass, \
+    o.organ_maintainance_respiration, o.is_above_ground, \
+    o.organ_growth_respiration, o.is_storage_organ \
+    FROM organ as o inner join crop as c on c.id = o.crop_id \
+    WHERE crop_id = " + cropId + " \
+    ORDER BY o.crop_id, c.id"
+  );
+
+  if (res[0].values.length === 0)
+    throw 'cropId (' + cropId + ') not available in table organ'; 
+
+  var columns = res[0].columns;
+  var rows = res[0].values;
+
+  for (var r = 0, rs = rows.length; r < rs; r++) {
+
+      var row = rows[r];
 
       cps.pc_NumberOfOrgans++;
-      cps.pc_InitialOrganBiomass.push(row.initial_organ_biomass);
-      cps.pc_OrganMaintenanceRespiration.push(row.organ_maintainance_respiration);
-      cps.pc_AbovegroundOrgan.push(row.is_above_ground === 1);
-      cps.pc_OrganGrowthRespiration.push(row.organ_growth_respiration);
-      cps.pc_StorageOrgan.push(row.is_storage_organ === 1);
+      cps.pc_InitialOrganBiomass.push(row[columns.indexOf('initial_organ_biomass')]);
+      cps.pc_OrganMaintenanceRespiration.push(row[columns.indexOf('organ_maintainance_respiration')]);
+      cps.pc_AbovegroundOrgan.push(row[columns.indexOf('is_above_ground')] == 1); /* db value might be bool or int */
+      cps.pc_OrganGrowthRespiration.push(row[columns.indexOf('organ_growth_respiration')]);
+      cps.pc_StorageOrgan.push(row[columns.indexOf('is_storage_organ')] == 1); /* db value might be bool or int */
 
-    }
   }
 
-  for (var r = 0, rs = data.dev_stage.rows.length; r < rs; r++) {
-    if (data.dev_stage.rows[r].crop_id === cropId) {
-  
-      var row = data.dev_stage.rows[r];      
+  var res = db.exec(
+   "SELECT id, stage_temperature_sum, \
+    base_temperature, opt_temperature, vernalisation_requirement, \
+    day_length_requirement, base_day_length, \
+    drought_stress_threshold, critical_oxygen_content, \
+    specific_leaf_area, stage_max_root_n_content, \
+    stage_kc_factor \
+    FROM dev_stage \
+    WHERE crop_id = " + cropId + " \
+    order by id"
+  );
 
-      cps.pc_NumberOfDevelopmentalStages++;
-      cps.pc_StageTemperatureSum.push(row.stage_temperature_sum);
-      cps.pc_BaseTemperature.push(row.base_temperature);
-      cps.pc_OptimumTemperature.push(row.opt_temperature);
-      cps.pc_VernalisationRequirement.push(row.vernalisation_requirement);
-      cps.pc_DaylengthRequirement.push(row.day_length_requirement);
-      cps.pc_BaseDaylength.push(row.base_day_length);
-      cps.pc_DroughtStressThreshold.push(row.drought_stress_threshold);
-      cps.pc_CriticalOxygenContent.push(row.critical_oxygen_content);
-      cps.pc_SpecificLeafArea.push(row.specific_leaf_area);
-      cps.pc_StageMaxRootNConcentration.push(row.stage_max_root_n_content);
-      cps.pc_StageKcFactor.push(row.stage_kc_factor);
-    }
+  if (res[0].values.length === 0)
+    throw 'cropId (' + cropId + ') not available in table dev_stage'; 
+
+  var columns = res[0].columns;
+  var rows = res[0].values;
+
+  for (var r = 0, rs = rows.length; r < rs; r++) {
+  
+    var row = rows[r];      
+
+    cps.pc_NumberOfDevelopmentalStages++;
+    cps.pc_StageTemperatureSum.push(row[columns.indexOf('stage_temperature_sum')]);
+    cps.pc_BaseTemperature.push(row[columns.indexOf('base_temperature')]);
+    cps.pc_OptimumTemperature.push(row[columns.indexOf('opt_temperature')]);
+    cps.pc_VernalisationRequirement.push(row[columns.indexOf('vernalisation_requirement')]);
+    cps.pc_DaylengthRequirement.push(row[columns.indexOf('day_length_requirement')]);
+    cps.pc_BaseDaylength.push(row[columns.indexOf('base_day_length')]);
+    cps.pc_DroughtStressThreshold.push(row[columns.indexOf('drought_stress_threshold')]);
+    cps.pc_CriticalOxygenContent.push(row[columns.indexOf('critical_oxygen_content')]);
+    cps.pc_SpecificLeafArea.push(row[columns.indexOf('specific_leaf_area')]);
+    cps.pc_StageMaxRootNConcentration.push(row[columns.indexOf('stage_max_root_n_content')]);
+    cps.pc_StageKcFactor.push(row[columns.indexOf('stage_kc_factor')]);
+
   }
 
   cps.resizeStageOrganVectors();
 
-  for (var r = 0, rs = data.crop2ods_dependent_param.rows.length; r < rs; r++) {
-    if (data.crop2ods_dependent_param.rows[r].crop_id === cropId) {
+  var res = db.exec(
+   "SELECT crop_id, organ_id, dev_stage_id, \
+    ods_dependent_param_id, value \
+    FROM crop2ods_dependent_param \
+    WHERE crop_id = " + cropId + " \
+    ORDER BY crop_id, ods_dependent_param_id, dev_stage_id, organ_id"
+  );
 
-      var row = data.crop2ods_dependent_param.rows[r];
+  var columns = res[0].columns;
+  var rows = res[0].values;
 
-      var ods_dependent_param_id = row.ods_dependent_param_id;
-      var dev_stage_id = row.dev_stage_id;
-      var organ_id = row.organ_id;
-      var sov = (ods_dependent_param_id === 1) ? cps.pc_AssimilatePartitioningCoeff : cps.pc_OrganSenescenceRate;
+  for (var r = 0, rs = rows.length; r < rs; r++) {
 
-      sov[dev_stage_id - 1][organ_id - 1] = row.value;
+    var row = rows[r];
 
-    }
+    var ods_dependent_param_id = row[columns.indexOf('ods_dependent_param_id')];
+    var dev_stage_id = row[columns.indexOf('dev_stage_id')];
+    var organ_id = row[columns.indexOf('organ_id')];
+    /* stage organ vectors */
+    var sov = (ods_dependent_param_id === 1) ? cps.pc_AssimilatePartitioningCoeff : cps.pc_OrganSenescenceRate;
+
+    sov[dev_stage_id - 1][organ_id - 1] = row[columns.indexOf('value')];
+
   }
 
-  for (var r = 0, rs = data.yield_parts.rows.length; r < rs; r++) {
-    if (data.yield_parts.rows[r].crop_id === cropId) {
+  var res = db.exec(
+   "SELECT crop_id, organ_id, is_primary, percentage, dry_matter \
+    FROM yield_parts \
+    WHERE crop_id = " + cropId
+  );
 
-      var row = data.yield_parts.rows[r];
+  var columns = res[0].columns;
+  var rows = res[0].values;
 
-      var organId = row.organ_id;
-      var percentage = row.percentage / 100.0;
-      var yieldDryMatter = row.dry_matter;
+  for (var r = 0, rs = rows.length; r < rs; r++) {
 
-      if (row.is_primary === 1)
-        cps.organIdsForPrimaryYield.push(new YieldComponent(organId, percentage, yieldDryMatter));
-      else
-        cps.organIdsForSecondaryYield.push(new YieldComponent(organId, percentage, yieldDryMatter));
+    var row = rows[r];
 
-    }
+    var organId = row[columns.indexOf('organ_id')];
+    var percentage = row[columns.indexOf('percentage')] / 100.0;
+    var yieldDryMatter = row[columns.indexOf('dry_matter')];
+
+    if (row[columns.indexOf('is_primary')] == 1) /* db value might be bool or int */
+      cps.organIdsForPrimaryYield.push(new YieldComponent(organId, percentage, yieldDryMatter));
+    else
+      cps.organIdsForSecondaryYield.push(new YieldComponent(organId, percentage, yieldDryMatter));
+
   }
 
-  for (var r = 0, rs = data.cutting_parts.rows.length; r < rs; r++) {
-    if (data.cutting_parts.rows[r].crop_id === cropId) {
+  /* get cutting parts if there are some data available */
+  var res = db.exec(
+   "SELECT crop_id, organ_id, is_primary, percentage, dry_matter \
+    FROM cutting_parts \
+    WHERE crop_id = " + cropId
+  );
 
-      var row = data.cutting_parts.rows[r];
+  if (res.length > 0) {
 
-      var organId = row.organ_id;
-      var percentage = row.percentage / 100.0;
-      var yieldDryMatter = row.dry_matter;
+    var columns = res[0].columns;
+    var rows = res[0].values;
+
+    for (var r = 0, rs = rows.length; r < rs; r++) {
+
+      var row = rows[r];
+
+      var organId = row[columns.indexOf('organ_id')];
+      var percentage = row[columns.indexOf('percentage')] / 100.0;
+      var yieldDryMatter = row[columns.indexOf('dry_matter')];
 
       // do not add cutting part organ id for sudan gras because they are already added
       if (cropId === 18)
@@ -148,36 +230,42 @@ var getCropParameters = function (cropId) {
         cps.organIdsForCutting.push(new YieldComponent(organId, percentage, yieldDryMatter));
 
     }
+
   }
 
   return cps;
    
 };
 
+
 /**
  * @brief Reads mineral fertiliser parameters from monica DB
  * @param id of the fertiliser
  * @return mineral fertiliser parameters value object with values from database
  */
-
 var getMineralFertiliserParameters = function (id) {
 
-   for (var r = 0, rs = data.mineral_fertilisers.rows.length; r < rs; r++) {
-    if (data.mineral_fertilisers.rows[r].ID === id) {
+  var res = db.exec(
+   "SELECT id, name, no3, nh4, carbamid \
+    FROM mineral_fertilisers \
+    WHERE id = " + id
+  );
 
-      var row = data.mineral_fertilisers.rows[r];
+  if (res[0].values.length != 1)
+    throw 'mineral fertiliser id (' + id + ') not available in table mineral_fertilisers';
 
-      var name = row.name;
-      var carbamid = row.carbamid;
-      var no3 = row.no3;
-      var nh4 = row.nh4;
+  var columns = res[0].columns;
+  var row = res[0].values[0]; /* one row */
 
-      break;
-    }
-  }
+  var name = row[columns.indexOf('name')];
+  var carbamid = row[columns.indexOf('carbamid')];
+  var no3 = row[columns.indexOf('no3')];
+  var nh4 = row[columns.indexOf('nh4')];
 
   return new MineralFertiliserParameters(name, carbamid, no3, nh4);
+
 };
+
 
 /**
  * @brief Reads organic fertiliser parameters from monica DB
@@ -186,85 +274,109 @@ var getMineralFertiliserParameters = function (id) {
  */
 var getOrganicFertiliserParameters = function (id) {
 
+  var res = db.exec(
+   "SELECT om_type, dm, nh4_n, no3_n, nh2_n, k_slow, k_fast, part_s, part_f, cn_s, cn_f, smb_s, smb_f, id \
+    FROM organic_fertiliser \
+    WHERE id = " + id
+  );
+
+  if (res[0].values.length != 1)
+    throw 'organic fertiliser id (' + id + ') not available in table organic_fertiliser';
+
+  var columns = res[0].columns;
+  var row = res[0].values[0]; /* one row */
+
   var omp = new OrganicMatterParameters();
 
-   for (var r = 0, rs = data.organic_fertilisers.rows.length; r < rs; r++) {
-    if (data.organic_fertilisers.rows[r].ID === id) {
-
-      var row = data.organic_fertilisers.rows[r];
-
-      omp.name = row.om_type;
-      omp.vo_AOM_DryMatterContent = row.dm;
-      omp.vo_AOM_NH4Content = row.nh4_n;
-      omp.vo_AOM_NO3Content = row.no3_n;
-      omp.vo_AOM_CarbamidContent = row.nh2_n;
-      omp.vo_AOM_SlowDecCoeffStandard = row.k_slow;
-      omp.vo_AOM_FastDecCoeffStandard = row.k_fast;
-      omp.vo_PartAOM_to_AOM_Slow = row.part_s;
-      omp.vo_PartAOM_to_AOM_Fast = row.part_f;
-      omp.vo_CN_Ratio_AOM_Slow = row.cn_s;
-      omp.vo_CN_Ratio_AOM_Fast = row.cn_f;
-      omp.vo_PartAOM_Slow_to_SMB_Slow = row.smb_s;
-      omp.vo_PartAOM_Slow_to_SMB_Fast = row.smb_f;
-
-      break;
-    }
-  }  
+  omp.name = row[columns.indexOf('om_type')];
+  omp.vo_AOM_DryMatterContent = row[columns.indexOf('dm')];
+  omp.vo_AOM_NH4Content = row[columns.indexOf('nh4_n')];
+  omp.vo_AOM_NO3Content = row[columns.indexOf('no3_n')];
+  omp.vo_AOM_CarbamidContent = row[columns.indexOf('nh2_n')];
+  omp.vo_AOM_SlowDecCoeffStandard = row[columns.indexOf('k_slow')];
+  omp.vo_AOM_FastDecCoeffStandard = row[columns.indexOf('k_fast')];
+  omp.vo_PartAOM_to_AOM_Slow = row[columns.indexOf('part_s')];
+  omp.vo_PartAOM_to_AOM_Fast = row[columns.indexOf('part_f')];
+  omp.vo_CN_Ratio_AOM_Slow = row[columns.indexOf('cn_s')];
+  omp.vo_CN_Ratio_AOM_Fast = row[columns.indexOf('cn_f')];
+  omp.vo_PartAOM_Slow_to_SMB_Slow = row[columns.indexOf('smb_s')];
+  omp.vo_PartAOM_Slow_to_SMB_Fast = row[columns.indexOf('smb_f')]; 
 
   return omp;
+
 };
 
 
 var getResidueParameters = function (cropId) {
 
+  var res = db.exec(
+   "SELECT residue_type, dm, nh4, no3, nh2, k_slow, k_fast, part_s, part_f, cn_s, cn_f, smb_s, smb_f, crop_id \
+    FROM residue_table \
+    WHERE crop_id = " + cropId
+  );
+
+  var columns = res[0].columns;
+  var row = res[0].values[0]; /* one row */
+
   var rps = new OrganicMatterParameters();
 
-   for (var r = 0, rs = data.residue_table.rows.length; r < rs; r++) {
-    if (data.residue_table.rows[r].crop_id === cropId) {
+  /* TODO: does any crop have a dataset in residue_table? */
+  if (row) { 
 
-      var row = data.residue_table.rows[r];
+    rps.name = row[columns.indexOf('residue_type')];
+    rps.vo_AOM_DryMatterContent = row[columns.indexOf('dm')];
+    rps.vo_AOM_NH4Content = row[columns.indexOf('nh4')];
+    rps.vo_AOM_NO3Content = row[columns.indexOf('no3')];
+    rps.vo_AOM_CarbamidContent = row[columns.indexOf('nh2')];
+    rps.vo_AOM_SlowDecCoeffStandard = row[columns.indexOf('k_slow')];
+    rps.vo_AOM_FastDecCoeffStandard = row[columns.indexOf('k_fast')];
+    rps.vo_PartAOM_to_AOM_Slow = row[columns.indexOf('part_s')];
+    rps.vo_PartAOM_to_AOM_Fast = row[columns.indexOf('part_f')];
+    rps.vo_CN_Ratio_AOM_Slow = row[columns.indexOf('cn_s')];
+    rps.vo_CN_Ratio_AOM_Fast = row[columns.indexOf('cn_f')];
+    rps.vo_PartAOM_Slow_to_SMB_Slow = row[columns.indexOf('smb_s')];
+    rps.vo_PartAOM_Slow_to_SMB_Fast = row[columns.indexOf('smb_f')];
 
-      rps.name = row.residue_type;
-      rps.vo_AOM_DryMatterContent = row.dm;
-      rps.vo_AOM_NH4Content = row.nh4;
-      rps.vo_AOM_NO3Content = row.no3;
-      rps.vo_AOM_CarbamidContent = row.nh2;
-      rps.vo_AOM_SlowDecCoeffStandard = row.k_slow;
-      rps.vo_AOM_FastDecCoeffStandard = row.k_fast;
-      rps.vo_PartAOM_to_AOM_Slow = row.part_s;
-      rps.vo_PartAOM_to_AOM_Fast = row.part_f;
-      rps.vo_CN_Ratio_AOM_Slow = row.cn_s;
-      rps.vo_CN_Ratio_AOM_Fast = row.cn_f;
-      rps.vo_PartAOM_Slow_to_SMB_Slow = row.smb_s;
-      rps.vo_PartAOM_Slow_to_SMB_Fast = row.smb_f;
-
-      break;
-    }
   }  
 
   return rps;
+
 };
+
 
 var readCapillaryRiseRates = function () {
 
+  var res = db.exec("SELECT soil_type, distance, capillary_rate FROM capillary_rise_rate");
+
+  var columns = res[0].columns;
+  var rows = res[0].values;
+
   var cap_rates = new CapillaryRiseRates();
 
-  for (var r = 0, rs = data.capillary_rise_rate.rows.length; r < rs; r++) {
+  for (var r = 0, rs = rows.length; r < rs; r++) {
 
-    var row = data.capillary_rise_rate.rows[r];
+    var row = rows[r];
     
-    var soil_type = row.soil_type;
-    var distance = row.distance;
-    var rate = row.capillary_rate;
+    var soil_type = row[columns.indexOf('soil_type')];
+    var distance = row[columns.indexOf('distance')];
+    var rate = row[columns.indexOf('capillary_rate')];
 
     cap_rates.addRate(soil_type, distance, rate);
+  
   }  
 
   return cap_rates;
+
 };
 
+/* type is always MODE_HERMES */
 var readUserParameterFromDatabase = function () {
 
+  var res = db.exec("SELECT name, value_hermes FROM user_parameter");
+
+  var columns = res[0].columns;
+  var rows = res[0].values;
+  
   var cpp = new CentralParameterProvider();
 
   var user_crops = cpp.userCropParameters;
@@ -275,222 +387,225 @@ var readUserParameterFromDatabase = function () {
   var user_soil_organic = cpp.userSoilOrganicParameters;
   var user_init_values = cpp.userInitValues;
 
-  for (var r = 0, rs = data.user_parameter.rows.length; r < rs; r++) {
+  for (var r = 0, rs = rows.length; r < rs; r++) {
 
-    var row = data.user_parameter.rows[r];
+    var row = rows[r];
 
-    var name = row.NAME;
+    var name = row[columns.indexOf('NAME')];
+    var value = row[columns.indexOf('VALUE_HERMES')];
+
     if (name == "tortuosity")
-      user_crops.pc_Tortuosity = row.VALUE_HERMES;
+      user_crops.pc_Tortuosity = value;
     else if (name == "canopy_reflection_coefficient")
-      user_crops.pc_CanopyReflectionCoefficient = row.VALUE_HERMES;
+      user_crops.pc_CanopyReflectionCoefficient = value;
     else if (name == "reference_max_assimilation_rate")
-      user_crops.pc_ReferenceMaxAssimilationRate = row.VALUE_HERMES;
+      user_crops.pc_ReferenceMaxAssimilationRate = value;
     else if (name == "reference_leaf_area_index")
-      user_crops.pc_ReferenceLeafAreaIndex = row.VALUE_HERMES;
+      user_crops.pc_ReferenceLeafAreaIndex = value;
     else if (name == "maintenance_respiration_parameter_2")
-      user_crops.pc_MaintenanceRespirationParameter2 = row.VALUE_HERMES;
+      user_crops.pc_MaintenanceRespirationParameter2 = value;
     else if (name == "maintenance_respiration_parameter_1")
-      user_crops.pc_MaintenanceRespirationParameter1 = row.VALUE_HERMES;
+      user_crops.pc_MaintenanceRespirationParameter1 = value;
     else if (name == "minimum_n_concentration_root")
-      user_crops.pc_MinimumNConcentrationRoot = row.VALUE_HERMES;
+      user_crops.pc_MinimumNConcentrationRoot = value;
     else if (name == "minimum_available_n")
-      user_crops.pc_MinimumAvailableN = row.VALUE_HERMES;
+      user_crops.pc_MinimumAvailableN = value;
     else if (name == "reference_albedo")
-      user_crops.pc_ReferenceAlbedo = row.VALUE_HERMES;
+      user_crops.pc_ReferenceAlbedo = value;
     else if (name == "stomata_conductance_alpha")
-      user_crops.pc_StomataConductanceAlpha = row.VALUE_HERMES;
+      user_crops.pc_StomataConductanceAlpha = value;
     else if (name == "saturation_beta")
-      user_crops.pc_SaturationBeta = row.VALUE_HERMES;
+      user_crops.pc_SaturationBeta = value;
     else if (name == "growth_respiration_redux")
-      user_crops.pc_GrowthRespirationRedux = row.VALUE_HERMES;
+      user_crops.pc_GrowthRespirationRedux = value;
     else if (name == "max_crop_n_demand")
-      user_crops.pc_MaxCropNDemand = row.VALUE_HERMES;
+      user_crops.pc_MaxCropNDemand = value;
     else if (name == "growth_respiration_parameter_2")
-      user_crops.pc_GrowthRespirationParameter2 = row.VALUE_HERMES;
+      user_crops.pc_GrowthRespirationParameter2 = value;
     else if (name == "growth_respiration_parameter_1")
-      user_crops.pc_GrowthRespirationParameter1 = row.VALUE_HERMES;
+      user_crops.pc_GrowthRespirationParameter1 = value;
     else if (name == "use_automatic_irrigation")
-      user_env.p_UseAutomaticIrrigation = (row.VALUE_HERMES === 1);
+      user_env.p_UseAutomaticIrrigation = (value == 1); /* db value might be bool or int */
     else if (name == "use_nmin_mineral_fertilising_method")
-      user_env.p_UseNMinMineralFertilisingMethod = (row.VALUE_HERMES === 1);
+      user_env.p_UseNMinMineralFertilisingMethod = (value == 1); /* db value might be bool or int */
     else if (name == "layer_thickness")
-      user_env.p_LayerThickness = row.VALUE_HERMES;
+      user_env.p_LayerThickness = value;
     else if (name == "number_of_layers")
-      user_env.p_NumberOfLayers = row.VALUE_HERMES;
+      user_env.p_NumberOfLayers = value;
     else if (name == "start_pv_index")
-      user_env.p_StartPVIndex = row.VALUE_HERMES;
+      user_env.p_StartPVIndex = value;
     else if (name == "albedo")
-      user_env.p_Albedo = row.VALUE_HERMES;
+      user_env.p_Albedo = value;
     else if (name == "athmospheric_co2")
-      user_env.p_AthmosphericCO2 = row.VALUE_HERMES;
+      user_env.p_AthmosphericCO2 = value;
     else if (name == "wind_speed_height")
-      user_env.p_WindSpeedHeight = row.VALUE_HERMES;
+      user_env.p_WindSpeedHeight = value;
     else if (name == "use_secondary_yields")
-      user_env.p_UseSecondaryYields = (row.VALUE_HERMES === 1);
+      user_env.p_UseSecondaryYields = (value == 1); /* db value might be bool or int */
     else if (name == "julian_day_automatic_fertilising")
-      user_env.p_JulianDayAutomaticFertilising = row.VALUE_HERMES;
+      user_env.p_JulianDayAutomaticFertilising = value;
     else if (name == "critical_moisture_depth")
-      user_soil_moisture.pm_CriticalMoistureDepth = row.VALUE_HERMES;
+      user_soil_moisture.pm_CriticalMoistureDepth = value;
     else if (name == "saturated_hydraulic_conductivity")
-      user_soil_moisture.pm_SaturatedHydraulicConductivity = row.VALUE_HERMES;
+      user_soil_moisture.pm_SaturatedHydraulicConductivity = value;
     else if (name == "surface_roughness")
-      user_soil_moisture.pm_SurfaceRoughness = row.VALUE_HERMES;
+      user_soil_moisture.pm_SurfaceRoughness = value;
     else if (name == "hydraulic_conductivity_redux")
-      user_soil_moisture.pm_HydraulicConductivityRedux = row.VALUE_HERMES;
+      user_soil_moisture.pm_HydraulicConductivityRedux = value;
     else if (name == "snow_accumulation_treshold_temperature")
-      user_soil_moisture.pm_SnowAccumulationTresholdTemperature = row.VALUE_HERMES;
+      user_soil_moisture.pm_SnowAccumulationTresholdTemperature = value;
     else if (name == "kc_factor")
-      user_soil_moisture.pm_KcFactor = row.VALUE_HERMES;
+      user_soil_moisture.pm_KcFactor = value;
     else if (name == "time_step")
-      user_env.p_timeStep = row.VALUE_HERMES;
+      user_env.p_timeStep = value;
     else if (name == "temperature_limit_for_liquid_water")
-      user_soil_moisture.pm_TemperatureLimitForLiquidWater = row.VALUE_HERMES;
+      user_soil_moisture.pm_TemperatureLimitForLiquidWater = value;
     else if (name == "correction_snow")
-      user_soil_moisture.pm_CorrectionSnow = row.VALUE_HERMES;
+      user_soil_moisture.pm_CorrectionSnow = value;
     else if (name == "correction_rain")
-      user_soil_moisture.pm_CorrectionRain = row.VALUE_HERMES;
+      user_soil_moisture.pm_CorrectionRain = value;
     else if (name == "snow_max_additional_density")
-      user_soil_moisture.pm_SnowMaxAdditionalDensity = row.VALUE_HERMES;
+      user_soil_moisture.pm_SnowMaxAdditionalDensity = value;
     else if (name == "new_snow_density_min")
-      user_soil_moisture.pm_NewSnowDensityMin = row.VALUE_HERMES;
+      user_soil_moisture.pm_NewSnowDensityMin = value;
     else if (name == "snow_retention_capacity_min")
-      user_soil_moisture.pm_SnowRetentionCapacityMin = row.VALUE_HERMES;
+      user_soil_moisture.pm_SnowRetentionCapacityMin = value;
     else if (name == "refreeze_parameter_2")
-      user_soil_moisture.pm_RefreezeParameter2 = row.VALUE_HERMES;
+      user_soil_moisture.pm_RefreezeParameter2 = value;
     else if (name == "refreeze_parameter_1")
-      user_soil_moisture.pm_RefreezeParameter1 = row.VALUE_HERMES;
+      user_soil_moisture.pm_RefreezeParameter1 = value;
     else if (name == "refreeze_temperature")
-      user_soil_moisture.pm_RefreezeTemperature = row.VALUE_HERMES;
+      user_soil_moisture.pm_RefreezeTemperature = value;
     else if (name == "snowmelt_temperature")
-      user_soil_moisture.pm_SnowMeltTemperature = row.VALUE_HERMES;
+      user_soil_moisture.pm_SnowMeltTemperature = value;
     else if (name == "snow_packing")
-      user_soil_moisture.pm_SnowPacking = row.VALUE_HERMES;
+      user_soil_moisture.pm_SnowPacking = value;
     else if (name == "snow_retention_capacity_max")
-      user_soil_moisture.pm_SnowRetentionCapacityMax = row.VALUE_HERMES;
+      user_soil_moisture.pm_SnowRetentionCapacityMax = value;
     else if (name == "evaporation_zeta")
-      user_soil_moisture.pm_EvaporationZeta = row.VALUE_HERMES;
+      user_soil_moisture.pm_EvaporationZeta = value;
     else if (name == "xsa_critical_soil_moisture")
-      user_soil_moisture.pm_XSACriticalSoilMoisture = row.VALUE_HERMES;
+      user_soil_moisture.pm_XSACriticalSoilMoisture = value;
     else if (name == "maximum_evaporation_impact_depth")
-      user_soil_moisture.pm_MaximumEvaporationImpactDepth = row.VALUE_HERMES;
+      user_soil_moisture.pm_MaximumEvaporationImpactDepth = value;
     else if (name == "ntau")
-      user_soil_temperature.pt_NTau = row.VALUE_HERMES;
+      user_soil_temperature.pt_NTau = value;
     else if (name == "initial_surface_temperature")
-      user_soil_temperature.pt_InitialSurfaceTemperature = row.VALUE_HERMES;
+      user_soil_temperature.pt_InitialSurfaceTemperature = value;
     else if (name == "base_temperature")
-      user_soil_temperature.pt_BaseTemperature = row.VALUE_HERMES;
+      user_soil_temperature.pt_BaseTemperature = value;
     else if (name == "quartz_raw_density")
-      user_soil_temperature.pt_QuartzRawDensity = row.VALUE_HERMES;
+      user_soil_temperature.pt_QuartzRawDensity = value;
     else if (name == "density_air")
-      user_soil_temperature.pt_DensityAir = row.VALUE_HERMES;
+      user_soil_temperature.pt_DensityAir = value;
     else if (name == "density_water")
-      user_soil_temperature.pt_DensityWater = row.VALUE_HERMES;
+      user_soil_temperature.pt_DensityWater = value;
     else if (name == "specific_heat_capacity_air")
-      user_soil_temperature.pt_SpecificHeatCapacityAir = row.VALUE_HERMES;
+      user_soil_temperature.pt_SpecificHeatCapacityAir = value;
     else if (name == "specific_heat_capacity_quartz")
-      user_soil_temperature.pt_SpecificHeatCapacityQuartz = row.VALUE_HERMES;
+      user_soil_temperature.pt_SpecificHeatCapacityQuartz = value;
     else if (name == "specific_heat_capacity_water")
-      user_soil_temperature.pt_SpecificHeatCapacityWater = row.VALUE_HERMES;
+      user_soil_temperature.pt_SpecificHeatCapacityWater = value;
     else if (name == "soil_albedo")
-      user_soil_temperature.pt_SoilAlbedo = row.VALUE_HERMES;
+      user_soil_temperature.pt_SoilAlbedo = value;
     else if (name == "dispersion_length")
-      user_soil_transport.pq_DispersionLength = row.VALUE_HERMES;
+      user_soil_transport.pq_DispersionLength = value;
     else if (name == "AD")
-      user_soil_transport.pq_AD = row.VALUE_HERMES;
+      user_soil_transport.pq_AD = value;
     else if (name == "diffusion_coefficient_standard")
-      user_soil_transport.pq_DiffusionCoefficientStandard = row.VALUE_HERMES;
+      user_soil_transport.pq_DiffusionCoefficientStandard = value;
     else if (name == "leaching_depth")
-      user_env.p_LeachingDepth = row.VALUE_HERMES;
+      user_env.p_LeachingDepth = value;
     else if (name == "groundwater_discharge")
-      user_soil_moisture.pm_GroundwaterDischarge = row.VALUE_HERMES;
+      user_soil_moisture.pm_GroundwaterDischarge = value;
     else if (name == "density_humus")
-      user_soil_temperature.pt_DensityHumus = row.VALUE_HERMES;
+      user_soil_temperature.pt_DensityHumus = value;
     else if (name == "specific_heat_capacity_humus")
-      user_soil_temperature.pt_SpecificHeatCapacityHumus = row.VALUE_HERMES;
+      user_soil_temperature.pt_SpecificHeatCapacityHumus = value;
     else if (name == "max_percolation_rate")
-      user_soil_moisture.pm_MaxPercolationRate = row.VALUE_HERMES;
+      user_soil_moisture.pm_MaxPercolationRate = value;
     else if (name == "max_groundwater_depth")
-      user_env.p_MaxGroundwaterDepth = row.VALUE_HERMES;
+      user_env.p_MaxGroundwaterDepth = value;
     else if (name == "min_groundwater_depth")
-      user_env.p_MinGroundwaterDepth = row.VALUE_HERMES;
+      user_env.p_MinGroundwaterDepth = value;
     else if (name == "min_groundwater_depth_month")
-      user_env.p_MinGroundwaterDepthMonth = row.VALUE_HERMES;
+      user_env.p_MinGroundwaterDepthMonth = value;
     else if (name == "SOM_SlowDecCoeffStandard")
-      user_soil_organic.po_SOM_SlowDecCoeffStandard = row.VALUE_HERMES;
+      user_soil_organic.po_SOM_SlowDecCoeffStandard = value;
     else if (name == "SOM_FastDecCoeffStandard")
-      user_soil_organic.po_SOM_FastDecCoeffStandard = row.VALUE_HERMES;
+      user_soil_organic.po_SOM_FastDecCoeffStandard = value;
     else if (name == "SMB_SlowMaintRateStandard")
-      user_soil_organic.po_SMB_SlowMaintRateStandard = row.VALUE_HERMES;
+      user_soil_organic.po_SMB_SlowMaintRateStandard = value;
     else if (name == "SMB_FastMaintRateStandard")
-      user_soil_organic.po_SMB_FastMaintRateStandard = row.VALUE_HERMES;
+      user_soil_organic.po_SMB_FastMaintRateStandard = value;
     else if (name == "SMB_SlowDeathRateStandard")
-      user_soil_organic.po_SMB_SlowDeathRateStandard = row.VALUE_HERMES;
+      user_soil_organic.po_SMB_SlowDeathRateStandard = value;
     else if (name == "SMB_FastDeathRateStandard")
-      user_soil_organic.po_SMB_FastDeathRateStandard = row.VALUE_HERMES;
+      user_soil_organic.po_SMB_FastDeathRateStandard = value;
     else if (name == "SMB_UtilizationEfficiency")
-      user_soil_organic.po_SMB_UtilizationEfficiency = row.VALUE_HERMES;
+      user_soil_organic.po_SMB_UtilizationEfficiency = value;
     else if (name == "SOM_SlowUtilizationEfficiency")
-      user_soil_organic.po_SOM_SlowUtilizationEfficiency = row.VALUE_HERMES;
+      user_soil_organic.po_SOM_SlowUtilizationEfficiency = value;
     else if (name == "SOM_FastUtilizationEfficiency")
-      user_soil_organic.po_SOM_FastUtilizationEfficiency = row.VALUE_HERMES;
+      user_soil_organic.po_SOM_FastUtilizationEfficiency = value;
     else if (name == "AOM_SlowUtilizationEfficiency")
-      user_soil_organic.po_AOM_SlowUtilizationEfficiency = row.VALUE_HERMES;
+      user_soil_organic.po_AOM_SlowUtilizationEfficiency = value;
     else if (name == "AOM_FastUtilizationEfficiency")
-      user_soil_organic.po_AOM_FastUtilizationEfficiency = row.VALUE_HERMES;
+      user_soil_organic.po_AOM_FastUtilizationEfficiency = value;
     else if (name == "AOM_FastMaxC_to_N")
-      user_soil_organic.po_AOM_FastMaxC_to_N = row.VALUE_HERMES;
+      user_soil_organic.po_AOM_FastMaxC_to_N = value;
     else if (name == "PartSOM_Fast_to_SOM_Slow")
-      user_soil_organic.po_PartSOM_Fast_to_SOM_Slow = row.VALUE_HERMES;
+      user_soil_organic.po_PartSOM_Fast_to_SOM_Slow = value;
     else if (name == "PartSMB_Slow_to_SOM_Fast")
-      user_soil_organic.po_PartSMB_Slow_to_SOM_Fast = row.VALUE_HERMES;
+      user_soil_organic.po_PartSMB_Slow_to_SOM_Fast = value;
     else if (name == "PartSMB_Fast_to_SOM_Fast")
-      user_soil_organic.po_PartSMB_Fast_to_SOM_Fast = row.VALUE_HERMES;
+      user_soil_organic.po_PartSMB_Fast_to_SOM_Fast = value;
     else if (name == "PartSOM_to_SMB_Slow")
-      user_soil_organic.po_PartSOM_to_SMB_Slow = row.VALUE_HERMES;
+      user_soil_organic.po_PartSOM_to_SMB_Slow = value;
     else if (name == "PartSOM_to_SMB_Fast")
-      user_soil_organic.po_PartSOM_to_SMB_Fast = row.VALUE_HERMES;
+      user_soil_organic.po_PartSOM_to_SMB_Fast = value;
     else if (name == "CN_Ratio_SMB")
-      user_soil_organic.po_CN_Ratio_SMB = row.VALUE_HERMES;
+      user_soil_organic.po_CN_Ratio_SMB = value;
     else if (name == "LimitClayEffect")
-      user_soil_organic.po_LimitClayEffect = row.VALUE_HERMES;
+      user_soil_organic.po_LimitClayEffect = value;
     else if (name == "AmmoniaOxidationRateCoeffStandard")
-      user_soil_organic.po_AmmoniaOxidationRateCoeffStandard = row.VALUE_HERMES;
+      user_soil_organic.po_AmmoniaOxidationRateCoeffStandard = value;
     else if (name == "NitriteOxidationRateCoeffStandard")
-      user_soil_organic.po_NitriteOxidationRateCoeffStandard = row.VALUE_HERMES;
+      user_soil_organic.po_NitriteOxidationRateCoeffStandard = value;
     else if (name == "TransportRateCoeff")
-      user_soil_organic.po_TransportRateCoeff = row.VALUE_HERMES;
+      user_soil_organic.po_TransportRateCoeff = value;
     else if (name == "SpecAnaerobDenitrification")
-      user_soil_organic.po_SpecAnaerobDenitrification = row.VALUE_HERMES;
+      user_soil_organic.po_SpecAnaerobDenitrification = value;
     else if (name == "ImmobilisationRateCoeffNO3")
-      user_soil_organic.po_ImmobilisationRateCoeffNO3 = row.VALUE_HERMES;
+      user_soil_organic.po_ImmobilisationRateCoeffNO3 = value;
     else if (name == "ImmobilisationRateCoeffNH4")
-      user_soil_organic.po_ImmobilisationRateCoeffNH4 = row.VALUE_HERMES;
+      user_soil_organic.po_ImmobilisationRateCoeffNH4 = value;
     else if (name == "Denit1")
-      user_soil_organic.po_Denit1 = row.VALUE_HERMES;
+      user_soil_organic.po_Denit1 = value;
     else if (name == "Denit2")
-      user_soil_organic.po_Denit2 = row.VALUE_HERMES;
+      user_soil_organic.po_Denit2 = value;
     else if (name == "Denit3")
-      user_soil_organic.po_Denit3 = row.VALUE_HERMES;
+      user_soil_organic.po_Denit3 = value;
     else if (name == "HydrolysisKM")
-      user_soil_organic.po_HydrolysisKM = row.VALUE_HERMES;
+      user_soil_organic.po_HydrolysisKM = value;
     else if (name == "ActivationEnergy")
-      user_soil_organic.po_ActivationEnergy = row.VALUE_HERMES;
+      user_soil_organic.po_ActivationEnergy = value;
     else if (name == "HydrolysisP1")
-      user_soil_organic.po_HydrolysisP1 = row.VALUE_HERMES;
+      user_soil_organic.po_HydrolysisP1 = value;
     else if (name == "HydrolysisP2")
-      user_soil_organic.po_HydrolysisP2 = row.VALUE_HERMES;
+      user_soil_organic.po_HydrolysisP2 = value;
     else if (name == "AtmosphericResistance")
-      user_soil_organic.po_AtmosphericResistance = row.VALUE_HERMES;
+      user_soil_organic.po_AtmosphericResistance = value;
     else if (name == "N2OProductionRate")
-      user_soil_organic.po_N2OProductionRate = row.VALUE_HERMES;
+      user_soil_organic.po_N2OProductionRate = value;
     else if (name == "Inhibitor_NH3")
-      user_soil_organic.po_Inhibitor_NH3 = row.VALUE_HERMES;
+      user_soil_organic.po_Inhibitor_NH3 = value;
 
     cpp.capillaryRiseRates = readCapillaryRiseRates();
   }
 
   return cpp;
+
 };
 
 var soilCharacteristicsKA5 = function (soilParameter) {
@@ -703,31 +818,46 @@ var soilCharacteristicsKA5 = function (soilParameter) {
 
 var readPrincipalSoilCharacteristicData = function (soilType, rawDensity) {
 
+  // C++
   // typedef map<int, RPSCDRes> M1;
   // typedef map<string, M1> M2;
   // static M2 m;
+
+  var res = db.exec(
+   "SELECT soil_type, soil_raw_density*10 AS soil_raw_density, air_capacity, field_capacity, n_field_capacity \
+    FROM soil_characteristic_data \
+    WHERE air_capacity != 0 AND field_capacity != 0 AND n_field_capacity != 0 \
+    ORDER BY soil_type, soil_raw_density"
+  );
+
+  if (res[0].values.length < 1)
+    throw 'soil_characteristic_data not available in monica.sqlite';  
+
+  var columns = res[0].columns;
+  var rows = res[0].values;
+
   var m = {};
 
-  for (var r = 0, rs = data.soil_characteristic_data.rows.length; r < rs; r++) {
+  for (var r = 0, rs = rows.length; r < rs; r++) {
 
-    var row = data.soil_characteristic_data.rows[r];
+    var row = rows[r];
 
-    if (row.soil_type === soilType) {
+    if (row[columns.indexOf('soil_type')] === soilType) {
 
-      var ac = row.air_capacity;
-      var fc = row.field_capacity;
-      var nfc = row.n_field_capacity;
+      var ac = row[columns.indexOf('air_capacity')];
+      var fc = row[columns.indexOf('field_capacity')];
+      var nfc = row[columns.indexOf('n_field_capacity')];
 
       var rp = new RPSCDRes(true);
       rp.sat = ac + fc;
       rp.fc = fc;
       rp.pwp = fc - nfc;
 
+      if (m[soilType] === undefined)
+        m[soilType] = {};
 
-      if (m[row.soil_type] === undefined)
-        m[row.soil_type] = {};
+      m[soilType][int(row[columns.indexOf('soil_raw_density')])] = rp;
 
-      m[row.soil_type][row['soil_raw_density*10']] = rp;
     }
   }
 
@@ -741,24 +871,39 @@ var readPrincipalSoilCharacteristicData = function (soilType, rawDensity) {
     rd10 += (rd10 < 15) ? 1 : -1;
 
   return (m[soilType][rd10]) ? m[soilType][rd10] : new RPSCDRes();
+
 };
 
 var readSoilCharacteristicModifier = function (soilType, organicMatter) {
 
+  // C++
   // typedef map<int, RPSCDRes> M1;
   // typedef map<string, M1> M2;
   // static M2 m;
+
+  var res = db.exec(
+   "SELECT soil_type, organic_matter*10 AS organic_matter, air_capacity, field_capacity, n_field_capacity \
+    FROM soil_aggregation_values \
+    ORDER BY soil_type, organic_matter"
+  );
+
+  if (res[0].values.length < 1)
+    throw 'soil_aggregation_values not available in monica.sqlite';  
+
+  var columns = res[0].columns;
+  var rows = res[0].values;
+
   var m = {};
 
-  for (var r = 0, rs = data.soil_aggregation_values.rows.length; r < rs; r++) {
+  for (var r = 0, rs = rows.length; r < rs; r++) {
 
-    var row = data.soil_aggregation_values.rows[r];
+    var row = rows[r];
 
-    if (row.soil_type === soilType) {
+    if (row[columns.indexOf('soil_type')] === soilType) {
 
-      var ac = row.air_capacity;
-      var fc = row.field_capacity;
-      var nfc = row.n_field_capacity;
+      var ac = row[columns.indexOf('air_capacity')];
+      var fc = row[columns.indexOf('field_capacity')];
+      var nfc = row[columns.indexOf('n_field_capacity')];
 
       var rp = new RPSCDRes(true);
       rp.sat = ac + fc;
@@ -766,16 +911,18 @@ var readSoilCharacteristicModifier = function (soilType, organicMatter) {
       rp.pwp = fc - nfc;
 
 
-      if (m[row.soil_type] === undefined)
-        m[row.soil_type] = {};
+      if (m[soilType] === undefined)
+        m[soilType] = {};
 
-      m[row.soil_type][row['organic_matter*10']] = rp;
+      m[soilType][int(row[columns.indexOf('organic_matter')])] = rp;
+
     }
   }
 
   var rd10 = int(organicMatter * 10);
 
   return (m[soilType][rd10]) ? m[soilType][rd10] : new RPSCDRes();
+  
 };
 
 

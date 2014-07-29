@@ -1,9 +1,7 @@
 {
   "crops": [
     {
-      "name": "winter rye",
-      "genType": "",
-      "spec": "",
+      "nameAndGenType": "winter rye",
       "sowingDate": "1991-10-01",
       "rowWidth": 5.0,
       "plantSpace": 5.0,
@@ -33,7 +31,7 @@
         {
           "date": "1992-04-01",
           "method": "Fixed",
-          "type": "AN",
+          "type": "Ammonium Nitrate",
           "amount": 40
         }
       ],
@@ -41,8 +39,8 @@
         {
           "date": "1992-05-01",
           "method": "Fixed",
-          "type": "CAM",
-          "amount": 3000
+          "type": "cattle manure",
+          "amount": 30
         }
       ]
     }

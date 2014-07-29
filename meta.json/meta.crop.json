@@ -1,0 +1,193 @@
+{
+  "crops": [
+    {
+      "name": {
+        "desc": "Crop species name",
+        "db": {
+          "table": "view_crop",
+          "columns": [
+            "crop_name"
+          ]
+        }
+      },
+      "sowingDate": {
+        "desc": "Date at which the crop is sown or transplanted",
+        "unit": "date",
+        "min": "0000-01-01",
+        "max": "2999-12-31"
+      },
+      "rowWidth": {
+        "desc": "Row width",
+        "unit": "cm",
+        "min": 0,
+        "max": 5000,
+        "default": 14.5,
+        "advanced": true
+      },
+      "plantSpace": {
+        "desc": "Plant spacing",
+        "unit": "cm",
+        "min": 0,
+        "max": 5000,
+        "default": 0,
+        "advanced": true
+      },
+      "plantDryWeight": {
+        "desc": "Dry weight at planting or seed dry weight",
+        "unit": "kg (DM) ha-1",
+        "min": 1,
+        "max": null
+      },
+      "percNTRansplant": {
+        "desc": "Nitrogen concentration in transplant (0.0 if not known)",
+        "unit": "kg kg-1",
+        "min": 0.0,
+        "max": 0.1,
+        "default": 0.07
+      },
+      "finalHarvestDate": {
+        "desc": "Date of final harvest",
+        "unit": "date"
+      },
+      "residuesRemoval": {
+        "desc": "Share of crop residues removed from field",
+        "unit": "kg (DM) kg-1 (DM)",
+        "min": 0,
+        "max": 1,
+        "default": 0.85
+      },
+      "tillageOperations": [
+        {
+          "date": {
+            "desc": "Tillage date",
+            "unit": "date"
+          },
+          "method": {
+            "desc": "Tillage Method",
+            "enum": [
+              "Plough",
+              "Cultivator"
+            ]
+          },
+          "depth": {
+            "desc": "Tillage depth",
+            "unit": "cm",
+            "min": 10,
+            "max": 200,
+            "default": 30
+          }
+        }
+      ],
+      "irrigations": [
+        {
+          "method": {
+            "desc": "Irrigation method",
+            "enum": [
+              "Sprinkler"
+            ],
+            "default": "Sprinkler"
+          },
+          "eventType": {
+            "desc": "Event type",
+            "enum": [
+              "Fixed",
+              "Content",
+              "Evapo"
+            ],
+            "default": "Fixed"
+          },
+          "threshold": {
+            "desc": "Soil water content threshold (if triggered event type is selected)",
+            "unit": "mm mm-1",
+            "min": 0,
+            "max": null,
+            "default": 0.2
+          },
+          "area": {
+            "desc": "Fraction of wetted soil surface",
+            "unit": "m2 m-2",
+            "min": 0,
+            "max": 1,
+            "default": 1
+          },
+          "amount": {
+            "desc": "Irrigation amount",
+            "unit": "mm",
+            "min": 0,
+            "max": null,
+            "default": 5
+          },
+          "NConc": {
+            "desc": "Nitrogen concentration in irrigation water",
+            "unit": "g l-1",
+            "min": 0,
+            "max": null,
+            "default": 0
+          }
+        }
+      ],
+      "organicFertilisers": [
+        {
+          "date": {
+            "desc": "Fertilising date",
+            "unit": "date"
+          },
+          "method": {
+            "desc": "Event type",
+            "enum": [
+              "Fixed",
+              "Automated"
+            ],
+            "default": "Fixed"
+          },
+          "type": {
+            "desc": "Organic fertiliser type",
+            "db": {
+              "table": "organic_fertiliser",
+              "columns": [
+                "om_type"
+              ]
+            }
+          },
+          "amount": {
+            "desc": "Amount of N applied",
+            "unit": "kg (N) ha-1",
+            "min": 0,
+            "max": null
+          }
+        }
+      ],
+      "mineralFertilisers": [
+        {
+          "date": {
+            "desc": "Fertilising date",
+            "unit": "date"
+          },
+          "method": {
+            "desc": "Event type",
+            "enum": [
+              "Fixed",
+              "Automated"
+            ],
+            "default": "Fixed"
+          },
+          "type": {
+            "desc": "Mineral fertiliser type",
+            "db": {
+              "table": "mineral_fertilisers",
+              "columns": [
+                "name"
+              ]
+            }
+          },
+          "amount": {
+            "desc": "Amount of N applied",
+            "unit": "kg (N) ha-1",
+            "min": 0,
+            "max": null
+          }
+        }
+      ]
+    }
+  ]
+}
