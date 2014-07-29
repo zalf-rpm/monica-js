@@ -33,6 +33,8 @@ var WorkStep = function (date) {
 
 var Seed = function (date, crop) {
 
+  WorkStep.call(this, date);
+
   this._date = date;
   this._crop = crop;
 
@@ -56,11 +58,14 @@ var Seed = function (date, crop) {
 
 };
 
-Seed.prototype = new WorkStep();
+Seed.prototype = Object.create(WorkStep);
+Seed.prototype.constructor = Seed;
 
 
 var Harvest = function (at, crop, cropResult) {
 
+  WorkStep.call(this, at);
+  
   this._date = at;
   this._crop = crop;
   this._cropResult = cropResult;
@@ -137,10 +142,12 @@ var Harvest = function (at, crop, cropResult) {
 
 };
 
-Harvest.prototype = new WorkStep();
-
+Harvest.prototype = Object.create(WorkStep);
+Harvest.prototype.constructor = Harvest;
 
 var Cutting = function (at, crop, cropResult) {
+
+  WorkStep.call(this, at);
   
   this._date = at;
   this._crop = crop;
@@ -201,10 +208,13 @@ var Cutting = function (at, crop, cropResult) {
   };
 };
 
-Cutting.prototype = new WorkStep();
+Cutting.prototypeObject.create(WorkStep);
+Cutting.prototype.constructor = Cutting;
 
 
 var MineralFertiliserApplication = function (at, partition, amount) {
+
+  WorkStep.call(this, at);
 
   this._date = at;
   this._partition = partition;
@@ -233,10 +243,13 @@ var MineralFertiliserApplication = function (at, partition, amount) {
 
 };
 
-MineralFertiliserApplication.prototype = new WorkStep();
+MineralFertiliserApplication.prototypeObject.create(WorkStep);
+MineralFertiliserApplication.prototype.constructor = MineralFertiliserApplication;
 
 
 var OrganicFertiliserApplication = function (at, parameters, amount, incorp) {
+
+  WorkStep.call(this, at);
 
   this._date = at;
   this._parameters = parameters;
@@ -273,10 +286,13 @@ var OrganicFertiliserApplication = function (at, parameters, amount, incorp) {
 
 };
 
-OrganicFertiliserApplication.prototype = new WorkStep();
+OrganicFertiliserApplication.prototype = Object.create(WorkStep);
+OrganicFertiliserApplication.prototype.constructor = OrganicFertiliserApplication;
 
 
 var TillageApplication = function (at, depth) {
+
+  WorkStep.call(this, at);
 
   this._date = at;
   this._depth = depth;
@@ -295,10 +311,13 @@ var TillageApplication = function (at, depth) {
 
 };
 
-TillageApplication.prototype = new WorkStep();
+TillageApplication.prototype = Object.create(WorkStep);
+TillageApplication.prototype.constructor = TillageApplication;
 
 
 var IrrigationApplication = function (at, amount, parameters) {
+
+  WorkStep.call(this, at);
 
   this._date = at;
   this._amount = amount;
@@ -331,4 +350,5 @@ var IrrigationApplication = function (at, amount, parameters) {
 
 };
 
-IrrigationApplication.prototype = new WorkStep();
+IrrigationApplication.prototype = Object.create(WorkStep);
+IrrigationApplication.prototype.constructor = IrrigationApplication;
