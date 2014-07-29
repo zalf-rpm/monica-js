@@ -20,9 +20,9 @@ console.log(JSON.stringify(crop, null, 2));
 
 /* read weather csv file */
 var weather_csv = fs.readFileSync('./weather.csv', { encoding: 'utf-8' });
-var wather_rows = weather_csv.split('\n');
-var weather_header = wather_rows[0].split(';');
-var weather_unit = wather_rows[1].split(';');
+var weather_rows = weather_csv.split('\n');
+var weather_header = weather_rows[0].split(';');
+var weather_unit = weather_rows[1].split(';');
 
 var weather = {
   tmin: [],
@@ -35,9 +35,9 @@ var weather = {
   precip: []
 };
 
-for (var r = 2 /* skip first two rows*/, rs = wather_rows.length; r < rs; r++) {
+for (var r = 2 /* skip first two rows*/, rs = weather_rows.length; r < rs; r++) {
 
-  var row = wather_rows[r].split(';');
+  var row = weather_rows[r].split(';');
   if (row.length != weather_header.length)
     continue;
 
