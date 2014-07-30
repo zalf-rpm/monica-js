@@ -927,7 +927,7 @@ var readSoilCharacteristicModifier = function (soilType, organicMatter) {
 
 
 
-var runMonica = function (env) {
+var runMonica = function (env, progress_callback) {
 
   var res = { crops: [] };
   
@@ -1110,6 +1110,10 @@ var runMonica = function (env) {
     // writes crop results to output file
     if (write_output_files)
       writeCropResults(model.cropGrowth(), foutFileName, goutFileName, model.isCropPlanted());
+    
+    /* if progress_callback is provided */
+    if (progress_callback)
+      progress_callback(getProgress(currentDate, model));
 
     model.generalStep(d);
 
@@ -2169,6 +2173,169 @@ var dumpMonicaParametersIntoFile = function (fileName, cpp) {
   parameter_output += endl;
 
   fs.writeFileSync(fileName, parameter_output, { encoding: 'utf8' });
+
+};
+
+/* return object with result variables. Used in progress_callback */
+var getProgress = function (currentDate, model) {
+
+  var isCropPlanted = model.isCropPlanted()
+    , mcg = model.cropGrowth()
+    , mst = model.soilTemperature()
+    , msm = model.soilMoisture()
+    , mso = model.soilOrganic()
+    , msc = model.soilColumn()
+    /* TODO: work-around. Hier muss was eleganteres hin! */
+    , msa = model.soilColumnNC()
+    , msq = model.soilTransport()
+    ;
+
+  var ret = {
+      date: currentDate.toLocaleDateString()
+    , CropName: isCropPlanted ? mcg.get_CropName() : ''
+    , TranspirationDeficit: isCropPlanted ? mcg.get_TranspirationDeficit() : 0 // [01]
+    , ActualTranspiration: isCropPlanted ? mcg.get_ActualTranspiration() : 0 
+    , CropNRedux: isCropPlanted ? mcg.get_CropNRedux() : 0 // [01]
+    , HeatStressRedux: isCropPlanted ? mcg.get_HeatStressRedux() : 0 // [01]
+    , OxygenDeficit: isCropPlanted ? mcg.get_OxygenDeficit() : 0 // [01]
+
+    , DevelopmentalStage: isCropPlanted ? mcg.get_DevelopmentalStage() + 1 : 0
+    , CurrentTemperatureSum: isCropPlanted ? mcg.get_CurrentTemperatureSum() : 0 
+    , VernalisationFactor: isCropPlanted ? mcg.get_VernalisationFactor() : 0 
+    , DaylengthFactor: isCropPlanted ? mcg.get_DaylengthFactor() : 0 
+    , OrganGrowthIncrementRoot: isCropPlanted ? mcg.get_OrganGrowthIncrement(0) : 0
+    , OrganGrowthIncrementLeaf: isCropPlanted ? mcg.get_OrganGrowthIncrement(1) : 0
+    , OrganGrowthIncrementShoot: isCropPlanted ? mcg.get_OrganGrowthIncrement(2) : 0
+    , OrganGrowthIncrementFruit: isCropPlanted ? mcg.get_OrganGrowthIncrement(3) : 0
+    
+    , RelativeTotalDevelopment: isCropPlanted ? mcg.get_RelativeTotalDevelopment() : 0 
+    , OrganBiomassRoot: isCropPlanted ? mcg.get_OrganBiomass(0) : 0
+    , OrganBiomassLeaf: isCropPlanted ? mcg.get_OrganBiomass(1) : 0
+    , OrganBiomassShoot: isCropPlanted ? mcg.get_OrganBiomass(2) : 0
+    , OrganBiomassFruit: isCropPlanted ? mcg.get_OrganBiomass(3) : 0
+    , PrimaryCropYield: isCropPlanted ? mcg.get_PrimaryCropYield() : 0 
+
+    , GrossPhotosynthesisHaRate: isCropPlanted ? mcg.get_GrossPhotosynthesisHaRate() : 0  // [kg CH2O ha-1 d-1]
+    , NetPhotosynthesis: isCropPlanted ? mcg.get_NetPhotosynthesis() : 0   // [kg CH2O ha-1 d-1]
+    , MaintenanceRespirationAS: isCropPlanted ? mcg.get_MaintenanceRespirationAS() : 0 // [kg CH2O ha-1]
+    , GrowthRespirationAS: isCropPlanted ? mcg.get_GrowthRespirationAS() : 0 // [kg CH2O ha-1]
+
+    , StomataResistance: isCropPlanted ? mcg.get_StomataResistance() : 0 // [s m-1]
+
+    , CropHeight: isCropPlanted ? mcg.get_CropHeight() : 0 // [m]
+    , LeafAreaIndex: isCropPlanted ? mcg.get_LeafAreaIndex() : 0  //[m2 m-2]
+    , RootingDepth: isCropPlanted ? mcg.get_RootingDepth() : 0  //[layer]
+    , AbovegroundBiomass: isCropPlanted ? mcg.get_AbovegroundBiomass() : 0  //[kg ha-1]
+
+    , TotalBiomassNContent: isCropPlanted ? mcg.get_TotalBiomassNContent() : 0 
+    , SumTotalNUptake: isCropPlanted ? mcg.get_SumTotalNUptake() : 0 
+    , ActNUptake: isCropPlanted ? mcg.get_ActNUptake() : 0  // [kg N ha-1]
+    , PotNUptake: isCropPlanted ? mcg.get_PotNUptake() : 0  // [kg N ha-1]
+    , TargetNConcentration: isCropPlanted ? mcg.get_TargetNConcentration() : 0 //[kg N kg-1]
+
+    , CriticalNConcentration: isCropPlanted ? mcg.get_CriticalNConcentration() : 0 //[kg N kg-1]
+    , AbovegroundBiomassNConcentration: isCropPlanted ? mcg.get_AbovegroundBiomassNConcentration() : 0 //[kg N kg-1]
+    , NetPrimaryProduction: isCropPlanted ? mcg.get_NetPrimaryProduction() : 0  // NPP, [kg C ha-1]
+    , GrossPrimaryProduction: isCropPlanted ? mcg.get_GrossPrimaryProduction() : 0 // GPP, [kg C ha-1]
+    , AutotrophicRespiration: isCropPlanted ? mcg.get_AutotrophicRespiration() : 0 // Ra, [kg C ha-1]
+  };
+
+  var outLayers = 20;
+
+  for (var i_Layer = 0; i_Layer < outLayers; i_Layer++)
+    ret['SoilMoisture_' + i_Layer] = msm.get_SoilMoisture(i_Layer);
+
+  ret['dailySumIrrigationWater'] = model.dailySumIrrigationWater();
+  ret['Infiltration'] = msm.get_Infiltration(); // {mm]
+  ret['SurfaceWaterStorage'] = msm.get_SurfaceWaterStorage();// {mm]
+  ret['SurfaceRunOff'] = msm.get_SurfaceRunOff();// {mm]
+  ret['SnowDepth'] = msm.get_SnowDepth(); // [mm]
+  ret['FrostDepth'] = msm.get_FrostDepth();
+  ret['ThawDepth'] = msm.get_ThawDepth();
+
+  for (var i_Layer = 0; i_Layer < outLayers; i_Layer++)
+   ret['PASW_' + i_Layer] = msm.get_SoilMoisture(i_Layer) - msa[i_Layer].get_PermanentWiltingPoint();
+
+  ret['SoilSurfaceTemperature'] = mst.get_SoilSurfaceTemperature();
+
+  for(var i_Layer = 0; i_Layer < 5; i_Layer++)
+    ret['SoilTemperature_' + i_Layer] = mst.get_SoilTemperature(i_Layer);// [°C]
+
+  ret['ActualEvaporation'] = msm.get_ActualEvaporation();// [mm]
+  ret['Evapotranspiration'] = msm.get_Evapotranspiration();// [mm]
+  ret['ET0'] = msm.get_ET0();// [mm]
+  ret['KcFactor'] = msm.get_KcFactor();
+  ret['AtmosphericCO2Concentration'] = model.get_AtmosphericCO2Concentration();// [ppm]
+  ret['GroundwaterDepth'] = model.get_GroundwaterDepth();// [m]
+  ret['GroundwaterRecharge'] = msm.get_GroundwaterRecharge();// [mm]
+  ret['NLeaching'] = msq.get_NLeaching(); // [kg N ha-1]
+
+
+  for(var i_Layer = 0; i_Layer < outLayers; i_Layer++)
+    ret['SoilNO3_' + i_Layer] = msc.soilLayer(i_Layer).get_SoilNO3();// [kg N m-3]
+
+  ret['SoilCarbamid'] = msc.soilLayer(0).get_SoilCarbamid();
+
+  for(var i_Layer = 0; i_Layer < outLayers; i_Layer++)
+    ret['SoilNH4_' + i_Layer] = msc.soilLayer(i_Layer).get_SoilNH4();
+
+  for(var i_Layer = 0; i_Layer < 4; i_Layer++)
+    ret['SoilNO2_' + i_Layer] = msc.soilLayer(i_Layer).get_SoilNO2();
+
+  for(var i_Layer = 0; i_Layer < 6; i_Layer++)
+    ret['SoilOrganicCarbon_' + i_Layer] = msc.soilLayer(i_Layer).vs_SoilOrganicCarbon(); // [kg C kg-1]
+
+  // SOC-0-30 [g C m-2]
+  var  soc_30_accumulator = 0.0;
+  for (var i_Layer = 0; i_Layer < 3; i_Layer++) {
+      // kg C / kg --> g C / m2
+      soc_30_accumulator += msc.soilLayer(i_Layer).vs_SoilOrganicCarbon() * msc.soilLayer(i_Layer).vs_SoilBulkDensity() * msc.soilLayer(i_Layer).vs_LayerThickness * 1000;
+  }
+  ret['soc_30_accumulator'] = soc_30_accumulator;
+
+
+  // SOC-0-200   [g C m-2]
+  var  soc_200_accumulator = 0.0;
+  for (var i_Layer = 0; i_Layer < outLayers; i_Layer++) {
+      // kg C / kg --> g C / m2
+      soc_200_accumulator += msc.soilLayer(i_Layer).vs_SoilOrganicCarbon() * msc.soilLayer(i_Layer).vs_SoilBulkDensity() * msc.soilLayer(i_Layer).vs_LayerThickness * 1000;
+  }
+  ret['soc_200_accumulator'] = soc_200_accumulator;
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['AOM_FastSum_' + i_Layer] = mso.get_AOM_FastSum(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['AOM_SlowSum_' + i_Layer] = mso.get_AOM_SlowSum(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['SMB_Fast_' + i_Layer] = mso.get_SMB_Fast(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['SMB_Slow_' + i_Layer] = mso.get_SMB_Slow(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['SOM_Fast_' + i_Layer] = mso.get_SOM_Fast(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['SOM_Slow_' + i_Layer] = mso.get_SOM_Slow(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['CBalance_' + i_Layer] = mso.get_CBalance(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 3; i_Layer++)
+    ret['NetNMineralisationRate_' + i_Layer] = mso.get_NetNMineralisationRate(i_Layer); // [kg N ha-1]
+
+
+  ret['NetNMineralisation'] = mso.get_NetNMineralisation(); // [kg N ha-1]
+  ret['Denitrification'] = mso.get_Denitrification(); // [kg N ha-1]
+  ret['N2O_Produced'] = mso.get_N2O_Produced(); // [kg N ha-1]
+  ret['SoilpH_0'] = msc.soilLayer(0).get_SoilpH(); // [ ]
+  ret['NetEcosystemProduction'] = mso.get_NetEcosystemProduction(); // [kg C ha-1]
+  ret['NetEcosystemExchange'] = mso.get_NetEcosystemExchange(); // [kg C ha-1]
+  ret['DecomposerRespiration'] = mso.get_DecomposerRespiration(); // Rh, [kg C ha-1 d-1] 
+
+  return ret;
 
 };
 

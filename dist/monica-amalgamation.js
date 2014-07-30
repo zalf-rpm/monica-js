@@ -7502,7 +7502,7 @@ var readSoilCharacteristicModifier = function (soilType, organicMatter) {
 
 
 
-var runMonica = function (env) {
+var runMonica = function (env, progress_callback) {
 
   var res = { crops: [] };
   
@@ -7685,6 +7685,10 @@ var runMonica = function (env) {
     // writes crop results to output file
     if (write_output_files)
       writeCropResults(model.cropGrowth(), foutFileName, goutFileName, model.isCropPlanted());
+    
+    /* if progress_callback is provided */
+    if (progress_callback)
+      progress_callback(getProgress(currentDate, model));
 
     model.generalStep(d);
 
@@ -8744,6 +8748,169 @@ var dumpMonicaParametersIntoFile = function (fileName, cpp) {
   parameter_output += endl;
 
   fs.writeFileSync(fileName, parameter_output, { encoding: 'utf8' });
+
+};
+
+/* return object with result variables. Used in progress_callback */
+var getProgress = function (currentDate, model) {
+
+  var isCropPlanted = model.isCropPlanted()
+    , mcg = model.cropGrowth()
+    , mst = model.soilTemperature()
+    , msm = model.soilMoisture()
+    , mso = model.soilOrganic()
+    , msc = model.soilColumn()
+    /* TODO: work-around. Hier muss was eleganteres hin! */
+    , msa = model.soilColumnNC()
+    , msq = model.soilTransport()
+    ;
+
+  var ret = {
+      date: currentDate.toLocaleDateString()
+    , CropName: isCropPlanted ? mcg.get_CropName() : ''
+    , TranspirationDeficit: isCropPlanted ? mcg.get_TranspirationDeficit() : 0 // [01]
+    , ActualTranspiration: isCropPlanted ? mcg.get_ActualTranspiration() : 0 
+    , CropNRedux: isCropPlanted ? mcg.get_CropNRedux() : 0 // [01]
+    , HeatStressRedux: isCropPlanted ? mcg.get_HeatStressRedux() : 0 // [01]
+    , OxygenDeficit: isCropPlanted ? mcg.get_OxygenDeficit() : 0 // [01]
+
+    , DevelopmentalStage: isCropPlanted ? mcg.get_DevelopmentalStage() + 1 : 0
+    , CurrentTemperatureSum: isCropPlanted ? mcg.get_CurrentTemperatureSum() : 0 
+    , VernalisationFactor: isCropPlanted ? mcg.get_VernalisationFactor() : 0 
+    , DaylengthFactor: isCropPlanted ? mcg.get_DaylengthFactor() : 0 
+    , OrganGrowthIncrementRoot: isCropPlanted ? mcg.get_OrganGrowthIncrement(0) : 0
+    , OrganGrowthIncrementLeaf: isCropPlanted ? mcg.get_OrganGrowthIncrement(1) : 0
+    , OrganGrowthIncrementShoot: isCropPlanted ? mcg.get_OrganGrowthIncrement(2) : 0
+    , OrganGrowthIncrementFruit: isCropPlanted ? mcg.get_OrganGrowthIncrement(3) : 0
+    
+    , RelativeTotalDevelopment: isCropPlanted ? mcg.get_RelativeTotalDevelopment() : 0 
+    , OrganBiomassRoot: isCropPlanted ? mcg.get_OrganBiomass(0) : 0
+    , OrganBiomassLeaf: isCropPlanted ? mcg.get_OrganBiomass(1) : 0
+    , OrganBiomassShoot: isCropPlanted ? mcg.get_OrganBiomass(2) : 0
+    , OrganBiomassFruit: isCropPlanted ? mcg.get_OrganBiomass(3) : 0
+    , PrimaryCropYield: isCropPlanted ? mcg.get_PrimaryCropYield() : 0 
+
+    , GrossPhotosynthesisHaRate: isCropPlanted ? mcg.get_GrossPhotosynthesisHaRate() : 0  // [kg CH2O ha-1 d-1]
+    , NetPhotosynthesis: isCropPlanted ? mcg.get_NetPhotosynthesis() : 0   // [kg CH2O ha-1 d-1]
+    , MaintenanceRespirationAS: isCropPlanted ? mcg.get_MaintenanceRespirationAS() : 0 // [kg CH2O ha-1]
+    , GrowthRespirationAS: isCropPlanted ? mcg.get_GrowthRespirationAS() : 0 // [kg CH2O ha-1]
+
+    , StomataResistance: isCropPlanted ? mcg.get_StomataResistance() : 0 // [s m-1]
+
+    , CropHeight: isCropPlanted ? mcg.get_CropHeight() : 0 // [m]
+    , LeafAreaIndex: isCropPlanted ? mcg.get_LeafAreaIndex() : 0  //[m2 m-2]
+    , RootingDepth: isCropPlanted ? mcg.get_RootingDepth() : 0  //[layer]
+    , AbovegroundBiomass: isCropPlanted ? mcg.get_AbovegroundBiomass() : 0  //[kg ha-1]
+
+    , TotalBiomassNContent: isCropPlanted ? mcg.get_TotalBiomassNContent() : 0 
+    , SumTotalNUptake: isCropPlanted ? mcg.get_SumTotalNUptake() : 0 
+    , ActNUptake: isCropPlanted ? mcg.get_ActNUptake() : 0  // [kg N ha-1]
+    , PotNUptake: isCropPlanted ? mcg.get_PotNUptake() : 0  // [kg N ha-1]
+    , TargetNConcentration: isCropPlanted ? mcg.get_TargetNConcentration() : 0 //[kg N kg-1]
+
+    , CriticalNConcentration: isCropPlanted ? mcg.get_CriticalNConcentration() : 0 //[kg N kg-1]
+    , AbovegroundBiomassNConcentration: isCropPlanted ? mcg.get_AbovegroundBiomassNConcentration() : 0 //[kg N kg-1]
+    , NetPrimaryProduction: isCropPlanted ? mcg.get_NetPrimaryProduction() : 0  // NPP, [kg C ha-1]
+    , GrossPrimaryProduction: isCropPlanted ? mcg.get_GrossPrimaryProduction() : 0 // GPP, [kg C ha-1]
+    , AutotrophicRespiration: isCropPlanted ? mcg.get_AutotrophicRespiration() : 0 // Ra, [kg C ha-1]
+  };
+
+  var outLayers = 20;
+
+  for (var i_Layer = 0; i_Layer < outLayers; i_Layer++)
+    ret['SoilMoisture_' + i_Layer] = msm.get_SoilMoisture(i_Layer);
+
+  ret['dailySumIrrigationWater'] = model.dailySumIrrigationWater();
+  ret['Infiltration'] = msm.get_Infiltration(); // {mm]
+  ret['SurfaceWaterStorage'] = msm.get_SurfaceWaterStorage();// {mm]
+  ret['SurfaceRunOff'] = msm.get_SurfaceRunOff();// {mm]
+  ret['SnowDepth'] = msm.get_SnowDepth(); // [mm]
+  ret['FrostDepth'] = msm.get_FrostDepth();
+  ret['ThawDepth'] = msm.get_ThawDepth();
+
+  for (var i_Layer = 0; i_Layer < outLayers; i_Layer++)
+   ret['PASW_' + i_Layer] = msm.get_SoilMoisture(i_Layer) - msa[i_Layer].get_PermanentWiltingPoint();
+
+  ret['SoilSurfaceTemperature'] = mst.get_SoilSurfaceTemperature();
+
+  for(var i_Layer = 0; i_Layer < 5; i_Layer++)
+    ret['SoilTemperature_' + i_Layer] = mst.get_SoilTemperature(i_Layer);// [°C]
+
+  ret['ActualEvaporation'] = msm.get_ActualEvaporation();// [mm]
+  ret['Evapotranspiration'] = msm.get_Evapotranspiration();// [mm]
+  ret['ET0'] = msm.get_ET0();// [mm]
+  ret['KcFactor'] = msm.get_KcFactor();
+  ret['AtmosphericCO2Concentration'] = model.get_AtmosphericCO2Concentration();// [ppm]
+  ret['GroundwaterDepth'] = model.get_GroundwaterDepth();// [m]
+  ret['GroundwaterRecharge'] = msm.get_GroundwaterRecharge();// [mm]
+  ret['NLeaching'] = msq.get_NLeaching(); // [kg N ha-1]
+
+
+  for(var i_Layer = 0; i_Layer < outLayers; i_Layer++)
+    ret['SoilNO3_' + i_Layer] = msc.soilLayer(i_Layer).get_SoilNO3();// [kg N m-3]
+
+  ret['SoilCarbamid'] = msc.soilLayer(0).get_SoilCarbamid();
+
+  for(var i_Layer = 0; i_Layer < outLayers; i_Layer++)
+    ret['SoilNH4_' + i_Layer] = msc.soilLayer(i_Layer).get_SoilNH4();
+
+  for(var i_Layer = 0; i_Layer < 4; i_Layer++)
+    ret['SoilNO2_' + i_Layer] = msc.soilLayer(i_Layer).get_SoilNO2();
+
+  for(var i_Layer = 0; i_Layer < 6; i_Layer++)
+    ret['SoilOrganicCarbon_' + i_Layer] = msc.soilLayer(i_Layer).vs_SoilOrganicCarbon(); // [kg C kg-1]
+
+  // SOC-0-30 [g C m-2]
+  var  soc_30_accumulator = 0.0;
+  for (var i_Layer = 0; i_Layer < 3; i_Layer++) {
+      // kg C / kg --> g C / m2
+      soc_30_accumulator += msc.soilLayer(i_Layer).vs_SoilOrganicCarbon() * msc.soilLayer(i_Layer).vs_SoilBulkDensity() * msc.soilLayer(i_Layer).vs_LayerThickness * 1000;
+  }
+  ret['soc_30_accumulator'] = soc_30_accumulator;
+
+
+  // SOC-0-200   [g C m-2]
+  var  soc_200_accumulator = 0.0;
+  for (var i_Layer = 0; i_Layer < outLayers; i_Layer++) {
+      // kg C / kg --> g C / m2
+      soc_200_accumulator += msc.soilLayer(i_Layer).vs_SoilOrganicCarbon() * msc.soilLayer(i_Layer).vs_SoilBulkDensity() * msc.soilLayer(i_Layer).vs_LayerThickness * 1000;
+  }
+  ret['soc_200_accumulator'] = soc_200_accumulator;
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['AOM_FastSum_' + i_Layer] = mso.get_AOM_FastSum(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['AOM_SlowSum_' + i_Layer] = mso.get_AOM_SlowSum(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['SMB_Fast_' + i_Layer] = mso.get_SMB_Fast(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['SMB_Slow_' + i_Layer] = mso.get_SMB_Slow(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['SOM_Fast_' + i_Layer] = mso.get_SOM_Fast(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['SOM_Slow_' + i_Layer] = mso.get_SOM_Slow(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+    ret['CBalance_' + i_Layer] = mso.get_CBalance(i_Layer);
+
+  for(var i_Layer = 0; i_Layer < 3; i_Layer++)
+    ret['NetNMineralisationRate_' + i_Layer] = mso.get_NetNMineralisationRate(i_Layer); // [kg N ha-1]
+
+
+  ret['NetNMineralisation'] = mso.get_NetNMineralisation(); // [kg N ha-1]
+  ret['Denitrification'] = mso.get_Denitrification(); // [kg N ha-1]
+  ret['N2O_Produced'] = mso.get_N2O_Produced(); // [kg N ha-1]
+  ret['SoilpH_0'] = msc.soilLayer(0).get_SoilpH(); // [ ]
+  ret['NetEcosystemProduction'] = mso.get_NetEcosystemProduction(); // [kg C ha-1]
+  ret['NetEcosystemExchange'] = mso.get_NetEcosystemExchange(); // [kg C ha-1]
+  ret['DecomposerRespiration'] = mso.get_DecomposerRespiration(); // Rh, [kg C ha-1 d-1] 
+
+  return ret;
 
 };
 
@@ -12115,6 +12282,7 @@ var SoilMoisture = function (sc, stps, mm, cpp) {
       vm_CapillaryRise = 0.0,
       vm_GroundwaterAdded = 0.0,
       vm_ActualTranspiration = 0.0,
+      vm_ActualEvaporation = 0.0,
       vm_PercolationFactor = 0.0,
       vm_LambdaReduced = 0.0;    
 
@@ -14234,22 +14402,20 @@ var Configuration = function (outPath, climate, doDebug) {
       cpp.userEnvironmentParameters.p_LayerThickness * cpp.userEnvironmentParameters.p_NumberOfLayers
     );
 
-    console.log(cpp);
-
     /* fetch soil horizon array */
     var horizonsArr = siteObj.horizons;
     /* fetch crop array */
     var cropsArr = cropObj.crops;
 
     /* sim */
-    var startYear = simObj.time.startYear;
-    var endYear = simObj.time.endYear;
+    var startYear = new Date(Date.parse(simObj.time.startDate)).getFullYear();
+    var endYear = new Date(Date.parse(simObj.time.endDate)).getFullYear();
 
-    cpp.userEnvironmentParameters.p_UseSecondaryYields = simObj.switch.useSecondaryYieldOn;
-    gp.pc_NitrogenResponseOn = simObj.switch.nitrogenResponseOn;
-    gp.pc_WaterDeficitResponseOn = simObj.switch.waterDeficitResponseOn;
-    gp.pc_EmergenceMoistureControlOn = simObj.switch.emergenceMoistureControlOn;
-    gp.pc_EmergenceFloodingControlOn = simObj.switch.emergenceFloodingControlOn;
+    cpp.userEnvironmentParameters.p_UseSecondaryYields = simObj.switch.useSecondaryYieldOn === true ? true : false;
+    gp.pc_NitrogenResponseOn = simObj.switch.nitrogenResponseOn === true ? true : false;
+    gp.pc_WaterDeficitResponseOn = simObj.switch.waterDeficitResponseOn === true ? true : false;
+    gp.pc_EmergenceMoistureControlOn = simObj.switch.emergenceMoistureControlOn === true ? true : false;
+    gp.pc_EmergenceFloodingControlOn = simObj.switch.emergenceFloodingControlOn === true ? true : false;
 
     cpp.userInitValues.p_initPercentageFC = simObj.init.percentageFC;
     cpp.userInitValues.p_initSoilNitrate = simObj.init.soilNitrate;
@@ -14266,12 +14432,12 @@ var Configuration = function (outPath, climate, doDebug) {
     sp.vs_DrainageCoeff = -1; //TODO: ?
 
     cpp.userEnvironmentParameters.p_AthmosphericCO2 = siteObj.atmosphericCO2;
-    if (siteObj.groundwaterDepthMin)
-      cpp.userEnvironmentParameters.p_MinGroundwaterDepth = siteObj.groundwaterDepthMin;
-    if (siteObj.groundwaterDepthMax)
-      cpp.userEnvironmentParameters.p_MaxGroundwaterDepth = siteObj.groundwaterDepthMax;
-    if (siteObj.groundwaterDepthMinMonth)
-      cpp.userEnvironmentParameters.p_MinGroundwaterDepthMonth = siteObj.groundwaterDepthMinMonth;
+    // if (siteObj.groundwaterDepthMin)
+    //   cpp.userEnvironmentParameters.p_MinGroundwaterDepth = siteObj.groundwaterDepthMin;
+    // if (siteObj.groundwaterDepthMax)
+    //   cpp.userEnvironmentParameters.p_MaxGroundwaterDepth = siteObj.groundwaterDepthMax;
+    // if (siteObj.groundwaterDepthMinMonth)
+    //   cpp.userEnvironmentParameters.p_MinGroundwaterDepthMonth = siteObj.groundwaterDepthMinMonth;
     cpp.userEnvironmentParameters.p_WindSpeedHeight = siteObj.windSpeedHeight;  
     cpp.userEnvironmentParameters.p_LeachingDepth = siteObj.leachingDepth;  
     // cpp.userEnvironmentParameters.p_NumberOfLayers = horizonsArr.numberOfLayers; // JV! currently not present in json 
@@ -14334,7 +14500,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
     console.log("run monica");
 
-    return runMonica(env);
+    return runMonica(env, setProgress);
   };
 
 
@@ -14387,7 +14553,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
         layers.push(layer);
         console.log("fetched layer " + layers.length + " in horizon " + h);
-        
+
       }
 
       console.log("fetched horizon " + h);
@@ -14507,7 +14673,15 @@ var Configuration = function (outPath, climate, doDebug) {
     console.log("fetching " + ts + " tillages");
 
     for (var t = 0; t < ts; ++t) {
+
       var tillObj = tillArr[t];
+
+      /* ignore if any value is null */
+      if (tillObj.date === null || tillObj.depth === null || tillObj.method === null) {
+        console.log("tillage parameters null: tillage ignored");
+        continue;
+      }
+
       var tDate = new Date(Date.parse(tillObj.date));
       var depth = tillObj.depth / 100; // cm to m
       var method = tillObj.method;
@@ -14561,6 +14735,13 @@ var Configuration = function (outPath, climate, doDebug) {
     for (var f = 0; f < fs; ++f) {
       
       var fertObj = fertArr[f];
+
+      /* ignore if any value is null */
+      if (fertObj.date === null || fertObj.method === null || fertObj.type === null || fertObj.amount === null) {
+        console.log("fertiliser parameters null: fertiliser ignored");
+        continue;
+      }
+
       var fDate = new Date(Date.parse(fertObj.date));
       var method = fertObj.method;
       var type = fertObj.type;
@@ -14668,6 +14849,14 @@ var Configuration = function (outPath, climate, doDebug) {
     for (var i = 0; i < is; ++i) {
       
       var irriObj = irriArr[i];
+
+      /* ignore if any value is null */
+      if (irriObj.date === null || irriObj.method  === null || irriObj.eventType  === null || irriObj.threshold  === null
+          || irriObj.amount === null || irriObj.NConc === null) {
+        console.log("irrigation parameters null: irrigation ignored");
+        continue;
+      }
+
       var method = irriObj.method;
       var eventType = irriObj.eventType;
       var threshold = irriObj.threshold;
@@ -14821,8 +15010,17 @@ var Configuration = function (outPath, climate, doDebug) {
 
   };
 
+  var setProgress = function (progress) {
+  
+    if (ENVIRONMENT_IS_WORKER)
+      postMessage({ progress: progress });
+    else
+      console.log(progress);
+  
+  };  
+
   return {
-    run: run    
+    run: run 
   };
 
 
@@ -14846,6 +15044,7 @@ if (ENVIRONMENT_IS_NODE) {
 } else if (ENVIRONMENT_IS_WORKER) {
 
   importScripts('./sql.js');
+  var db = null;
   var req = new XMLHttpRequest();
   req.open('GET', './monica.sqlite', true);
   req.responseType = "arraybuffer";
@@ -14853,7 +15052,7 @@ if (ENVIRONMENT_IS_NODE) {
     var arrayBuffer = req.response;
     if (arrayBuffer) {
       var byteArray = new Uint8Array(arrayBuffer);
-      var db = new SQL.Database(byteArray);  
+      db = new SQL.Database(byteArray);  
       monica.db = db;
     }
   };
@@ -14866,10 +15065,10 @@ if (ENVIRONMENT_IS_NODE) {
   onmessage = function (evt) {
     if (evt.data.hasOwnProperty('sql')) {
       postMessage(monica.db.exec(evt.data.sql));
-    } else if (evt.data.hasOwnProperty('config')) {
-      var config = evt.data.config;
-      var cfg = new Configuration(config.weather);
-      postMessage(cfg.run(config.sim. config.site, config.crop));
+    } else if (evt.data.hasOwnProperty('run')) {
+      var config = evt.data.run;
+      var cfg = new Configuration(null, config.weather, config.debug);
+      postMessage(cfg.run(config.sim, config.site, config.crop));
     } else {
       postMessage(null);
     }
@@ -14878,6 +15077,7 @@ if (ENVIRONMENT_IS_NODE) {
 } else {
 
   /* we expect that window.SQL is available */
+  var db = null;
   var req = new XMLHttpRequest();
   req.open('GET', './monica.sqlite', true);
   req.responseType = "arraybuffer";
@@ -14885,7 +15085,7 @@ if (ENVIRONMENT_IS_NODE) {
     var arrayBuffer = req.response;
     if (arrayBuffer) {
       var byteArray = new Uint8Array(arrayBuffer);
-      var db = new SQL.Database(byteArray);  
+      db = new SQL.Database(byteArray);  
       monica.db = db;
     }
   };

@@ -1,20 +1,18 @@
 {
   "crops": [
     {
-      "name": {
-        "desc": "Crop species name",
+      "nameAndGenType": {
+        "desc": "Crop species name and genetic type",
         "db": {
           "table": "view_crop",
           "columns": [
-            "crop_name"
+            "name_and_gentype"
           ]
         }
       },
       "sowingDate": {
         "desc": "Date at which the crop is sown or transplanted",
-        "unit": "date",
-        "min": "0000-01-01",
-        "max": "2999-12-31"
+        "unit": "date"
       },
       "rowWidth": {
         "desc": "Row width",
@@ -80,6 +78,10 @@
       ],
       "irrigations": [
         {
+          "date": {
+            "desc": "Irrigation date",
+            "unit": "date"
+          },          
           "method": {
             "desc": "Irrigation method",
             "enum": [

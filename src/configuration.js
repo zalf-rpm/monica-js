@@ -21,14 +21,14 @@ var Configuration = function (outPath, climate, doDebug) {
     var cropsArr = cropObj.crops;
 
     /* sim */
-    var startYear = simObj.time.startYear;
-    var endYear = simObj.time.endYear;
+    var startYear = new Date(Date.parse(simObj.time.startDate)).getFullYear();
+    var endYear = new Date(Date.parse(simObj.time.endDate)).getFullYear();
 
-    cpp.userEnvironmentParameters.p_UseSecondaryYields = simObj.switch.useSecondaryYieldOn;
-    gp.pc_NitrogenResponseOn = simObj.switch.nitrogenResponseOn;
-    gp.pc_WaterDeficitResponseOn = simObj.switch.waterDeficitResponseOn;
-    gp.pc_EmergenceMoistureControlOn = simObj.switch.emergenceMoistureControlOn;
-    gp.pc_EmergenceFloodingControlOn = simObj.switch.emergenceFloodingControlOn;
+    cpp.userEnvironmentParameters.p_UseSecondaryYields = simObj.switch.useSecondaryYieldOn === true ? true : false;
+    gp.pc_NitrogenResponseOn = simObj.switch.nitrogenResponseOn === true ? true : false;
+    gp.pc_WaterDeficitResponseOn = simObj.switch.waterDeficitResponseOn === true ? true : false;
+    gp.pc_EmergenceMoistureControlOn = simObj.switch.emergenceMoistureControlOn === true ? true : false;
+    gp.pc_EmergenceFloodingControlOn = simObj.switch.emergenceFloodingControlOn === true ? true : false;
 
     cpp.userInitValues.p_initPercentageFC = simObj.init.percentageFC;
     cpp.userInitValues.p_initSoilNitrate = simObj.init.soilNitrate;
@@ -45,12 +45,12 @@ var Configuration = function (outPath, climate, doDebug) {
     sp.vs_DrainageCoeff = -1; //TODO: ?
 
     cpp.userEnvironmentParameters.p_AthmosphericCO2 = siteObj.atmosphericCO2;
-    if (siteObj.groundwaterDepthMin)
-      cpp.userEnvironmentParameters.p_MinGroundwaterDepth = siteObj.groundwaterDepthMin;
-    if (siteObj.groundwaterDepthMax)
-      cpp.userEnvironmentParameters.p_MaxGroundwaterDepth = siteObj.groundwaterDepthMax;
-    if (siteObj.groundwaterDepthMinMonth)
-      cpp.userEnvironmentParameters.p_MinGroundwaterDepthMonth = siteObj.groundwaterDepthMinMonth;
+    // if (siteObj.groundwaterDepthMin)
+    //   cpp.userEnvironmentParameters.p_MinGroundwaterDepth = siteObj.groundwaterDepthMin;
+    // if (siteObj.groundwaterDepthMax)
+    //   cpp.userEnvironmentParameters.p_MaxGroundwaterDepth = siteObj.groundwaterDepthMax;
+    // if (siteObj.groundwaterDepthMinMonth)
+    //   cpp.userEnvironmentParameters.p_MinGroundwaterDepthMonth = siteObj.groundwaterDepthMinMonth;
     cpp.userEnvironmentParameters.p_WindSpeedHeight = siteObj.windSpeedHeight;  
     cpp.userEnvironmentParameters.p_LeachingDepth = siteObj.leachingDepth;  
     // cpp.userEnvironmentParameters.p_NumberOfLayers = horizonsArr.numberOfLayers; // JV! currently not present in json 
@@ -113,7 +113,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
     console.log("run monica");
 
-    return runMonica(env);
+    return runMonica(env, setProgress);
   };
 
 
@@ -286,7 +286,15 @@ var Configuration = function (outPath, climate, doDebug) {
     console.log("fetching " + ts + " tillages");
 
     for (var t = 0; t < ts; ++t) {
+
       var tillObj = tillArr[t];
+
+      /* ignore if any value is null */
+      if (tillObj.date === null || tillObj.depth === null || tillObj.method === null) {
+        console.log("tillage parameters null: tillage ignored");
+        continue;
+      }
+
       var tDate = new Date(Date.parse(tillObj.date));
       var depth = tillObj.depth / 100; // cm to m
       var method = tillObj.method;
@@ -340,6 +348,13 @@ var Configuration = function (outPath, climate, doDebug) {
     for (var f = 0; f < fs; ++f) {
       
       var fertObj = fertArr[f];
+
+      /* ignore if any value is null */
+      if (fertObj.date === null || fertObj.method === null || fertObj.type === null || fertObj.amount === null) {
+        console.log("fertiliser parameters null: fertiliser ignored");
+        continue;
+      }
+
       var fDate = new Date(Date.parse(fertObj.date));
       var method = fertObj.method;
       var type = fertObj.type;
@@ -447,6 +462,14 @@ var Configuration = function (outPath, climate, doDebug) {
     for (var i = 0; i < is; ++i) {
       
       var irriObj = irriArr[i];
+
+      /* ignore if any value is null */
+      if (irriObj.date === null || irriObj.method  === null || irriObj.eventType  === null || irriObj.threshold  === null
+          || irriObj.amount === null || irriObj.NConc === null) {
+        console.log("irrigation parameters null: irrigation ignored");
+        continue;
+      }
+
       var method = irriObj.method;
       var eventType = irriObj.eventType;
       var threshold = irriObj.threshold;
@@ -600,8 +623,17 @@ var Configuration = function (outPath, climate, doDebug) {
 
   };
 
+  var setProgress = function (progress) {
+  
+    if (ENVIRONMENT_IS_WORKER)
+      postMessage({ progress: progress });
+    else
+      console.log(progress);
+  
+  };  
+
   return {
-    run: run    
+    run: run 
   };
 
 

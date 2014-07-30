@@ -15,6 +15,7 @@ if (ENVIRONMENT_IS_NODE) {
 } else if (ENVIRONMENT_IS_WORKER) {
 
   importScripts('./sql.js');
+  var db = null;
   var req = new XMLHttpRequest();
   req.open('GET', './monica.sqlite', true);
   req.responseType = "arraybuffer";
@@ -22,7 +23,7 @@ if (ENVIRONMENT_IS_NODE) {
     var arrayBuffer = req.response;
     if (arrayBuffer) {
       var byteArray = new Uint8Array(arrayBuffer);
-      var db = new SQL.Database(byteArray);  
+      db = new SQL.Database(byteArray);  
       monica.db = db;
     }
   };
@@ -35,10 +36,10 @@ if (ENVIRONMENT_IS_NODE) {
   onmessage = function (evt) {
     if (evt.data.hasOwnProperty('sql')) {
       postMessage(monica.db.exec(evt.data.sql));
-    } else if (evt.data.hasOwnProperty('config')) {
-      var config = evt.data.config;
-      var cfg = new Configuration(config.weather);
-      postMessage(cfg.run(config.sim. config.site, config.crop));
+    } else if (evt.data.hasOwnProperty('run')) {
+      var config = evt.data.run;
+      var cfg = new Configuration(null, config.weather, config.debug);
+      postMessage(cfg.run(config.sim, config.site, config.crop));
     } else {
       postMessage(null);
     }
@@ -47,6 +48,7 @@ if (ENVIRONMENT_IS_NODE) {
 } else {
 
   /* we expect that window.SQL is available */
+  var db = null;
   var req = new XMLHttpRequest();
   req.open('GET', './monica.sqlite', true);
   req.responseType = "arraybuffer";
@@ -54,7 +56,7 @@ if (ENVIRONMENT_IS_NODE) {
     var arrayBuffer = req.response;
     if (arrayBuffer) {
       var byteArray = new Uint8Array(arrayBuffer);
-      var db = new SQL.Database(byteArray);  
+      db = new SQL.Database(byteArray);  
       monica.db = db;
     }
   };

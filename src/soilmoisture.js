@@ -65,6 +65,7 @@ var SoilMoisture = function (sc, stps, mm, cpp) {
       vm_CapillaryRise = 0.0,
       vm_GroundwaterAdded = 0.0,
       vm_ActualTranspiration = 0.0,
+      vm_ActualEvaporation = 0.0,
       vm_PercolationFactor = 0.0,
       vm_LambdaReduced = 0.0;    
 
