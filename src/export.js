@@ -1,7 +1,3 @@
-var ENVIRONMENT_IS_NODE = typeof process === 'object' && typeof require === 'function';
-var ENVIRONMENT_IS_WEB = typeof window === 'object';
-var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
-
 if (ENVIRONMENT_IS_NODE) {
 
   var fs = require('fs');
@@ -19,7 +15,7 @@ if (ENVIRONMENT_IS_NODE) {
   var req = new XMLHttpRequest();
   req.open('GET', './monica.sqlite', true);
   req.responseType = "arraybuffer";
-  req.onload = function (oEvent) {
+  req.onload = function (evt) {
     var arrayBuffer = req.response;
     if (arrayBuffer) {
       var byteArray = new Uint8Array(arrayBuffer);
@@ -52,7 +48,7 @@ if (ENVIRONMENT_IS_NODE) {
   var req = new XMLHttpRequest();
   req.open('GET', './monica.sqlite', true);
   req.responseType = "arraybuffer";
-  req.onload = function (oEvent) {
+  req.onload = function (evt) {
     var arrayBuffer = req.response;
     if (arrayBuffer) {
       var byteArray = new Uint8Array(arrayBuffer);

@@ -45,7 +45,7 @@ var DataAccessor = function (startDate, endDate) {
 
   this.addClimateData = function (acd, data) {
     if(!this._data.length > 0 && this._numberOfSteps === data.length)
-      console.log("Error: this._numberOfSteps === data.length");
+      log({ error: "this._numberOfSteps === data.length" });
 
     this._data.push(data);
     this._acd2dataIndex[acd] = this._data.length - 1;

@@ -1,7 +1,5 @@
 /* JS debugging */
 
-var DEBUG = DEBUG || false;
-
 var debugArgs = function (arguments_, funcName) {
 
   // TODO: recursive

@@ -1,44 +1,55 @@
 /* math, constants and helper functions */
 
-var abs   = Math.abs
-  , acos  = Math.acos
-  , asin  = Math.asin
-  , atan  = Math.atan
-  , ceil  = Math.ceil
-  , cos   = Math.cos
-  , exp   = Math.exp
-  , floor = Math.floor
-  , int   = function (x) {
-      return x | 0;
-    }
-  , log   = Math.log
-  , log10 = function (x) { 
-      return Math.log(x) / Math.LN10; 
-    }
-  , max   = Math.max
-  , min   = Math.min
-  , pow   = Math.pow
-  , round = Math.round
-  , fixed = function (n, x) { 
-      return x.toFixed(n);
-    }
-  , roundN  = function (n, x) { 
-      return parseFloat(x.toFixed(n));
-    }
-  , sin   = Math.sin
-  , sqrt  = Math.sqrt
-  , tan   = Math.tan
-  , PI    = Math.PI
+var ENVIRONMENT_IS_NODE = typeof process === 'object' && typeof require === 'function'
+  , ENVIRONMENT_IS_WEB = typeof window === 'object'
+  , ENVIRONMENT_IS_WORKER = typeof importScripts === 'function'
   ;
 
-var UNDEFINED = -9999.9,
-    UNDEFINED_INT = -9999;
+var DEBUG = false
+  , VERBOSE = true 
+  ;
+
+var UNDEFINED = -9999.9
+  , UNDEFINED_INT = -9999
+  ;
 
 var ROOT = 0
   , LEAF = 1
   , SHOOT = 2
   , STORAGE_ORGAN = 3
   ;
+
+var abs    = Math.abs
+  , acos   = Math.acos
+  , asin   = Math.asin
+  , atan   = Math.atan
+  , ceil   = Math.ceil
+  , cos    = Math.cos
+  , exp    = Math.exp
+  , floor  = Math.floor
+  , int    = function (x) {
+      return x | 0;
+    }
+  , log    = Math.log
+  , log10  = function (x) { 
+      return Math.log(x) / Math.LN10; 
+    }
+  , max    = Math.max
+  , min    = Math.min
+  , pow    = Math.pow
+  , round  = Math.round
+  , fixed  = function (n, x) { 
+      return x.toFixed(n);
+    }
+  , roundN = function (n, x) { 
+      return parseFloat(x.toFixed(n));
+    }
+  , sin    = Math.sin
+  , sqrt   = Math.sqrt
+  , tan    = Math.tan
+  , PI     = Math.PI
+  ;
+
 
 // var Eva2_Nutzung = {
 //   NUTZUNG_UNDEFINED: 0,
@@ -225,5 +236,29 @@ Date.prototype.isValid = function () {
 
 Date.prototype.isLeapYear = function () { 
   return (ceil((new Date(this.getFullYear() + 1, 0, 1) - new Date(this.getFullYear(), 0, 1)) / (24 * 60 * 60 * 1000)) === 366); 
+};
+
+/* log function */
+var log = function (msg) {
+
+  if (ENVIRONMENT_IS_WORKER) {
+    if (msg.hasOwnProperty('info') && !VERBOSE)
+      return;
+    postMessage(msg);
+  } else {
+    if (typeof msg === 'object') {
+      if (msg.hasOwnProperty('info') && VERBOSE)
+        console.log(msg.info);
+      else if (msg.hasOwnProperty('warn'))
+        console.log('WARNING: ' + msg.error);
+      else if (msg.hasOwnProperty('error'))
+        console.log('ERROR: ' + msg.error);
+      else if (msg.hasOwnProperty('debug'))
+        console.log('DEBUG: ' + msg.debug);
+    } else {
+      console.log(msg);
+    }
+  }
+
 };
 
