@@ -250,7 +250,7 @@ var log = function (msg) {
       if (msg.hasOwnProperty('info') && VERBOSE)
         console.log(msg.info);
       else if (msg.hasOwnProperty('warn'))
-        console.log('WARNING: ' + msg.error);
+        console.log('WARNING: ' + msg.warn);
       else if (msg.hasOwnProperty('error'))
         console.log('ERROR: ' + msg.error);
       else if (msg.hasOwnProperty('debug'))
