@@ -9,6 +9,13 @@ var DEBUG = false
   , VERBOSE = true 
   ;
 
+var MSG = {
+    INFO: 0
+  , WARN: 1
+  , ERROR: 2
+  , DEBUG: 3
+};  
+
 var UNDEFINED = -9999.9
   , UNDEFINED_INT = -9999
   ;
@@ -239,25 +246,54 @@ Date.prototype.isLeapYear = function () {
 };
 
 /* log function */
-var log = function (msg) {
+var logger = function (type, msg) {
 
   if (ENVIRONMENT_IS_WORKER) {
-    if (msg.hasOwnProperty('info') && !VERBOSE)
-      return;
-    postMessage(msg);
-  } else {
-    if (typeof msg === 'object') {
-      if (msg.hasOwnProperty('info') && VERBOSE)
-        console.log(msg.info);
-      else if (msg.hasOwnProperty('warn'))
-        console.log('WARNING: ' + msg.warn);
-      else if (msg.hasOwnProperty('error'))
-        console.log('ERROR: ' + msg.error);
-      else if (msg.hasOwnProperty('debug'))
-        console.log('DEBUG: ' + msg.debug);
-    } else {
-      console.log(msg);
+
+    if (!(type === MSG.INFO && !VERBOSE)) {
+
+      switch(type) {
+        case MSG.INFO:
+          postMessage({ info: msg });
+          break;
+        case MSG.WARN:
+          postMessage({ warn: msg });
+          break;
+        case MSG.ERROR:
+          postMessage({ error: msg });
+          break;
+        case MSG.DEBUG:
+          postMessage({ debug: msg });
+          break;
+        default:
+          postMessage({ msg: msg });
+      }
+
     }
+
+  } else {
+
+    if (!(type === MSG.INFO && !VERBOSE)) {
+
+      switch(type) {
+        case MSG.INFO:
+          console.log('info: ' + msg);
+          break;
+        case MSG.WARN:
+          console.log('warn: ' + msg);
+          break;
+        case MSG.ERROR:
+          console.log('error: ' + msg);
+          break;
+        case MSG.DEBUG:
+          console.log('debug: ' + msg);
+          break;
+        default:
+          console.log(msg);
+      }
+
+    }
+
   }
 
 };

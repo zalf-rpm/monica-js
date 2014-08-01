@@ -44,8 +44,9 @@ var DataAccessor = function (startDate, endDate) {
   };
 
   this.addClimateData = function (acd, data) {
+    /* TODO: in monica gucken was das zu bedeuten hat */
     if(!this._data.length > 0 && this._numberOfSteps === data.length)
-      log({ error: "this._numberOfSteps === data.length" });
+      logger(MSG.WARN, "this._numberOfSteps === data.length");
 
     this._data.push(data);
     this._acd2dataIndex[acd] = this._data.length - 1;

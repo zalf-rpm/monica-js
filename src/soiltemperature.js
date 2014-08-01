@@ -22,10 +22,8 @@ var SoilTemperature = function (sc, mm, cpp) {
         }
       };
 
-  for (var i = 0; i < sc.vs_NumberOfLayers(); i++) {
+  for (var i = 0; i < sc.vs_NumberOfLayers(); i++)
     soilColumn[i] = sc[i];
-    // console.log(!soilColumn[i]);
-  }
 
   soilColumn[sc.vs_NumberOfLayers()] = soilColumn.gl;
   soilColumn[sc.vs_NumberOfLayers() + 1] = soilColumn.bl;
@@ -64,7 +62,7 @@ var SoilTemperature = function (sc, mm, cpp) {
 
     vt_MatrixPrimaryDiagonal[i + 1] = 0.0;
 
-  console.log("Constructor: SoilTemperature");
+  logger(MSG.INFO, "Constructor: SoilTemperature");
 
   var user_temp = cpp.userSoilTemperatureParameters;
 
@@ -137,7 +135,7 @@ var SoilTemperature = function (sc, mm, cpp) {
 
   // initialising heat state variables
   for (var i_Layer = 0; i_Layer < vs_NumberOfLayers; i_Layer++) {
-    // console.log("layer: " + i_Layer);
+    // logger(MSG.INFO, "layer: " + i_Layer);
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // Calculate heat conductivity following Neusypina 1979
@@ -149,8 +147,8 @@ var SoilTemperature = function (sc, mm, cpp) {
     var sbdi = soilColumn.at(i_Layer).vs_SoilBulkDensity();
     var smi = vs_SoilMoisture_const[i_Layer];
 
-    // console.log("sbdi: " + sbdi);  
-    // console.log("smi: " + smi);  
+    // logger(MSG.INFO, "sbdi: " + sbdi);  
+    // logger(MSG.INFO, "smi: " + smi);  
 
     vt_HeatConductivity[i_Layer] = ((3.0 * (sbdi / 1000.0) - 1.7) * 0.001) /
            (1.0 + (11.5 - 5.0 * (sbdi / 1000.0)) *
@@ -160,8 +158,8 @@ var SoilTemperature = function (sc, mm, cpp) {
            * 4.184; // gives result in [J]
            // --> [J m-1 d-1 K-1]
 
-    // console.log("vt_HeatConductivity");       
-    // console.log(vt_HeatConductivity);      
+    // logger(MSG.INFO, "vt_HeatConductivity");       
+    // logger(MSG.INFO, vt_HeatConductivity);      
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // Calculate specific heat capacity following DAISY
@@ -206,7 +204,7 @@ var SoilTemperature = function (sc, mm, cpp) {
 
   // Calculation of the mean heat conductivity per layer
   vt_HeatConductivityMean[0] = vt_HeatConductivity[0];
-  // console.log(vt_HeatConductivityMean);
+  // logger(MSG.INFO, vt_HeatConductivityMean);
 
   for (var i_Layer = 1; i_Layer < vt_NumberOfLayers; i_Layer++) {
 
@@ -217,7 +215,7 @@ var SoilTemperature = function (sc, mm, cpp) {
 
     // @todo <b>Claas: </b>Formel nochmal durchgehen
     vt_HeatConductivityMean[i_Layer] = ((lti_1 * hci_1) + (lti * hci)) / (lti + lti_1);
-    // console.log(vt_HeatConductivityMean);
+    // logger(MSG.INFO, vt_HeatConductivityMean);
 
   } // for
 
@@ -255,8 +253,7 @@ var SoilTemperature = function (sc, mm, cpp) {
    */
   var step = function (tmin, tmax, globrad) {
 
-    // console.log("-------- SoilTemperature::step ----------");
-    // console.log(arguments);
+    if (DEBUG) debug(arguments);
 
     var vt_GroundLayer = vt_NumberOfLayers - 2;
     var vt_BottomLayer = vt_NumberOfLayers - 1;
@@ -282,11 +279,11 @@ var SoilTemperature = function (sc, mm, cpp) {
        + (vt_VolumeMatrix[0] - vt_VolumeMatrixOld[0]) / soilColumn[0].vs_LayerThickness)
         * vt_SoilTemperature[0] + vt_HeatFlow;
 
-    // console.log("f_SoilSurfaceTemperature(tmin, tmax, globrad): " + f_SoilSurfaceTemperature(tmin, tmax, globrad));
-    // console.log("vt_B[0]: " + vt_B[0]);
-    // console.log("vt_HeatConductivityMean[0]: " + vt_HeatConductivityMean[0]);
-    // console.log("vt_HeatFlow: " + vt_HeatFlow);
-    // console.log("vt_Solution[0]: " + vt_Solution[0]);
+    // logger(MSG.INFO, "f_SoilSurfaceTemperature(tmin, tmax, globrad): " + f_SoilSurfaceTemperature(tmin, tmax, globrad));
+    // logger(MSG.INFO, "vt_B[0]: " + vt_B[0]);
+    // logger(MSG.INFO, "vt_HeatConductivityMean[0]: " + vt_HeatConductivityMean[0]);
+    // logger(MSG.INFO, "vt_HeatFlow: " + vt_HeatFlow);
+    // logger(MSG.INFO, "vt_Solution[0]: " + vt_Solution[0]);
 
     for (var i_Layer = 1; i_Layer < vt_NumberOfLayers; i_Layer++) {
 
@@ -296,7 +293,7 @@ var SoilTemperature = function (sc, mm, cpp) {
           * vt_SoilTemperature[i_Layer];
     } // for
 
-      // console.log(vt_Solution);
+      // logger(MSG.INFO, vt_Solution);
 
     // end subroutine NumericalSolution
 
@@ -365,6 +362,8 @@ var SoilTemperature = function (sc, mm, cpp) {
    * @param globrad
    */
   var f_SoilSurfaceTemperature = function (tmin, tmax, globrad) {
+
+    if (DEBUG) debug(arguments);
 
     var shading_coefficient = dampingFactor;
 

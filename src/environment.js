@@ -4,7 +4,7 @@ var Environment = function (sps, cpp) {
 
   // copy constructor
   if (arguments[0] instanceof Environment) {
-    console.log("Copy constructor: Env" + "\tsoil param size: " + env.soilParams.length);;
+    debug("Copy constructor: Env" + "\tsoil param size: " + env.soilParams.length);
     this.env = arguments[0];
     this.customId = env.customId;
     this.soilParams = env.soilParams;

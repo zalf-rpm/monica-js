@@ -40,7 +40,8 @@ var Model = function (env, da) {
    */
   var seedCrop = function (crop) {
 
-    console.log("seedCrop");
+    debug("seedCrop");
+
     that._currentCropGrowth = null;
     p_daysWithCrop = 0;
     p_accuNStress = 0.0;
@@ -58,13 +59,13 @@ var Model = function (env, da) {
       _soilMoisture.put_Crop(that._currentCropGrowth);
       _soilOrganic.put_Crop(that._currentCropGrowth);
 
-      console.log("seedDate: " + _currentCrop.seedDate().toString()
+      logger(MSG.INFO, "seedDate: " + _currentCrop.seedDate().toString()
           + " harvestDate: " + _currentCrop.harvestDate().toString());
 
       if(_env.useNMinMineralFertilisingMethod && _currentCrop.seedDate().dayOfYear() <=
          _currentCrop.harvestDate().dayOfYear())
       {
-        console.log("nMin fertilising summer crop");
+        logger(MSG.INFO, "nMin fertilising summer crop");
         var fert_amount = applyMineralFertiliserViaNMinMethod
             (_env.nMinFertiliserPartition,
              NMinCropParameters(cps.pc_SamplingDepth,
@@ -92,8 +93,8 @@ var Model = function (env, da) {
       //prepare to add root and crop residues to soilorganic (AOMs)
       var rootBiomass = that._currentCropGrowth.get_OrganBiomass(0);
       var rootNConcentration = that._currentCropGrowth.get_RootNConcentration();
-      console.log("adding organic matter from root to soilOrganic");
-      console.log("root biomass: " + rootBiomass
+      logger(MSG.INFO, "adding organic matter from root to soilOrganic");
+      logger(MSG.INFO, "root biomass: " + rootBiomass
           + " Root N concentration: " + rootNConcentration);
 
       _soilOrganic.addOrganicMatter(_currentCrop.residueParameters(),
@@ -103,14 +104,14 @@ var Model = function (env, da) {
           that._currentCropGrowth.get_ResidueBiomass(_env.useSecondaryYields);
       //!@todo Claas: das hier noch berechnen
       var residueNConcentration = that._currentCropGrowth.get_ResiduesNConcentration();
-      console.log("adding organic matter from residues to soilOrganic");
-      console.log("residue biomass: " + residueBiomass
+      logger(MSG.INFO, "adding organic matter from residues to soilOrganic");
+      logger(MSG.INFO, "residue biomass: " + residueBiomass
           + " Residue N concentration: " + residueNConcentration);
-      console.log("primary yield biomass: " + that._currentCropGrowth.get_PrimaryCropYield()
+      logger(MSG.INFO, "primary yield biomass: " + that._currentCropGrowth.get_PrimaryCropYield()
           + " Primary yield N concentration: " + that._currentCropGrowth.get_PrimaryYieldNConcentration());
-      console.log("secondary yield biomass: " + that._currentCropGrowth.get_SecondaryCropYield()
+      logger(MSG.INFO, "secondary yield biomass: " + that._currentCropGrowth.get_SecondaryCropYield()
           + " Secondary yield N concentration: " + that._currentCropGrowth.get_PrimaryYieldNConcentration());
-      console.log("Residues N content: " + that._currentCropGrowth.get_ResiduesNContent()
+      logger(MSG.INFO, "Residues N content: " + that._currentCropGrowth.get_ResiduesNContent()
           + " Primary yield N content: " + that._currentCropGrowth.get_PrimaryYieldNContent()
           + " Secondary yield N content: " + that._currentCropGrowth.get_SecondaryYieldNContent());
 
@@ -139,8 +140,8 @@ var Model = function (env, da) {
       var total_biomass = that._currentCropGrowth.totalBiomass();
       var totalNConcentration = that._currentCropGrowth.get_AbovegroundBiomassNConcentration() + that._currentCropGrowth.get_RootNConcentration();
 
-      console.log("Adding organic matter from total biomass of crop to soilOrganic");
-      console.log("Total biomass: " + total_biomass
+      logger(MSG.INFO, "Adding organic matter from total biomass of crop to soilOrganic");
+      logger(MSG.INFO, "Total biomass: " + total_biomass
           + " Total N concentration: " + totalNConcentration);
 
       _soilOrganic.addOrganicMatter(_currentCrop.residueParameters(),
@@ -168,7 +169,7 @@ var Model = function (env, da) {
   };
 
   var applyOrganicFertiliser = function (params, amount, incorporation) {
-    console.log("MONICA model: applyOrganicFertiliser:\t" + amount + "\t" + params.vo_NConcentration);
+    logger(MSG.INFO, "MONICA model: applyOrganicFertiliser:\t" + amount + "\t" + params.vo_NConcentration);
     _soilOrganic.setIncorporation(incorporation);
     _soilOrganic.addOrganicMatter(params, amount, params.vo_NConcentration);
     addDailySumFertiliser(amount * params.vo_NConcentration);
@@ -272,7 +273,7 @@ var Model = function (env, da) {
        && _currentCrop.seedDate().dayOfYear() > _currentCrop.harvestDate().dayOfYear()
       && _dataAccessor.julianDayForStep(stepNo) == pc_JulianDayAutomaticFertilising)
       {
-      console.log("nMin fertilising winter crop");
+      logger(MSG.INFO, "nMin fertilising winter crop");
       var cps = _currentCrop.cropParameters();
       var fert_amount = applyMineralFertiliserViaNMinMethod
           (_env.nMinFertiliserPartition,
@@ -382,8 +383,8 @@ var Model = function (env, da) {
     leapYear
   ) {
 
-    // console.log("GroundwaterDepthForDate");
-    // console.log(arguments);
+    // logger(MSG.INFO, "GroundwaterDepthForDate");
+    // logger(MSG.INFO, arguments);
     
     var groundwaterDepth;
     var days;

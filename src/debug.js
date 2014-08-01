@@ -18,7 +18,7 @@ var debugArgs = function (arguments_, funcName) {
         return (isNaN(x) || x === null || x === undefined || x === Infinity);
       }
     , doLog = function (x) {
-        console.log('args: ' + JSON.stringify(x, null, 2));
+        logger(MSG.DEBUG, 'args: ' + JSON.stringify(x, null, 2));
       }
     ;
 
@@ -114,13 +114,13 @@ var debug = function () {
 
   if (arguments.length === 2) {
     if (typeof arguments[1] === 'string')
-      console.log("debug: " + arguments[1] + ' = ' + ((typeof arguments[0] === 'object') ? JSON.stringify(arguments[0], null, 1) : arguments[0]));
+      logger(MSG.DEBUG, arguments[1] + ' = ' + ((typeof arguments[0] === 'object') ? JSON.stringify(arguments[0], null, 1) : arguments[0]));
     if (typeof arguments[0] === 'string')
-      console.log("debug: " + arguments[0] + ' = ' + ((typeof arguments[1] === 'object') ? JSON.stringify(arguments[1], null, 1) : arguments[1]));
+      logger(MSG.DEBUG, arguments[0] + ' = ' + ((typeof arguments[1] === 'object') ? JSON.stringify(arguments[1], null, 1) : arguments[1]));
   } else if (typeof arguments[0] === 'string') {
-    console.log("debug: " + arguments[0]);
+    logger(MSG.DEBUG, arguments[0]);
   } else {
-    console.log(arguments[0]);
+    logger(MSG.DEBUG, arguments[0]);
   }
 
 };

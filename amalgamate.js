@@ -1,8 +1,8 @@
 var fs = require('fs')
-  , filename = 'monica-amalgamation.js'
+  , uglify = require("uglify-js")
   , files = [
-        'debug'
-      , 'global'
+        'global'
+      , 'debug'
       , 'tools'
       , 'parameters'
       , 'workstep'
@@ -27,7 +27,8 @@ var fs = require('fs')
   ;
 
 /* wrap everything in function */
-fs.writeFileSync('./dist/' + filename, 'var monica = monica || {};\n(function () {\n\n');
+fs.writeFileSync('./dist/monica-amalgamation.js', 'var monica = monica || {};\n(function () {\n\n');
+fs.writeFileSync('./dist/monica-amalgamation.min.js', 'var monica = monica || {};\n(function () {\n\n');
 
 /* we now use monica.sqlite with emscripten sqlite port */
 /* append data (monica.sqlite) */
@@ -41,15 +42,22 @@ var example_config = {
   , site: JSON.parse(fs.readFileSync('./project.json/example.site.json', { encoding: 'utf8' }))
   , crop: JSON.parse(fs.readFileSync('./project.json/example.crop.json', { encoding: 'utf8' }))
 };
-fs.appendFileSync('./dist/' + filename, 'var example_config = ' + JSON.stringify(example_config, null, 1) + ';\n');
+fs.appendFileSync('./dist/monica-amalgamation.js', 'var example_config = ' + JSON.stringify(example_config, null, 1) + ';\n');
+fs.appendFileSync('./dist/monica-amalgamation.min.js', 'var example_config = ' + JSON.stringify(example_config, null, 1) + ';\n');
 
 /* append MONICA JS files */
 for (var f = 0; f < files.length; f++) {
-  var file = fs.readFileSync('./src/' + files[f] + '.js', { encoding: 'utf8' });
-  fs.appendFileSync('./dist/' + filename, file  + '\n\n');
+
+  if (files[f] === 'export') /* do not compress export.js */
+    fs.appendFileSync('./dist/monica-amalgamation.min.js', fs.readFileSync('./src/' + files[f] + '.js', { encoding: 'utf8' }));
+  else
+    fs.appendFileSync('./dist/monica-amalgamation.min.js', uglify.minify('./src/' + files[f] + '.js').code + '\n\n');
+
+  fs.appendFileSync('./dist/monica-amalgamation.js', fs.readFileSync('./src/' + files[f] + '.js', { encoding: 'utf8' }) + '\n\n');
 }
 
 /* append execution of wrapper function */
-fs.appendFileSync('./dist/' + filename, '\n}());\n');
+fs.appendFileSync('./dist/monica-amalgamation.js', '\n}());\n');
+fs.appendFileSync('./dist/monica-amalgamation.min.js', '\n}());\n');
 
 

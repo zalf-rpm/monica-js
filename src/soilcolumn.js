@@ -22,7 +22,7 @@ var SoilColumn = function (gps, sp, cpp) {
   soilColumnArray.vq_CropNUptake = 0.0;
   soilColumnArray.vs_SoilLayers = [];
 
-  console.log("Constructor: SoilColumn "  + sp.length);
+  logger(MSG.INFO, "Constructor: SoilColumn "  + sp.length);
 
   for (var i = 0; i < this.soilParams.length; i++) {
     var layer = new SoilLayer(gps.ps_LayerThickness[0], sp[i], cpp);
@@ -124,7 +124,7 @@ var SoilColumn = function (gps, sp, cpp) {
         func: this.applyMineralFertiliserViaNMinMethod,
         args: [fp, vf_SamplingDepth, vf_CropNTarget, vf_CropNTarget30, vf_FertiliserMinApplication, vf_FertiliserMaxApplication, vf_TopDressingDelay]
       });
-      console.log("Error: Soil too wet for fertilisation. Fertiliser event adjourned to next day.");
+      logger(MSG.WARN, "Soil too wet for fertilisation. Fertiliser event adjourned to next day.");
       return 0.0;
     }
 
@@ -168,7 +168,7 @@ var SoilColumn = function (gps, sp, cpp) {
       // If the N demand of the crop is smaller than the user defined
       // minimum fertilisation then no need to fertilise
       vf_FertiliserRecommendation = 0.0;
-      console.log("Error: Fertiliser demand below minimum application value. No fertiliser applied.");
+      logger(MSG.WARN, "Fertiliser demand below minimum application value. No fertiliser applied.");
     }
 
     if( vf_FertiliserRecommendation > vf_FertiliserMaxApplication) {
@@ -179,8 +179,8 @@ var SoilColumn = function (gps, sp, cpp) {
       that._vf_TopDressingPartition = fp;
       that._vf_TopDressingDelay = vf_TopDressingDelay;
       vf_FertiliserRecommendation = vf_FertiliserMaxApplication;
-      console.log(
-        "Error: Fertiliser demand above maximum application value. " +
+      logger(MSG.WARN, 
+        "Fertiliser demand above maximum application value. " +
         "A top dressing of " + _vf_TopDressing + " " + 
         "will be applied from now on day" + vf_TopDressingDelay + "."
        );
@@ -189,7 +189,7 @@ var SoilColumn = function (gps, sp, cpp) {
     //Apply fertiliser
     this.applyMineralFertiliser(fp, vf_FertiliserRecommendation);
 
-    console.log("SoilColumn::applyMineralFertiliserViaNMinMethod:\t" + vf_FertiliserRecommendation);
+    logger(MSG.INFO, "SoilColumn::applyMineralFertiliserViaNMinMethod:\t" + vf_FertiliserRecommendation);
 
     //apply the callback to all of the fertiliser, even though some if it
     //(the top-dressing) will only be applied later
@@ -219,7 +219,7 @@ var SoilColumn = function (gps, sp, cpp) {
     //is actually only called from cropStep and thus there should always
     //be a crop
     if (that.cropGrowth === null)
-      console.log("Error: crop is null");
+      logger(MSG.ERROR, "crop is null");
 
     var s = that.cropGrowth.get_HeatSumIrrigationStart();
     var e = that.cropGrowth.get_HeatSumIrrigationEnd();
@@ -248,7 +248,7 @@ var SoilColumn = function (gps, sp, cpp) {
     if (vi_PlantAvailableWaterFraction <= vi_IrrigationThreshold) {
       this.applyIrrigation(vi_IrrigationAmount, vi_IrrigationNConcentration);
 
-      console.log(
+      logger(MSG.INFO, 
         "applying automatic irrigation treshold: " + vi_IrrigationThreshold +
         " amount: " + vi_IrrigationAmount +
         " N concentration: " + vi_IrrigationNConcentration

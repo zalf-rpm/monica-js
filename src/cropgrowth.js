@@ -829,8 +829,7 @@ var CropGrowth = function (sc, gps, cps, stps, cpp) {
       }
 
     } else {
-
-      console.log("irregular developmental stage");
+      logger(MSG.WARN, "irregular developmental stage");
     }
 
   };
@@ -1668,11 +1667,11 @@ var CropGrowth = function (sc, gps, cps, stps, cpp) {
 
                     var incr = assimilate_partition_leaf * vc_NetPhotosynthesis;
                     if (abs(incr) <= vc_OrganBiomass[i_Organ]){
-                        console.log("LEAF - Reducing organ biomass - default case (" + (vc_OrganBiomass[i_Organ] + vc_OrganGrowthIncrement[i_Organ]) + ")");
-                        vc_OrganGrowthIncrement[i_Organ] = incr;
+                      logger(MSG.INFO, "LEAF - Reducing organ biomass - default case (" + (vc_OrganBiomass[i_Organ] + vc_OrganGrowthIncrement[i_Organ]) + ")");
+                      vc_OrganGrowthIncrement[i_Organ] = incr;
                     } else {
                         // temporary hack because complex algorithm produces questionable results
-                        console.log("LEAF - Not enough biomass for reduction - Reducing only what is available ");
+                        logger(MSG.INFO, "LEAF - Not enough biomass for reduction - Reducing only what is available ");
                         vc_OrganGrowthIncrement[i_Organ] = (-1) * vc_OrganBiomass[i_Organ];
 
 
@@ -1695,10 +1694,10 @@ var CropGrowth = function (sc, gps, cps, stps, cpp) {
 
                     if (abs(incr) <= vc_OrganBiomass[i_Organ]){
                         vc_OrganGrowthIncrement[i_Organ] = incr;
-                        console.log("SHOOT - Reducing organ biomass - default case (" + (vc_OrganBiomass[i_Organ] + vc_OrganGrowthIncrement[i_Organ]) + ")");
+                        logger(MSG.INFO, "SHOOT - Reducing organ biomass - default case (" + (vc_OrganBiomass[i_Organ] + vc_OrganGrowthIncrement[i_Organ]) + ")");
                     } else {
                         // temporary hack because complex algorithm produces questionable results
-                        console.log("SHOOT - Not enough biomass for reduction - Reducing only what is available ");
+                        logger(MSG.INFO, "SHOOT - Not enough biomass for reduction - Reducing only what is available");
                         vc_OrganGrowthIncrement[i_Organ] = (-1) * vc_OrganBiomass[i_Organ];
 
 
@@ -2643,27 +2642,27 @@ var CropGrowth = function (sc, gps, cps, stps, cpp) {
     var old_above_biomass = vc_AbovegroundBiomass;
     var removing_biomass = 0.0;
 
-    console.log("CropGrowth::applyCutting()");;
+    logger(MSG.INFO, "apply cutting");
+
     var new_OrganBiomass = [];      //! old WORG
     for (var organ=1; organ<pc_NumberOfOrgans+1; organ++) {
 
         var cut_organ_count = cropParams.organIdsForCutting.length;
-        var biomasse = vc_OrganBiomass[organ - 1];
-        console.log("Alte Biomasse: " + biomasse  + "\tOrgan: " + organ);
+        var biomass = vc_OrganBiomass[organ - 1];
+        logger(MSG.INFO, "old biomass: " + biomass  + "\tOrgan: " + organ);
         for (var cut_organ=0; cut_organ<cut_organ_count; cut_organ++) {
 
             var yc = new YieldComponent(cropParams.organIdsForCutting[cut_organ]);
 
             if (organ == yc.organId) {
-                console.log("YC yc.yieldPercentage: " + yc.yieldPercentage);
-                biomasse = vc_OrganBiomass[organ - 1] * ((1-yc.yieldPercentage));
-                vc_AbovegroundBiomass -= biomasse;
+                biomass = vc_OrganBiomass[organ - 1] * ((1-yc.yieldPercentage));
+                vc_AbovegroundBiomass -= biomass;
 
-                removing_biomass +=biomasse;
+                removing_biomass +=biomass;
             }
         }
-        new_OrganBiomass.push(biomasse);
-        console.log("Neue Biomasse: " + biomasse);
+        new_OrganBiomass.push(biomass);
+        logger(MSG.INFO, "new biomass: " + biomass);
     }
 
     vc_TotalBiomassNContent = (removing_biomass / old_above_biomass) * vc_TotalBiomassNContent;

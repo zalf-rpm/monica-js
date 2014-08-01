@@ -31,7 +31,7 @@ var SoilTransport = function (sc, sps, cpp) {
     vq_SoilMoisture[i] = 0.2;
   }    
 
-  console.log("!!! N Deposition: " + vs_NDeposition);
+  logger(MSG.INFO, "N deposition: " + vs_NDeposition);
   var vs_LeachingDepth = centralParameterProvider.userEnvironmentParameters.p_LeachingDepth;
   var vq_TimeStep = centralParameterProvider.userEnvironmentParameters.p_timeStep;
 

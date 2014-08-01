@@ -610,7 +610,8 @@ var readUserParameterFromDatabase = function () {
 
 var soilCharacteristicsKA5 = function (soilParameter) {
 
-  console.log("soilCharacteristicsKA5");
+  logger(MSG.INFO, "soilCharacteristicsKA5");
+
   var texture = soilParameter.vs_SoilTexture;
   var stoneContent = soilParameter.vs_SoilStoneContent;
 
@@ -937,11 +938,11 @@ var runMonica = function (env, progress_callback) {
   });
 
   if(env.cropRotation.length === 0) {
-    console.log("Error: Fruchtfolge is empty");
+    logger(MSG.ERROR, "rotation is empty");
     return res;
   }
 
-  console.log("starting Monica");
+  logger(MSG.INFO, "starting monica");
 
   var write_output_files = (env.pathToOutputDir != null && !!fs);
   var foutFileName = env.pathToOutputDir + '/rmout.dat';
@@ -986,15 +987,14 @@ var runMonica = function (env, progress_callback) {
   var nextAbsolutePPApplicationDate =
       useRelativeDates ? nextPPApplicationDate.toAbsoluteDate
                          (currentDate.year() + 1) : nextPPApplicationDate;
-  console.log("next app-date: " + nextPPApplicationDate.toString()
+  logger(MSG.INFO, "next app-date: " + nextPPApplicationDate.toString()
           + " next abs app-date: " + nextAbsolutePPApplicationDate.toString());
 
   //if for some reason there are no applications (no nothing) in the
   //production process: quit
   if(!nextAbsolutePPApplicationDate.isValid())
   {
-    console.log("start of production-process: " + currentPP.toString()
-            + " is not valid");
+    logger(MSG.ERROR, "start of production-process: " + currentPP.toString() + " is not valid");
     return res;
   }
 
@@ -1007,7 +1007,7 @@ var runMonica = function (env, progress_callback) {
 
   for (var d = 0; d < nods; ++d, currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1), ++dim) {
 
-    console.log("currentDate: " + currentDate.getDate() + "." + (currentDate.getMonth() + 1) + "." + currentDate.getFullYear());
+    logger(MSG.INFO, "currentDate: " + currentDate.getDate() + "." + (currentDate.getMonth() + 1) + "." + currentDate.getFullYear());
     model.resetDailyCounter();
 
     // test if model's crop has been dying in previous step
@@ -1019,7 +1019,7 @@ var runMonica = function (env, progress_callback) {
     //there's something to at this day
     if (nextAbsolutePPApplicationDate.setHours(0,0,0,0) == currentDate.setHours(0,0,0,0)) {
 
-      console.log(
+      logger(MSG.INFO, 
         " applying at: " + nextPPApplicationDate.toString() +
         " absolute-at: " + nextAbsolutePPApplicationDate.toString()
       );
@@ -1042,7 +1042,7 @@ var runMonica = function (env, progress_callback) {
           (currentDate.year() + (nextPPApplicationDate.dayOfYear() > prevPPApplicationDate.dayOfYear() ? 0 : 1),
            true) : nextPPApplicationDate;
 
-      console.log(
+      logger(MSG.INFO, 
         " next app-date: " + nextPPApplicationDate.toString() + 
         " next abs app-date: " + nextAbsolutePPApplicationDate.toString()
       );
@@ -1083,7 +1083,7 @@ var runMonica = function (env, progress_callback) {
             (currentDate.year() + (nextPPApplicationDate.dayOfYear() > prevPPApplicationDate.dayOfYear() ? 0 : 1),
              true) : nextPPApplicationDate;
 
-        console.log(
+        logger(MSG.INFO, 
           " new valid next app-date: " + nextPPApplicationDate.toString() +
           " next abs app-date: " + nextAbsolutePPApplicationDate.toString()
         );
@@ -1187,7 +1187,7 @@ var runMonica = function (env, progress_callback) {
       monthETa = 0.0;
 
       dim = 0;
-      console.log("stored monthly values for month: " + currentMonth);
+      logger(MSG.INFO, "stored monthly values for month: " + currentMonth);
     
     } else {
 
@@ -1225,7 +1225,7 @@ var runMonica = function (env, progress_callback) {
       writeGeneralResults(foutFileName, goutFileName, env, model, d);
   }
 
-  console.log("returning from runMonica");
+  logger(MSG.INFO, "returning from runMonica");
 
   return res;
 };

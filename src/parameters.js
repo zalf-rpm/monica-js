@@ -495,50 +495,50 @@ var SoilParameters = function () {
     var is_valid = true;
 
     if (this.vs_FieldCapacity <= 0) {
-        console.log("SoilParameters::Error: No field capacity defined in database for " + this.vs_SoilTexture + " , RawDensity: "+ this._vs_SoilRawDensity);
+        logger(MSG.WARN, "SoilParameters::Error: No field capacity defined in database for " + this.vs_SoilTexture + " , RawDensity: "+ this._vs_SoilRawDensity);
         is_valid = false;
     }
     if (this.vs_Saturation <= 0) {
-        console.log("SoilParameters::Error: No saturation defined in database for " + this.vs_SoilTexture + " , RawDensity: " + this._vs_SoilRawDensity);
+        logger(MSG.WARN, "SoilParameters::Error: No saturation defined in database for " + this.vs_SoilTexture + " , RawDensity: " + this._vs_SoilRawDensity);
         is_valid = false;
     }
     if (this.vs_PermanentWiltingPoint <= 0) {
-        console.log("SoilParameters::Error: No saturation defined in database for " + this.vs_SoilTexture + " , RawDensity: " + this._vs_SoilRawDensity);
+        logger(MSG.WARN, "SoilParameters::Error: No saturation defined in database for " + this.vs_SoilTexture + " , RawDensity: " + this._vs_SoilRawDensity);
         is_valid = false;
     }
 
     if (this.vs_SoilSandContent<0) {
-        console.log("SoilParameters::Error: Invalid soil sand content: "+ this.vs_SoilSandContent);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid soil sand content: "+ this.vs_SoilSandContent);
         is_valid = false;
     }
 
     if (this.vs_SoilClayContent<0) {
-        console.log("SoilParameters::Error: Invalid soil clay content: "+ this.vs_SoilClayContent);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid soil clay content: "+ this.vs_SoilClayContent);
         is_valid = false;
     }
 
     if (this.vs_SoilpH<0) {
-        console.log("SoilParameters::Error: Invalid soil ph value: "+ this.vs_SoilpH);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid soil ph value: "+ this.vs_SoilpH);
         is_valid = false;
     }
 
     if (this.vs_SoilStoneContent<0) {
-        console.log("SoilParameters::Error: Invalid soil stone content: "+ this.vs_SoilStoneContent);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid soil stone content: "+ this.vs_SoilStoneContent);
         is_valid = false;
     }
 
     if (this.vs_Saturation<0) {
-        console.log("SoilParameters::Error: Invalid value for saturation: "+ this.vs_Saturation);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid value for saturation: "+ this.vs_Saturation);
         is_valid = false;
     }
 
     if (this.vs_PermanentWiltingPoint<0) {
-        console.log("SoilParameters::Error: Invalid value for permanent wilting point: "+ this.vs_PermanentWiltingPoint);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid value for permanent wilting point: "+ this.vs_PermanentWiltingPoint);
         is_valid = false;
     }
 /*
     if (this._vs_SoilRawDensity<0) {
-        console.log("SoilParameters::Error: Invalid soil raw density: "+ this._vs_SoilRawDensity);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid soil raw density: "+ this._vs_SoilRawDensity);
         is_valid = false;
     }
 */
@@ -977,7 +977,7 @@ var CapillaryRiseRates = function () {
     }    
 
     if (size <= 0 )
-      console.log("Error. No capillary rise rates in data structure available.");
+      logger(MSG.WARN, "No capillary rise rates in data structure available.");
 
     return (this.cap_rates_map[bodart][distance] === undefined) ? 0.0 : this.cap_rates_map[bodart][distance];
 

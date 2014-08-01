@@ -125,176 +125,65 @@ var example_config = {
   ]
  }
 };
-/* JS debugging */
-
-var DEBUG = DEBUG || false;
-
-var debugArgs = function (arguments_, funcName) {
-
-  // TODO: recursive
-
-  if (!DEBUG) return; 
-
-  var args = Array.prototype.slice.call(arguments_)
-    , funcName = funcName || ''
-    , isInvalid = function (x) {
-        if (x instanceof Function)
-          return false;
-        if (typeof x === 'object') 
-          return (x === null || x === undefined);
-        if (typeof x === 'string' || x === 'boolean')
-          return (x === null || x === undefined);
-        return (isNaN(x) || x === null || x === undefined || x === Infinity);
-      }
-    , doLog = function (x) {
-        console.log('args: ' + JSON.stringify(x, null, 2));
-      }
-    ;
-
-  for (var i = 0, is = args.length; i < is; i++) {
-    var arg = args[i];
-    if (arg && typeof arg === 'object') {
-      if (Array.isArray(arg)) {
-        arg.forEach(function (e) {
-          if (e && typeof e === 'object') {
-            if (isTypedArray(e)) {
-              for (var i = 0, is = arg.length; i < is; i++) {
-                if (isInvalid(arg[i])) {
-                  doLog(arg);
-                  throw arg;
-                }
-              }
-            } else if (Array.isArray(e)) {
-              e.forEach(function (e2) {
-                if (isInvalid(e2)) {
-                  doLog(e);
-                  throw e2;
-                }
-              });
-            } else {
-              for (var prop in e) {
-                if (e.hasOwnProperty(prop)) {
-                  if (isInvalid(e[prop])) {
-                    doLog(e);
-                    throw prop;
-                  }
-                }
-              }
-            }
-          } else {
-            if (isInvalid(e)) {
-              doLog(arg);
-              throw e;
-            }
-          }
-        });
-      } else if (isTypedArray(arg)) {
-        for (var i = 0, is = arg.length; i < is; i++) {
-          if (isInvalid(arg[i])) {
-            doLog(arg);
-            throw arg;
-          }
-        }
-      } else {
-        for (var prop in arg) {
-          if (arg.hasOwnProperty(prop)) {
-            if (isInvalid(arg[prop])) {
-              doLog(arg);
-              throw arg;
-            }
-          }
-        }
-      }
-    } else { 
-      if (isInvalid(arg)) {
-        doLog(args);
-        throw arg;
-      }
-    }
-  }
-
-};
-
-var isTypedArray = function (x) {
-  return (
-    x instanceof Int8Array ||
-    x instanceof Uint8Array || 
-    x instanceof Uint8ClampedArray || 
-    x instanceof Int16Array ||
-    x instanceof Uint16Array || 
-    x instanceof Int32Array ||
-    x instanceof Uint32Array ||
-    x instanceof Float64Array || 
-    x instanceof Float64Array
-  );
-}
-
-var debug = function () {
-
-  if (!DEBUG) return;
-
-  // check if it is an arguments object
-  if (
-    typeof arguments[0] === 'object' &&
-    arguments[0].length != undefined && 
-    !Array.isArray(arguments[0]) &&
-    !isTypedArray(arguments[0])
-  ) return debugArgs(arguments[0]);
-
-  if (arguments.length === 2) {
-    if (typeof arguments[1] === 'string')
-      console.log("debug: " + arguments[1] + ' = ' + ((typeof arguments[0] === 'object') ? JSON.stringify(arguments[0], null, 1) : arguments[0]));
-    if (typeof arguments[0] === 'string')
-      console.log("debug: " + arguments[0] + ' = ' + ((typeof arguments[1] === 'object') ? JSON.stringify(arguments[1], null, 1) : arguments[1]));
-  } else if (typeof arguments[0] === 'string') {
-    console.log("debug: " + arguments[0]);
-  } else {
-    console.log(arguments[0]);
-  }
-
-};
-
 /* math, constants and helper functions */
 
-var abs   = Math.abs
-  , acos  = Math.acos
-  , asin  = Math.asin
-  , atan  = Math.atan
-  , ceil  = Math.ceil
-  , cos   = Math.cos
-  , exp   = Math.exp
-  , floor = Math.floor
-  , int   = function (x) {
-      return x | 0;
-    }
-  , log   = Math.log
-  , log10 = function (x) { 
-      return Math.log(x) / Math.LN10; 
-    }
-  , max   = Math.max
-  , min   = Math.min
-  , pow   = Math.pow
-  , round = Math.round
-  , fixed = function (n, x) { 
-      return x.toFixed(n);
-    }
-  , roundN  = function (n, x) { 
-      return parseFloat(x.toFixed(n));
-    }
-  , sin   = Math.sin
-  , sqrt  = Math.sqrt
-  , tan   = Math.tan
-  , PI    = Math.PI
+var ENVIRONMENT_IS_NODE = typeof process === 'object' && typeof require === 'function'
+  , ENVIRONMENT_IS_WEB = typeof window === 'object'
+  , ENVIRONMENT_IS_WORKER = typeof importScripts === 'function'
   ;
 
-var UNDEFINED = -9999.9,
-    UNDEFINED_INT = -9999;
+var DEBUG = false
+  , VERBOSE = true 
+  ;
+
+var MSG = {
+    INFO: 0
+  , WARN: 1
+  , ERROR: 2
+  , DEBUG: 3
+};  
+
+var UNDEFINED = -9999.9
+  , UNDEFINED_INT = -9999
+  ;
 
 var ROOT = 0
   , LEAF = 1
   , SHOOT = 2
   , STORAGE_ORGAN = 3
   ;
+
+var abs    = Math.abs
+  , acos   = Math.acos
+  , asin   = Math.asin
+  , atan   = Math.atan
+  , ceil   = Math.ceil
+  , cos    = Math.cos
+  , exp    = Math.exp
+  , floor  = Math.floor
+  , int    = function (x) {
+      return x | 0;
+    }
+  , log    = Math.log
+  , log10  = function (x) { 
+      return Math.log(x) / Math.LN10; 
+    }
+  , max    = Math.max
+  , min    = Math.min
+  , pow    = Math.pow
+  , round  = Math.round
+  , fixed  = function (n, x) { 
+      return x.toFixed(n);
+    }
+  , roundN = function (n, x) { 
+      return parseFloat(x.toFixed(n));
+    }
+  , sin    = Math.sin
+  , sqrt   = Math.sqrt
+  , tan    = Math.tan
+  , PI     = Math.PI
+  ;
+
 
 // var Eva2_Nutzung = {
 //   NUTZUNG_UNDEFINED: 0,
@@ -483,7 +372,187 @@ Date.prototype.isLeapYear = function () {
   return (ceil((new Date(this.getFullYear() + 1, 0, 1) - new Date(this.getFullYear(), 0, 1)) / (24 * 60 * 60 * 1000)) === 366); 
 };
 
+/* log function */
+var logger = function (type, msg) {
 
+  if (ENVIRONMENT_IS_WORKER) {
+
+    if (!(type === MSG.INFO && !VERBOSE)) {
+
+      switch(type) {
+        case MSG.INFO:
+          postMessage({ info: msg });
+          break;
+        case MSG.WARN:
+          postMessage({ warn: msg });
+          break;
+        case MSG.ERROR:
+          postMessage({ error: msg });
+          break;
+        case MSG.DEBUG:
+          postMessage({ debug: msg });
+          break;
+        default:
+          postMessage({ msg: msg });
+      }
+
+    }
+
+  } else {
+
+    if (!(type === MSG.INFO && !VERBOSE)) {
+
+      switch(type) {
+        case MSG.INFO:
+          console.log('info: ' + msg);
+          break;
+        case MSG.WARN:
+          console.log('warn: ' + msg);
+          break;
+        case MSG.ERROR:
+          console.log('error: ' + msg);
+          break;
+        case MSG.DEBUG:
+          console.log('debug: ' + msg);
+          break;
+        default:
+          console.log(msg);
+      }
+
+    }
+
+  }
+
+};
+
+
+
+/* JS debugging */
+
+var debugArgs = function (arguments_, funcName) {
+
+  // TODO: recursive
+
+  if (!DEBUG) return; 
+
+  var args = Array.prototype.slice.call(arguments_)
+    , funcName = funcName || ''
+    , isInvalid = function (x) {
+        if (x instanceof Function)
+          return false;
+        if (typeof x === 'object') 
+          return (x === null || x === undefined);
+        if (typeof x === 'string' || x === 'boolean')
+          return (x === null || x === undefined);
+        return (isNaN(x) || x === null || x === undefined || x === Infinity);
+      }
+    , doLog = function (x) {
+        logger(MSG.DEBUG, 'args: ' + JSON.stringify(x, null, 2));
+      }
+    ;
+
+  for (var i = 0, is = args.length; i < is; i++) {
+    var arg = args[i];
+    if (arg && typeof arg === 'object') {
+      if (Array.isArray(arg)) {
+        arg.forEach(function (e) {
+          if (e && typeof e === 'object') {
+            if (isTypedArray(e)) {
+              for (var i = 0, is = arg.length; i < is; i++) {
+                if (isInvalid(arg[i])) {
+                  doLog(arg);
+                  throw arg;
+                }
+              }
+            } else if (Array.isArray(e)) {
+              e.forEach(function (e2) {
+                if (isInvalid(e2)) {
+                  doLog(e);
+                  throw e2;
+                }
+              });
+            } else {
+              for (var prop in e) {
+                if (e.hasOwnProperty(prop)) {
+                  if (isInvalid(e[prop])) {
+                    doLog(e);
+                    throw prop;
+                  }
+                }
+              }
+            }
+          } else {
+            if (isInvalid(e)) {
+              doLog(arg);
+              throw e;
+            }
+          }
+        });
+      } else if (isTypedArray(arg)) {
+        for (var i = 0, is = arg.length; i < is; i++) {
+          if (isInvalid(arg[i])) {
+            doLog(arg);
+            throw arg;
+          }
+        }
+      } else {
+        for (var prop in arg) {
+          if (arg.hasOwnProperty(prop)) {
+            if (isInvalid(arg[prop])) {
+              doLog(arg);
+              throw arg;
+            }
+          }
+        }
+      }
+    } else { 
+      if (isInvalid(arg)) {
+        doLog(args);
+        throw arg;
+      }
+    }
+  }
+
+};
+
+var isTypedArray = function (x) {
+  return (
+    x instanceof Int8Array ||
+    x instanceof Uint8Array || 
+    x instanceof Uint8ClampedArray || 
+    x instanceof Int16Array ||
+    x instanceof Uint16Array || 
+    x instanceof Int32Array ||
+    x instanceof Uint32Array ||
+    x instanceof Float64Array || 
+    x instanceof Float64Array
+  );
+}
+
+var debug = function () {
+
+  if (!DEBUG) return;
+
+  // check if it is an arguments object
+  if (
+    typeof arguments[0] === 'object' &&
+    arguments[0].length != undefined && 
+    !Array.isArray(arguments[0]) &&
+    !isTypedArray(arguments[0])
+  ) return debugArgs(arguments[0]);
+
+  if (arguments.length === 2) {
+    if (typeof arguments[1] === 'string')
+      logger(MSG.DEBUG, arguments[1] + ' = ' + ((typeof arguments[0] === 'object') ? JSON.stringify(arguments[0], null, 1) : arguments[0]));
+    if (typeof arguments[0] === 'string')
+      logger(MSG.DEBUG, arguments[0] + ' = ' + ((typeof arguments[1] === 'object') ? JSON.stringify(arguments[1], null, 1) : arguments[1]));
+  } else if (typeof arguments[0] === 'string') {
+    logger(MSG.DEBUG, arguments[0]);
+  } else {
+    logger(MSG.DEBUG, arguments[0]);
+  }
+
+};
 
 var Tools = {
 
@@ -1384,50 +1453,50 @@ var SoilParameters = function () {
     var is_valid = true;
 
     if (this.vs_FieldCapacity <= 0) {
-        console.log("SoilParameters::Error: No field capacity defined in database for " + this.vs_SoilTexture + " , RawDensity: "+ this._vs_SoilRawDensity);
+        logger(MSG.WARN, "SoilParameters::Error: No field capacity defined in database for " + this.vs_SoilTexture + " , RawDensity: "+ this._vs_SoilRawDensity);
         is_valid = false;
     }
     if (this.vs_Saturation <= 0) {
-        console.log("SoilParameters::Error: No saturation defined in database for " + this.vs_SoilTexture + " , RawDensity: " + this._vs_SoilRawDensity);
+        logger(MSG.WARN, "SoilParameters::Error: No saturation defined in database for " + this.vs_SoilTexture + " , RawDensity: " + this._vs_SoilRawDensity);
         is_valid = false;
     }
     if (this.vs_PermanentWiltingPoint <= 0) {
-        console.log("SoilParameters::Error: No saturation defined in database for " + this.vs_SoilTexture + " , RawDensity: " + this._vs_SoilRawDensity);
+        logger(MSG.WARN, "SoilParameters::Error: No saturation defined in database for " + this.vs_SoilTexture + " , RawDensity: " + this._vs_SoilRawDensity);
         is_valid = false;
     }
 
     if (this.vs_SoilSandContent<0) {
-        console.log("SoilParameters::Error: Invalid soil sand content: "+ this.vs_SoilSandContent);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid soil sand content: "+ this.vs_SoilSandContent);
         is_valid = false;
     }
 
     if (this.vs_SoilClayContent<0) {
-        console.log("SoilParameters::Error: Invalid soil clay content: "+ this.vs_SoilClayContent);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid soil clay content: "+ this.vs_SoilClayContent);
         is_valid = false;
     }
 
     if (this.vs_SoilpH<0) {
-        console.log("SoilParameters::Error: Invalid soil ph value: "+ this.vs_SoilpH);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid soil ph value: "+ this.vs_SoilpH);
         is_valid = false;
     }
 
     if (this.vs_SoilStoneContent<0) {
-        console.log("SoilParameters::Error: Invalid soil stone content: "+ this.vs_SoilStoneContent);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid soil stone content: "+ this.vs_SoilStoneContent);
         is_valid = false;
     }
 
     if (this.vs_Saturation<0) {
-        console.log("SoilParameters::Error: Invalid value for saturation: "+ this.vs_Saturation);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid value for saturation: "+ this.vs_Saturation);
         is_valid = false;
     }
 
     if (this.vs_PermanentWiltingPoint<0) {
-        console.log("SoilParameters::Error: Invalid value for permanent wilting point: "+ this.vs_PermanentWiltingPoint);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid value for permanent wilting point: "+ this.vs_PermanentWiltingPoint);
         is_valid = false;
     }
 /*
     if (this._vs_SoilRawDensity<0) {
-        console.log("SoilParameters::Error: Invalid soil raw density: "+ this._vs_SoilRawDensity);
+        logger(MSG.WARN, "SoilParameters::Error: Invalid soil raw density: "+ this._vs_SoilRawDensity);
         is_valid = false;
     }
 */
@@ -1866,7 +1935,7 @@ var CapillaryRiseRates = function () {
     }    
 
     if (size <= 0 )
-      console.log("Error. No capillary rise rates in data structure available.");
+      logger(MSG.WARN, "No capillary rise rates in data structure available.");
 
     return (this.cap_rates_map[bodart][distance] === undefined) ? 0.0 : this.cap_rates_map[bodart][distance];
 
@@ -1963,7 +2032,7 @@ var Seed = function (date, crop) {
   };
 
   this.apply = function (model) {
-    console.log("seeding crop: " + this._crop.name() + " at: " + this.date().toString());
+    logger(MSG.INFO, "seeding crop: " + this._crop.name() + " at: " + this.date().toString());
     model.seedCrop(this._crop);
   };
 
@@ -1998,7 +2067,7 @@ var Harvest = function (at, crop, cropResult) {
   
     if (model.cropGrowth()) {
 
-      console.log("harvesting crop: " + this._crop.name() + " at: " + this.date().toString());
+      logger(MSG.INFO, "harvesting crop: " + this._crop.name() + " at: " + this.date().toString());
 
       if (model.currentCrop() == this._crop) {
 
@@ -2043,7 +2112,7 @@ var Harvest = function (at, crop, cropResult) {
         model.harvestCurrentCrop();
 
       } else {
-          console.log("Crop: " + model.currentCrop().toString()
+          logger(MSG.INFO, "Crop: " + model.currentCrop().toString()
             + " to be harvested isn't actual crop of this Harvesting action: "
             + this._crop.toString());
       }
@@ -2074,7 +2143,7 @@ var Cutting = function (at, crop, cropResult) {
 
   this.apply = function (model) {
   
-    console.log("Cutting crop: " + this._crop.name() + " at: " + this.date().toString());
+    logger(MSG.INFO, "Cutting crop: " + this._crop.name() + " at: " + this.date().toString());
     if (model.currentCrop() == this._crop) {
       // if (model.cropGrowth()) {
         // this._crop.setHarvestYields(
@@ -2500,8 +2569,9 @@ var DataAccessor = function (startDate, endDate) {
   };
 
   this.addClimateData = function (acd, data) {
+    /* TODO: in monica gucken was das zu bedeuten hat */
     if(!this._data.length > 0 && this._numberOfSteps === data.length)
-      console.log("Error: this._numberOfSteps === data.length");
+      logger(MSG.WARN, "this._numberOfSteps === data.length");
 
     this._data.push(data);
     this._acd2dataIndex[acd] = this._data.length - 1;
@@ -3495,8 +3565,7 @@ var CropGrowth = function (sc, gps, cps, stps, cpp) {
       }
 
     } else {
-
-      console.log("irregular developmental stage");
+      logger(MSG.WARN, "irregular developmental stage");
     }
 
   };
@@ -4334,11 +4403,11 @@ var CropGrowth = function (sc, gps, cps, stps, cpp) {
 
                     var incr = assimilate_partition_leaf * vc_NetPhotosynthesis;
                     if (abs(incr) <= vc_OrganBiomass[i_Organ]){
-                        console.log("LEAF - Reducing organ biomass - default case (" + (vc_OrganBiomass[i_Organ] + vc_OrganGrowthIncrement[i_Organ]) + ")");
-                        vc_OrganGrowthIncrement[i_Organ] = incr;
+                      logger(MSG.INFO, "LEAF - Reducing organ biomass - default case (" + (vc_OrganBiomass[i_Organ] + vc_OrganGrowthIncrement[i_Organ]) + ")");
+                      vc_OrganGrowthIncrement[i_Organ] = incr;
                     } else {
                         // temporary hack because complex algorithm produces questionable results
-                        console.log("LEAF - Not enough biomass for reduction - Reducing only what is available ");
+                        logger(MSG.INFO, "LEAF - Not enough biomass for reduction - Reducing only what is available ");
                         vc_OrganGrowthIncrement[i_Organ] = (-1) * vc_OrganBiomass[i_Organ];
 
 
@@ -4361,10 +4430,10 @@ var CropGrowth = function (sc, gps, cps, stps, cpp) {
 
                     if (abs(incr) <= vc_OrganBiomass[i_Organ]){
                         vc_OrganGrowthIncrement[i_Organ] = incr;
-                        console.log("SHOOT - Reducing organ biomass - default case (" + (vc_OrganBiomass[i_Organ] + vc_OrganGrowthIncrement[i_Organ]) + ")");
+                        logger(MSG.INFO, "SHOOT - Reducing organ biomass - default case (" + (vc_OrganBiomass[i_Organ] + vc_OrganGrowthIncrement[i_Organ]) + ")");
                     } else {
                         // temporary hack because complex algorithm produces questionable results
-                        console.log("SHOOT - Not enough biomass for reduction - Reducing only what is available ");
+                        logger(MSG.INFO, "SHOOT - Not enough biomass for reduction - Reducing only what is available");
                         vc_OrganGrowthIncrement[i_Organ] = (-1) * vc_OrganBiomass[i_Organ];
 
 
@@ -5309,27 +5378,27 @@ var CropGrowth = function (sc, gps, cps, stps, cpp) {
     var old_above_biomass = vc_AbovegroundBiomass;
     var removing_biomass = 0.0;
 
-    console.log("CropGrowth::applyCutting()");;
+    logger(MSG.INFO, "apply cutting");
+
     var new_OrganBiomass = [];      //! old WORG
     for (var organ=1; organ<pc_NumberOfOrgans+1; organ++) {
 
         var cut_organ_count = cropParams.organIdsForCutting.length;
-        var biomasse = vc_OrganBiomass[organ - 1];
-        console.log("Alte Biomasse: " + biomasse  + "\tOrgan: " + organ);
+        var biomass = vc_OrganBiomass[organ - 1];
+        logger(MSG.INFO, "old biomass: " + biomass  + "\tOrgan: " + organ);
         for (var cut_organ=0; cut_organ<cut_organ_count; cut_organ++) {
 
             var yc = new YieldComponent(cropParams.organIdsForCutting[cut_organ]);
 
             if (organ == yc.organId) {
-                console.log("YC yc.yieldPercentage: " + yc.yieldPercentage);
-                biomasse = vc_OrganBiomass[organ - 1] * ((1-yc.yieldPercentage));
-                vc_AbovegroundBiomass -= biomasse;
+                biomass = vc_OrganBiomass[organ - 1] * ((1-yc.yieldPercentage));
+                vc_AbovegroundBiomass -= biomass;
 
-                removing_biomass +=biomasse;
+                removing_biomass +=biomass;
             }
         }
-        new_OrganBiomass.push(biomasse);
-        console.log("Neue Biomasse: " + biomasse);
+        new_OrganBiomass.push(biomass);
+        logger(MSG.INFO, "new biomass: " + biomass);
     }
 
     vc_TotalBiomassNContent = (removing_biomass / old_above_biomass) * vc_TotalBiomassNContent;
@@ -5663,7 +5732,7 @@ var Environment = function (sps, cpp) {
 
   // copy constructor
   if (arguments[0] instanceof Environment) {
-    console.log("Copy constructor: Env" + "\tsoil param size: " + env.soilParams.length);;
+    debug("Copy constructor: Env" + "\tsoil param size: " + env.soilParams.length);
     this.env = arguments[0];
     this.customId = env.customId;
     this.soilParams = env.soilParams;
@@ -5786,7 +5855,8 @@ var Model = function (env, da) {
    */
   var seedCrop = function (crop) {
 
-    console.log("seedCrop");
+    debug("seedCrop");
+
     that._currentCropGrowth = null;
     p_daysWithCrop = 0;
     p_accuNStress = 0.0;
@@ -5804,13 +5874,13 @@ var Model = function (env, da) {
       _soilMoisture.put_Crop(that._currentCropGrowth);
       _soilOrganic.put_Crop(that._currentCropGrowth);
 
-      console.log("seedDate: " + _currentCrop.seedDate().toString()
+      logger(MSG.INFO, "seedDate: " + _currentCrop.seedDate().toString()
           + " harvestDate: " + _currentCrop.harvestDate().toString());
 
       if(_env.useNMinMineralFertilisingMethod && _currentCrop.seedDate().dayOfYear() <=
          _currentCrop.harvestDate().dayOfYear())
       {
-        console.log("nMin fertilising summer crop");
+        logger(MSG.INFO, "nMin fertilising summer crop");
         var fert_amount = applyMineralFertiliserViaNMinMethod
             (_env.nMinFertiliserPartition,
              NMinCropParameters(cps.pc_SamplingDepth,
@@ -5838,8 +5908,8 @@ var Model = function (env, da) {
       //prepare to add root and crop residues to soilorganic (AOMs)
       var rootBiomass = that._currentCropGrowth.get_OrganBiomass(0);
       var rootNConcentration = that._currentCropGrowth.get_RootNConcentration();
-      console.log("adding organic matter from root to soilOrganic");
-      console.log("root biomass: " + rootBiomass
+      logger(MSG.INFO, "adding organic matter from root to soilOrganic");
+      logger(MSG.INFO, "root biomass: " + rootBiomass
           + " Root N concentration: " + rootNConcentration);
 
       _soilOrganic.addOrganicMatter(_currentCrop.residueParameters(),
@@ -5849,14 +5919,14 @@ var Model = function (env, da) {
           that._currentCropGrowth.get_ResidueBiomass(_env.useSecondaryYields);
       //!@todo Claas: das hier noch berechnen
       var residueNConcentration = that._currentCropGrowth.get_ResiduesNConcentration();
-      console.log("adding organic matter from residues to soilOrganic");
-      console.log("residue biomass: " + residueBiomass
+      logger(MSG.INFO, "adding organic matter from residues to soilOrganic");
+      logger(MSG.INFO, "residue biomass: " + residueBiomass
           + " Residue N concentration: " + residueNConcentration);
-      console.log("primary yield biomass: " + that._currentCropGrowth.get_PrimaryCropYield()
+      logger(MSG.INFO, "primary yield biomass: " + that._currentCropGrowth.get_PrimaryCropYield()
           + " Primary yield N concentration: " + that._currentCropGrowth.get_PrimaryYieldNConcentration());
-      console.log("secondary yield biomass: " + that._currentCropGrowth.get_SecondaryCropYield()
+      logger(MSG.INFO, "secondary yield biomass: " + that._currentCropGrowth.get_SecondaryCropYield()
           + " Secondary yield N concentration: " + that._currentCropGrowth.get_PrimaryYieldNConcentration());
-      console.log("Residues N content: " + that._currentCropGrowth.get_ResiduesNContent()
+      logger(MSG.INFO, "Residues N content: " + that._currentCropGrowth.get_ResiduesNContent()
           + " Primary yield N content: " + that._currentCropGrowth.get_PrimaryYieldNContent()
           + " Secondary yield N content: " + that._currentCropGrowth.get_SecondaryYieldNContent());
 
@@ -5885,8 +5955,8 @@ var Model = function (env, da) {
       var total_biomass = that._currentCropGrowth.totalBiomass();
       var totalNConcentration = that._currentCropGrowth.get_AbovegroundBiomassNConcentration() + that._currentCropGrowth.get_RootNConcentration();
 
-      console.log("Adding organic matter from total biomass of crop to soilOrganic");
-      console.log("Total biomass: " + total_biomass
+      logger(MSG.INFO, "Adding organic matter from total biomass of crop to soilOrganic");
+      logger(MSG.INFO, "Total biomass: " + total_biomass
           + " Total N concentration: " + totalNConcentration);
 
       _soilOrganic.addOrganicMatter(_currentCrop.residueParameters(),
@@ -5914,7 +5984,7 @@ var Model = function (env, da) {
   };
 
   var applyOrganicFertiliser = function (params, amount, incorporation) {
-    console.log("MONICA model: applyOrganicFertiliser:\t" + amount + "\t" + params.vo_NConcentration);
+    logger(MSG.INFO, "MONICA model: applyOrganicFertiliser:\t" + amount + "\t" + params.vo_NConcentration);
     _soilOrganic.setIncorporation(incorporation);
     _soilOrganic.addOrganicMatter(params, amount, params.vo_NConcentration);
     addDailySumFertiliser(amount * params.vo_NConcentration);
@@ -6018,7 +6088,7 @@ var Model = function (env, da) {
        && _currentCrop.seedDate().dayOfYear() > _currentCrop.harvestDate().dayOfYear()
       && _dataAccessor.julianDayForStep(stepNo) == pc_JulianDayAutomaticFertilising)
       {
-      console.log("nMin fertilising winter crop");
+      logger(MSG.INFO, "nMin fertilising winter crop");
       var cps = _currentCrop.cropParameters();
       var fert_amount = applyMineralFertiliserViaNMinMethod
           (_env.nMinFertiliserPartition,
@@ -6128,8 +6198,8 @@ var Model = function (env, da) {
     leapYear
   ) {
 
-    // console.log("GroundwaterDepthForDate");
-    // console.log(arguments);
+    // logger(MSG.INFO, "GroundwaterDepthForDate");
+    // logger(MSG.INFO, arguments);
     
     var groundwaterDepth;
     var days;
@@ -7185,7 +7255,8 @@ var readUserParameterFromDatabase = function () {
 
 var soilCharacteristicsKA5 = function (soilParameter) {
 
-  console.log("soilCharacteristicsKA5");
+  logger(MSG.INFO, "soilCharacteristicsKA5");
+
   var texture = soilParameter.vs_SoilTexture;
   var stoneContent = soilParameter.vs_SoilStoneContent;
 
@@ -7512,11 +7583,11 @@ var runMonica = function (env, progress_callback) {
   });
 
   if(env.cropRotation.length === 0) {
-    console.log("Error: Fruchtfolge is empty");
+    logger(MSG.ERROR, "rotation is empty");
     return res;
   }
 
-  console.log("starting Monica");
+  logger(MSG.INFO, "starting monica");
 
   var write_output_files = (env.pathToOutputDir != null && !!fs);
   var foutFileName = env.pathToOutputDir + '/rmout.dat';
@@ -7561,15 +7632,14 @@ var runMonica = function (env, progress_callback) {
   var nextAbsolutePPApplicationDate =
       useRelativeDates ? nextPPApplicationDate.toAbsoluteDate
                          (currentDate.year() + 1) : nextPPApplicationDate;
-  console.log("next app-date: " + nextPPApplicationDate.toString()
+  logger(MSG.INFO, "next app-date: " + nextPPApplicationDate.toString()
           + " next abs app-date: " + nextAbsolutePPApplicationDate.toString());
 
   //if for some reason there are no applications (no nothing) in the
   //production process: quit
   if(!nextAbsolutePPApplicationDate.isValid())
   {
-    console.log("start of production-process: " + currentPP.toString()
-            + " is not valid");
+    logger(MSG.ERROR, "start of production-process: " + currentPP.toString() + " is not valid");
     return res;
   }
 
@@ -7582,7 +7652,7 @@ var runMonica = function (env, progress_callback) {
 
   for (var d = 0; d < nods; ++d, currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1), ++dim) {
 
-    console.log("currentDate: " + currentDate.getDate() + "." + (currentDate.getMonth() + 1) + "." + currentDate.getFullYear());
+    logger(MSG.INFO, "currentDate: " + currentDate.getDate() + "." + (currentDate.getMonth() + 1) + "." + currentDate.getFullYear());
     model.resetDailyCounter();
 
     // test if model's crop has been dying in previous step
@@ -7594,7 +7664,7 @@ var runMonica = function (env, progress_callback) {
     //there's something to at this day
     if (nextAbsolutePPApplicationDate.setHours(0,0,0,0) == currentDate.setHours(0,0,0,0)) {
 
-      console.log(
+      logger(MSG.INFO, 
         " applying at: " + nextPPApplicationDate.toString() +
         " absolute-at: " + nextAbsolutePPApplicationDate.toString()
       );
@@ -7617,7 +7687,7 @@ var runMonica = function (env, progress_callback) {
           (currentDate.year() + (nextPPApplicationDate.dayOfYear() > prevPPApplicationDate.dayOfYear() ? 0 : 1),
            true) : nextPPApplicationDate;
 
-      console.log(
+      logger(MSG.INFO, 
         " next app-date: " + nextPPApplicationDate.toString() + 
         " next abs app-date: " + nextAbsolutePPApplicationDate.toString()
       );
@@ -7658,7 +7728,7 @@ var runMonica = function (env, progress_callback) {
             (currentDate.year() + (nextPPApplicationDate.dayOfYear() > prevPPApplicationDate.dayOfYear() ? 0 : 1),
              true) : nextPPApplicationDate;
 
-        console.log(
+        logger(MSG.INFO, 
           " new valid next app-date: " + nextPPApplicationDate.toString() +
           " next abs app-date: " + nextAbsolutePPApplicationDate.toString()
         );
@@ -7762,7 +7832,7 @@ var runMonica = function (env, progress_callback) {
       monthETa = 0.0;
 
       dim = 0;
-      console.log("stored monthly values for month: " + currentMonth);
+      logger(MSG.INFO, "stored monthly values for month: " + currentMonth);
     
     } else {
 
@@ -7800,7 +7870,7 @@ var runMonica = function (env, progress_callback) {
       writeGeneralResults(foutFileName, goutFileName, env, model, d);
   }
 
-  console.log("returning from runMonica");
+  logger(MSG.INFO, "returning from runMonica");
 
   return res;
 };
@@ -9411,7 +9481,7 @@ var SoilColumn = function (gps, sp, cpp) {
   soilColumnArray.vq_CropNUptake = 0.0;
   soilColumnArray.vs_SoilLayers = [];
 
-  console.log("Constructor: SoilColumn "  + sp.length);
+  logger(MSG.INFO, "Constructor: SoilColumn "  + sp.length);
 
   for (var i = 0; i < this.soilParams.length; i++) {
     var layer = new SoilLayer(gps.ps_LayerThickness[0], sp[i], cpp);
@@ -9513,7 +9583,7 @@ var SoilColumn = function (gps, sp, cpp) {
         func: this.applyMineralFertiliserViaNMinMethod,
         args: [fp, vf_SamplingDepth, vf_CropNTarget, vf_CropNTarget30, vf_FertiliserMinApplication, vf_FertiliserMaxApplication, vf_TopDressingDelay]
       });
-      console.log("Error: Soil too wet for fertilisation. Fertiliser event adjourned to next day.");
+      logger(MSG.WARN, "Soil too wet for fertilisation. Fertiliser event adjourned to next day.");
       return 0.0;
     }
 
@@ -9557,7 +9627,7 @@ var SoilColumn = function (gps, sp, cpp) {
       // If the N demand of the crop is smaller than the user defined
       // minimum fertilisation then no need to fertilise
       vf_FertiliserRecommendation = 0.0;
-      console.log("Error: Fertiliser demand below minimum application value. No fertiliser applied.");
+      logger(MSG.WARN, "Fertiliser demand below minimum application value. No fertiliser applied.");
     }
 
     if( vf_FertiliserRecommendation > vf_FertiliserMaxApplication) {
@@ -9568,8 +9638,8 @@ var SoilColumn = function (gps, sp, cpp) {
       that._vf_TopDressingPartition = fp;
       that._vf_TopDressingDelay = vf_TopDressingDelay;
       vf_FertiliserRecommendation = vf_FertiliserMaxApplication;
-      console.log(
-        "Error: Fertiliser demand above maximum application value. " +
+      logger(MSG.WARN, 
+        "Fertiliser demand above maximum application value. " +
         "A top dressing of " + _vf_TopDressing + " " + 
         "will be applied from now on day" + vf_TopDressingDelay + "."
        );
@@ -9578,7 +9648,7 @@ var SoilColumn = function (gps, sp, cpp) {
     //Apply fertiliser
     this.applyMineralFertiliser(fp, vf_FertiliserRecommendation);
 
-    console.log("SoilColumn::applyMineralFertiliserViaNMinMethod:\t" + vf_FertiliserRecommendation);
+    logger(MSG.INFO, "SoilColumn::applyMineralFertiliserViaNMinMethod:\t" + vf_FertiliserRecommendation);
 
     //apply the callback to all of the fertiliser, even though some if it
     //(the top-dressing) will only be applied later
@@ -9608,7 +9678,7 @@ var SoilColumn = function (gps, sp, cpp) {
     //is actually only called from cropStep and thus there should always
     //be a crop
     if (that.cropGrowth === null)
-      console.log("Error: crop is null");
+      logger(MSG.ERROR, "crop is null");
 
     var s = that.cropGrowth.get_HeatSumIrrigationStart();
     var e = that.cropGrowth.get_HeatSumIrrigationEnd();
@@ -9637,7 +9707,7 @@ var SoilColumn = function (gps, sp, cpp) {
     if (vi_PlantAvailableWaterFraction <= vi_IrrigationThreshold) {
       this.applyIrrigation(vi_IrrigationAmount, vi_IrrigationNConcentration);
 
-      console.log(
+      logger(MSG.INFO, 
         "applying automatic irrigation treshold: " + vi_IrrigationThreshold +
         " amount: " + vi_IrrigationAmount +
         " N concentration: " + vi_IrrigationNConcentration
@@ -12307,7 +12377,7 @@ var SoilMoisture = function (sc, stps, mm, cpp) {
       // vm_WaterFlux[i] = 0.0;
     }
 
-    console.log("Constructor: SoilMoisture");
+    logger(MSG.INFO, "Constructor: SoilMoisture");
 
   var snowComponent = new SnowComponent(centralParameterProvider),
       frostComponent = new FrostComponent(soilColumn, centralParameterProvider),
@@ -12518,7 +12588,7 @@ var SoilMoisture = function (sc, stps, mm, cpp) {
       if (siteParameters.vs_Slope < 0.0 || siteParameters.vs_Slope > 1.0) {
 
         // no valid slope
-        console.log("Slope value out ouf boundary");
+        logger(MSG.WARN, "Slope value out ouf boundary");
 
       } else if (siteParameters.vs_Slope == 0.0) {
 
@@ -12606,7 +12676,7 @@ var SoilMoisture = function (sc, stps, mm, cpp) {
     if (abs((vm_SurfaceWaterStorageOld + vm_WaterToInfiltrate) - (vm_SurfaceRunOff + vm_Infiltration
         + vm_SurfaceWaterStorage)) > 0.01) {
 
-      console.log("water balance wrong!");
+      logger(MSG.WARN, "water balance wrong!");
     }
 
     // water flux of next layer equals percolation rate of layer above
@@ -13549,7 +13619,7 @@ var SoilTransport = function (sc, sps, cpp) {
     vq_SoilMoisture[i] = 0.2;
   }    
 
-  console.log("!!! N Deposition: " + vs_NDeposition);
+  logger(MSG.INFO, "N deposition: " + vs_NDeposition);
   var vs_LeachingDepth = centralParameterProvider.userEnvironmentParameters.p_LeachingDepth;
   var vq_TimeStep = centralParameterProvider.userEnvironmentParameters.p_timeStep;
 
@@ -13948,10 +14018,8 @@ var SoilTemperature = function (sc, mm, cpp) {
         }
       };
 
-  for (var i = 0; i < sc.vs_NumberOfLayers(); i++) {
+  for (var i = 0; i < sc.vs_NumberOfLayers(); i++)
     soilColumn[i] = sc[i];
-    // console.log(!soilColumn[i]);
-  }
 
   soilColumn[sc.vs_NumberOfLayers()] = soilColumn.gl;
   soilColumn[sc.vs_NumberOfLayers() + 1] = soilColumn.bl;
@@ -13990,7 +14058,7 @@ var SoilTemperature = function (sc, mm, cpp) {
 
     vt_MatrixPrimaryDiagonal[i + 1] = 0.0;
 
-  console.log("Constructor: SoilTemperature");
+  logger(MSG.INFO, "Constructor: SoilTemperature");
 
   var user_temp = cpp.userSoilTemperatureParameters;
 
@@ -14063,7 +14131,7 @@ var SoilTemperature = function (sc, mm, cpp) {
 
   // initialising heat state variables
   for (var i_Layer = 0; i_Layer < vs_NumberOfLayers; i_Layer++) {
-    // console.log("layer: " + i_Layer);
+    // logger(MSG.INFO, "layer: " + i_Layer);
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // Calculate heat conductivity following Neusypina 1979
@@ -14075,8 +14143,8 @@ var SoilTemperature = function (sc, mm, cpp) {
     var sbdi = soilColumn.at(i_Layer).vs_SoilBulkDensity();
     var smi = vs_SoilMoisture_const[i_Layer];
 
-    // console.log("sbdi: " + sbdi);  
-    // console.log("smi: " + smi);  
+    // logger(MSG.INFO, "sbdi: " + sbdi);  
+    // logger(MSG.INFO, "smi: " + smi);  
 
     vt_HeatConductivity[i_Layer] = ((3.0 * (sbdi / 1000.0) - 1.7) * 0.001) /
            (1.0 + (11.5 - 5.0 * (sbdi / 1000.0)) *
@@ -14086,8 +14154,8 @@ var SoilTemperature = function (sc, mm, cpp) {
            * 4.184; // gives result in [J]
            // --> [J m-1 d-1 K-1]
 
-    // console.log("vt_HeatConductivity");       
-    // console.log(vt_HeatConductivity);      
+    // logger(MSG.INFO, "vt_HeatConductivity");       
+    // logger(MSG.INFO, vt_HeatConductivity);      
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // Calculate specific heat capacity following DAISY
@@ -14132,7 +14200,7 @@ var SoilTemperature = function (sc, mm, cpp) {
 
   // Calculation of the mean heat conductivity per layer
   vt_HeatConductivityMean[0] = vt_HeatConductivity[0];
-  // console.log(vt_HeatConductivityMean);
+  // logger(MSG.INFO, vt_HeatConductivityMean);
 
   for (var i_Layer = 1; i_Layer < vt_NumberOfLayers; i_Layer++) {
 
@@ -14143,7 +14211,7 @@ var SoilTemperature = function (sc, mm, cpp) {
 
     // @todo <b>Claas: </b>Formel nochmal durchgehen
     vt_HeatConductivityMean[i_Layer] = ((lti_1 * hci_1) + (lti * hci)) / (lti + lti_1);
-    // console.log(vt_HeatConductivityMean);
+    // logger(MSG.INFO, vt_HeatConductivityMean);
 
   } // for
 
@@ -14181,8 +14249,7 @@ var SoilTemperature = function (sc, mm, cpp) {
    */
   var step = function (tmin, tmax, globrad) {
 
-    // console.log("-------- SoilTemperature::step ----------");
-    // console.log(arguments);
+    if (DEBUG) debug(arguments);
 
     var vt_GroundLayer = vt_NumberOfLayers - 2;
     var vt_BottomLayer = vt_NumberOfLayers - 1;
@@ -14208,11 +14275,11 @@ var SoilTemperature = function (sc, mm, cpp) {
        + (vt_VolumeMatrix[0] - vt_VolumeMatrixOld[0]) / soilColumn[0].vs_LayerThickness)
         * vt_SoilTemperature[0] + vt_HeatFlow;
 
-    // console.log("f_SoilSurfaceTemperature(tmin, tmax, globrad): " + f_SoilSurfaceTemperature(tmin, tmax, globrad));
-    // console.log("vt_B[0]: " + vt_B[0]);
-    // console.log("vt_HeatConductivityMean[0]: " + vt_HeatConductivityMean[0]);
-    // console.log("vt_HeatFlow: " + vt_HeatFlow);
-    // console.log("vt_Solution[0]: " + vt_Solution[0]);
+    // logger(MSG.INFO, "f_SoilSurfaceTemperature(tmin, tmax, globrad): " + f_SoilSurfaceTemperature(tmin, tmax, globrad));
+    // logger(MSG.INFO, "vt_B[0]: " + vt_B[0]);
+    // logger(MSG.INFO, "vt_HeatConductivityMean[0]: " + vt_HeatConductivityMean[0]);
+    // logger(MSG.INFO, "vt_HeatFlow: " + vt_HeatFlow);
+    // logger(MSG.INFO, "vt_Solution[0]: " + vt_Solution[0]);
 
     for (var i_Layer = 1; i_Layer < vt_NumberOfLayers; i_Layer++) {
 
@@ -14222,7 +14289,7 @@ var SoilTemperature = function (sc, mm, cpp) {
           * vt_SoilTemperature[i_Layer];
     } // for
 
-      // console.log(vt_Solution);
+      // logger(MSG.INFO, vt_Solution);
 
     // end subroutine NumericalSolution
 
@@ -14291,6 +14358,8 @@ var SoilTemperature = function (sc, mm, cpp) {
    * @param globrad
    */
   var f_SoilSurfaceTemperature = function (tmin, tmax, globrad) {
+
+    if (DEBUG) debug(arguments);
 
     var shading_coefficient = dampingFactor;
 
@@ -14394,6 +14463,8 @@ var Configuration = function (outPath, climate, doDebug) {
   var _outPath = outPath; 
 
   var run = function run(simObj, siteObj, cropObj) {
+
+    logger(MSG.INFO, 'fetching parameters from database');
     
     var sp = new SiteParameters();
     var cpp = readUserParameterFromDatabase();
@@ -14421,7 +14492,7 @@ var Configuration = function (outPath, climate, doDebug) {
     cpp.userInitValues.p_initSoilNitrate = simObj.init.soilNitrate;
     cpp.userInitValues.p_initSoilAmmonium = simObj.init.soilAmmonium;
 
-    console.log("fetched sim data");
+    logger(MSG.INFO, 'fetched sim data');
     
     /* site */
     sp.vq_NDeposition = siteObj.NDeposition;
@@ -14445,7 +14516,7 @@ var Configuration = function (outPath, climate, doDebug) {
     // TODO: maxMineralisationDepth? (gp ps_MaxMineralisationDepth und ps_MaximumMineralisationDepth?)
     gp.ps_MaxMineralisationDepth = 0.4;
 
-    console.log("fetched site data");
+    logger(MSG.INFO, 'fetched site data');
 
     /* soil */
     var lThicknessCm = 100.0 * cpp.userEnvironmentParameters.p_LayerThickness;
@@ -14454,29 +14525,29 @@ var Configuration = function (outPath, climate, doDebug) {
 
     var layers = [];
     if (!createLayers(layers, horizonsArr, lThicknessCm, maxNoOfLayers)) {
-      console.log("Error fetching soil data");
+      logger(MSG.ERROR, 'error fetching soil data');
       return;
     }
     
-    console.log("fetched soil data");
+    logger(MSG.INFO, 'fetched soil data');
 
     /* weather */
     var da = new DataAccessor(new Date(startYear, 0, 1), new Date(endYear, 11, 31));
     if (!createClimate(da, cpp, sp.vs_Latitude)) {
-      console.log("Error fetching climate data");
+      logger(MSG.ERROR, 'error fetching climate data');
       return;
     }
     
-    console.log("fetched climate data");
+    logger(MSG.INFO, 'fetched climate data');
 
     /* crops */
     var pps = [];
     if (!createProcesses(pps, cropsArr)) {
-      console.log("Error fetching crop data");
+      logger(MSG.ERROR, 'error fetching crop data');
       return;
     }
     
-    console.log("fetched crop data");
+    logger(MSG.INFO, 'fetched crop data');
 
     var env = new Environment(layers, cpp);
     env.general = gp;
@@ -14498,7 +14569,7 @@ var Configuration = function (outPath, climate, doDebug) {
     //   env.nMinFertiliserPartition = getMineralFertiliserParametersFromMonicaDB(hermes_config->getMineralFertiliserID());
     // }
 
-    console.log("run monica");
+    logger(MSG.INFO, 'start monica model');
 
     return runMonica(env, setProgress);
   };
@@ -14509,7 +14580,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var hs = horizonsArr.length;
     
-    console.log("fetching " + hs + " horizons");
+    logger(MSG.INFO, 'fetching ' + hs + ' horizons');
 
     for (var h = 0; h < hs; ++h ) {
       
@@ -14548,15 +14619,15 @@ var Configuration = function (outPath, climate, doDebug) {
         /* TODO: hinter readJSON verschieben */ 
         if (!layer.isValid()) {
           ok = false;
-          console.log("Error in soil parameters.");
+          logger(MSG.ERROR, 'error in soil parameters');
         }
 
         layers.push(layer);
-        console.log("fetched layer " + layers.length + " in horizon " + h);
+        logger(MSG.INFO, 'fetched layer ' + layers.length + ' in horizon ' + h);
 
       }
 
-      console.log("fetched horizon " + h);
+      logger(MSG.INFO, 'fetched horizon ' + h);
     }  
 
     return ok;
@@ -14567,7 +14638,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var cs = cropsArr.length;
     
-    console.log("fetching " + cs + " crops");
+    logger(MSG.INFO, 'fetching ' + cs + ' crops');
 
     for (var c = 0; c < cs; c++) {
 
@@ -14582,17 +14653,12 @@ var Configuration = function (outPath, climate, doDebug) {
         WHERE name_and_gentype='" + nameAndGenType + "'"
       );
 
-      if (res[0].values.length != 1)
-        throw 'crop (' + nameAndGenType + ') not available in table crop';  
-
-      var columns = res[0].columns;
-      var row = res[0].values[0]; /* only one row */   
-
-      cropId = row[columns.indexOf('crop_id')];
+      if (res.length > 0)
+        cropId = res[0].values[0][0];
 
       if (cropId < 0 || isNaN(cropId)) {
         ok = false;
-        console.log("Invalid crop id: " + nameAndGenType);
+        logger(MSG.ERROR, 'invalid crop id: ' + nameAndGenType);
       }
 
       var sd = new Date(Date.parse(cropObj.sowingDate));
@@ -14604,7 +14670,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!sd.isValid() || !hd.isValid()) {
         ok = false;
-        console.log("Invalid sowing or harvest date");
+        logger(MSG.ERROR, 'invalid sowing or harvest date');
       }
 
       var crop = new Crop(cropId, nameAndGenType /*TODO: hermesCropId?*/);
@@ -14619,7 +14685,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (tillArr) { /* in case no tillage has been added */
         if (!addTillageOperations(pps[c], tillArr)) {
           ok = false;
-          console.log("Error adding tillages");
+          logger(MSG.ERROR, 'error adding tillages');
         }
       }
 
@@ -14628,7 +14694,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (minFertArr) { /* in case no min fertilizer has been added */
         if (!addFertilizers(pps[c], minFertArr, false)) {
           ok = false;
-          console.log("Error adding mineral fertilisers");
+          logger(MSG.ERROR, 'error adding mineral fertilisers');
         }
       }
 
@@ -14637,7 +14703,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (orgFertArr) { /* in case no org fertilizer has been added */ 
         if (!addFertilizers(pps[c], orgFertArr, true)) {
           ok = false;
-          console.log("Error adding organic fertilisers");
+          logger(MSG.ERROR, 'error adding organic fertilisers');
         }
       }
 
@@ -14646,7 +14712,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (irriArr) {  /* in case no irrigation has been added */
         if (!addIrrigations(pps[c], irriArr)) {
           ok = false;
-          console.log("Error adding irrigations");
+          logger(MSG.ERROR, 'error adding irrigations');
         }
       }
 
@@ -14655,11 +14721,12 @@ var Configuration = function (outPath, climate, doDebug) {
       if (cutArr) { /* in case no tillage has been added */
         if (!addCuttings(pps[c], cutArr)) {
           ok = false;
-          console.log("Error adding cuttings");
+          logger(MSG.ERROR, 'error adding cuttings');
         }
       }
 
-      console.log("fetched crop " + c + ", nameAndGenType: " + nameAndGenType + ", id: " + cropId);
+      logger(MSG.INFO, 'fetched crop ' + c + ', nameAndGenType: ' + nameAndGenType + ', id: ' + cropId);
+
     }
 
     return ok;
@@ -14670,7 +14737,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var ts = tillArr.length;
 
-    console.log("fetching " + ts + " tillages");
+    logger(MSG.INFO, 'fetching ' + ts + ' tillages');
 
     for (var t = 0; t < ts; ++t) {
 
@@ -14678,7 +14745,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       /* ignore if any value is null */
       if (tillObj.date === null || tillObj.depth === null || tillObj.method === null) {
-        console.log("tillage parameters null: tillage ignored");
+        logger(MSG.WARN, 'at least one tillage parameter null: tillage ' + t + ' ignored');
         continue;
       }
 
@@ -14688,10 +14755,13 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!tDate.isValid()) {
         ok = false;
-        console.log("Invalid tillage date " + method);
+        logger(MSG.ERROR, 'invalid tillage date in tillage no. ' + t);
       }
 
       pp.addApplication(new TillageApplication(tDate, depth));
+
+      logger(MSG.INFO, 'fetched tillage ' + t);
+
     }
 
     return ok;
@@ -14705,8 +14775,8 @@ var Configuration = function (outPath, climate, doDebug) {
 
     if (!fDateate.isValid())
     {
-      debug() << "Error - Invalid date in \"" << pathToFile << "\"" << endl;
-      debug() << "Line: " << s << endl;
+      debug() << 'Error - Invalid date in \'' << pathToFile << '\'' << endl;
+      debug() << 'Line: ' << s << endl;
       ok = false;
     }
 
@@ -14722,15 +14792,15 @@ var Configuration = function (outPath, climate, doDebug) {
 
       currentEnd = it->end();
 
-      //cout << "new PP start: " << it->start().toString()
-      //<< " new PP end: " << it->end().toString() << endl;
-      //cout << "new currentEnd: " << currentEnd.toString() << endl;
+      //cout << 'new PP start: ' << it->start().toString()
+      //<< ' new PP end: ' << it->end().toString() << endl;
+      //cout << 'new currentEnd: ' << currentEnd.toString() << endl;
     }
     */
     var ok = true;
     var fs = fertArr.length;
 
-    console.log("fetching " + fs + " fertilizers");
+    logger(MSG.INFO, 'fetching ' + fs + ' ' + (isOrganic ? 'organic' : 'mineral') + ' fertilisers');
 
     for (var f = 0; f < fs; ++f) {
       
@@ -14738,7 +14808,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       /* ignore if any value is null */
       if (fertObj.date === null || fertObj.method === null || fertObj.type === null || fertObj.amount === null) {
-        console.log("fertiliser parameters null: fertiliser ignored");
+        logger(MSG.WARN, 'at least one fertiliser parameter null: ' + (isOrganic ? 'organic' : 'mineral') + ' fertiliser ' + f + 'ignored');
         continue;
       }
 
@@ -14749,7 +14819,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!fDate.isValid()) {
         ok = false;
-        console.log("Invalid fertilization date " + type + ", " + method);
+        logger(MSG.ERROR, 'invalid fertilization date in ' + f);
       }
 
       if (isOrganic)  {
@@ -14762,13 +14832,11 @@ var Configuration = function (outPath, climate, doDebug) {
           WHERE om_type='" + type + "'"
         );
 
-        var columns = res[0].columns;
-        var row = res[0].values[0]; /* only one row */   
-
-        orgId = row[0]; 
+        if (res.length > 0)
+          orgId = res[0].values[0][0]; 
     
         if (orgId < 0) {
-          console.log("Error: " + type + " not found.");
+          logger(MSG.ERROR, 'organic fertilser ' + type + ' not found');
           ok = false;
         }
 
@@ -14783,20 +14851,20 @@ var Configuration = function (outPath, climate, doDebug) {
           FROM mineral_fertilisers \
           WHERE name='" + type + "'"
         );
-
-        var columns = res[0].columns;
-        var row = res[0].values[0]; /* only one row */   
-
-        minId = row[0];
+ 
+        if (res.length > 0)
+          minId = res[0].values[0][0]; 
         
         if (minId < 0) {
-          console.log("Error: " + type + " not found.");
+          logger(MSG.ERROR, 'mineral fertilser ' + type + ' not found');
           ok = false;
         }
         
         pp.addApplication(new MineralFertiliserApplication(fDate, getMineralFertiliserParameters(minId), amount));
       
       }
+
+      logger(MSG.INFO, 'fetched ' + (isOrganic ? 'organic' : 'mineral') + ' fertiliser ' + f);
 
     }
      
@@ -14814,16 +14882,16 @@ var Configuration = function (outPath, climate, doDebug) {
     /*Date idate = parseDate(irrDate).toDate(it->crop()->seedDate().useLeapYears());
     if (!idate.isValid())
     {
-      debug() << "Error - Invalid date in \"" << pathToFile << "\"" << endl;
-      debug() << "Line: " << s << endl;
-      debug() << "Aborting simulation now!" << endl;
+      debug() << 'Error - Invalid date in \'' << pathToFile << '\'' << endl;
+      debug() << 'Line: ' << s << endl;
+      debug() << 'Aborting simulation now!' << endl;
       exit(-1);
     }
 
-    //cout << "PP start: " << it->start().toString()
-    //<< " PP end: " << it->end().toString() << endl;
-    //cout << "irrigationDate: " << idate.toString()
-    //<< " currentEnd: " << currentEnd.toString() << endl;
+    //cout << 'PP start: ' << it->start().toString()
+    //<< ' PP end: ' << it->end().toString() << endl;
+    //cout << 'irrigationDate: ' << idate.toString()
+    //<< ' currentEnd: ' << currentEnd.toString() << endl;
 
     //if the currently read irrigation date is after the current end
     //of the crop, move as long through the crop rotation as
@@ -14837,14 +14905,14 @@ var Configuration = function (outPath, climate, doDebug) {
 
       currentEnd = it->end();
 
-      //cout << "new PP start: " << it->start().toString()
-      //<< " new PP end: " << it->end().toString() << endl;
-      //cout << "new currentEnd: " << currentEnd.toString() << endl;
+      //cout << 'new PP start: ' << it->start().toString()
+      //<< ' new PP end: ' << it->end().toString() << endl;
+      //cout << 'new currentEnd: ' << currentEnd.toString() << endl;
     }*/
 
     var is = irriArr.length;
     
-    console.log("fetching " + is + " irrigations");
+    logger(MSG.INFO, 'fetching ' + is + ' irrigations');
 
     for (var i = 0; i < is; ++i) {
       
@@ -14853,7 +14921,7 @@ var Configuration = function (outPath, climate, doDebug) {
       /* ignore if any value is null */
       if (irriObj.date === null || irriObj.method  === null || irriObj.eventType  === null || irriObj.threshold  === null
           || irriObj.amount === null || irriObj.NConc === null) {
-        console.log("irrigation parameters null: irrigation ignored");
+        logger(MSG.WARN, 'at least one irrigation parameter null: irrigation ' + i + ' ignored');
         continue;
       }
 
@@ -14867,10 +14935,13 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!iDate.isValid()) {
         ok = false;
-        console.log("Invalid irrigation date " + method + ", " + eventType);
+        logger(MSG.ERROR, 'invalid irrigation date in ' + i);
       }
 
       pp.addApplication(new IrrigationApplication(iDate, amount, new IrrigationParameters(NConc, 0.0)));
+
+      logger(MSG.INFO, 'fetched irrigation ' + i);
+
     }
 
     return ok;
@@ -14885,7 +14956,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var cs = cutArr.length;
 
-    console.log("fetching " + cs + " cuttings");
+    logger(MSG.INFO, 'fetching ' + cs + ' cuttings');
 
     for (var c = 0; c < cs; ++c) {
       var cutObj = cutArr[c];
@@ -14935,25 +15006,25 @@ var Configuration = function (outPath, climate, doDebug) {
     // var date = new Date(da.startDate().getFullYear(), 0, 1);
 
     // var idx_t_av = data.met.columns.indexOf('t_av');
-    // var idx_t_min = data.met.columns.indexOf("t_min");
-    // var idx_t_max = data.met.columns.indexOf("t_max");
-    // var idx_t_s10 = data.met.columns.indexOf("t_s10");
-    // var idx_t_s20 = data.met.columns.indexOf("t_s20");
-    // var idx_vappd = data.met.columns.indexOf("vappd");
-    // var idx_wind = data.met.columns.indexOf("wind");
-    // var idx_sundu = data.met.columns.indexOf("sundu");
-    // var idx_radia = data.met.columns.indexOf("radia");
-    // var idx_prec = data.met.columns.indexOf("prec");
-    // var idx_day = data.met.columns.indexOf("day");
-    // var idx_year = data.met.columns.indexOf("year");
-    // var idx_rf = data.met.columns.indexOf("rf");
+    // var idx_t_min = data.met.columns.indexOf('t_min');
+    // var idx_t_max = data.met.columns.indexOf('t_max');
+    // var idx_t_s10 = data.met.columns.indexOf('t_s10');
+    // var idx_t_s20 = data.met.columns.indexOf('t_s20');
+    // var idx_vappd = data.met.columns.indexOf('vappd');
+    // var idx_wind = data.met.columns.indexOf('wind');
+    // var idx_sundu = data.met.columns.indexOf('sundu');
+    // var idx_radia = data.met.columns.indexOf('radia');
+    // var idx_prec = data.met.columns.indexOf('prec');
+    // var idx_day = data.met.columns.indexOf('day');
+    // var idx_year = data.met.columns.indexOf('year');
+    // var idx_rf = data.met.columns.indexOf('rf');
 
     // for (var y = da.startDate().getFullYear(), ys = da.endDate().getFullYear(); y <= ys; y++) {
 
     //   var daysCount = 0;
     //   var allowedDays = ceil((new Date(y + 1, 0, 1) - new Date(y, 0, 1)) / (24 * 60 * 60 * 1000));
 
-    //   console.log("allowedDays: " + allowedDays + " " + y+ "\t" + useLeapYears + "\tlatitude:\t" + latitude);
+    //   console.log('allowedDays: ' + allowedDays + ' ' + y+ '\t' + useLeapYears + '\tlatitude:\t' + latitude);
 
     //   for (var r = 0, rs = data.met.rows.length; r < rs; r++) {
 
@@ -14970,12 +15041,12 @@ var Configuration = function (outPath, climate, doDebug) {
     //     } else if (row[idx_sundu] >= 0.0) {
     //       // invalid globrad use sunhours
     //       // convert sunhours into globrad
-    //       // debug() << "Invalid globrad - use sunhours instead" << endl;
+    //       // debug() << 'Invalid globrad - use sunhours instead' << endl;
     //       globrad.push(Tools.sunshine2globalRadiation(r + 1, sunhours, latitude, true));    
     //       sunhours.push(row[idx_sundu]);
     //     } else {
     //       // error case
-    //       console.log("Error: No global radiation or sunhours specified for day " + date);
+    //       console.log('Error: No global radiation or sunhours specified for day ' + date);
     //       ok = false;
     //     }
 
@@ -15015,7 +15086,7 @@ var Configuration = function (outPath, climate, doDebug) {
     if (ENVIRONMENT_IS_WORKER)
       postMessage({ progress: progress });
     else
-      console.log(progress);
+      logger(MSG.INFO, progress.date);
   
   };  
 
@@ -15026,10 +15097,6 @@ var Configuration = function (outPath, climate, doDebug) {
 
 };
 
-
-var ENVIRONMENT_IS_NODE = typeof process === 'object' && typeof require === 'function';
-var ENVIRONMENT_IS_WEB = typeof window === 'object';
-var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
 
 if (ENVIRONMENT_IS_NODE) {
 
@@ -15048,7 +15115,7 @@ if (ENVIRONMENT_IS_NODE) {
   var req = new XMLHttpRequest();
   req.open('GET', './monica.sqlite', true);
   req.responseType = "arraybuffer";
-  req.onload = function (oEvent) {
+  req.onload = function (evt) {
     var arrayBuffer = req.response;
     if (arrayBuffer) {
       var byteArray = new Uint8Array(arrayBuffer);
@@ -15081,7 +15148,7 @@ if (ENVIRONMENT_IS_NODE) {
   var req = new XMLHttpRequest();
   req.open('GET', './monica.sqlite', true);
   req.responseType = "arraybuffer";
-  req.onload = function (oEvent) {
+  req.onload = function (evt) {
     var arrayBuffer = req.response;
     if (arrayBuffer) {
       var byteArray = new Uint8Array(arrayBuffer);

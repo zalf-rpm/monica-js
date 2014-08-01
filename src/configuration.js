@@ -8,7 +8,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
   var run = function run(simObj, siteObj, cropObj) {
 
-    log({ info: 'fetching parameters from database' });
+    logger(MSG.INFO, 'fetching parameters from database');
     
     var sp = new SiteParameters();
     var cpp = readUserParameterFromDatabase();
@@ -36,7 +36,7 @@ var Configuration = function (outPath, climate, doDebug) {
     cpp.userInitValues.p_initSoilNitrate = simObj.init.soilNitrate;
     cpp.userInitValues.p_initSoilAmmonium = simObj.init.soilAmmonium;
 
-    log({ info: 'fetched sim data' });
+    logger(MSG.INFO, 'fetched sim data');
     
     /* site */
     sp.vq_NDeposition = siteObj.NDeposition;
@@ -60,7 +60,7 @@ var Configuration = function (outPath, climate, doDebug) {
     // TODO: maxMineralisationDepth? (gp ps_MaxMineralisationDepth und ps_MaximumMineralisationDepth?)
     gp.ps_MaxMineralisationDepth = 0.4;
 
-    log({ info: 'fetched site data' });
+    logger(MSG.INFO, 'fetched site data');
 
     /* soil */
     var lThicknessCm = 100.0 * cpp.userEnvironmentParameters.p_LayerThickness;
@@ -69,29 +69,29 @@ var Configuration = function (outPath, climate, doDebug) {
 
     var layers = [];
     if (!createLayers(layers, horizonsArr, lThicknessCm, maxNoOfLayers)) {
-      log({ error: 'error fetching soil data' });
+      logger(MSG.ERROR, 'error fetching soil data');
       return;
     }
     
-    log({ info: 'fetched soil data' });
+    logger(MSG.INFO, 'fetched soil data');
 
     /* weather */
     var da = new DataAccessor(new Date(startYear, 0, 1), new Date(endYear, 11, 31));
     if (!createClimate(da, cpp, sp.vs_Latitude)) {
-      log({ error: 'error fetching climate data' });
+      logger(MSG.ERROR, 'error fetching climate data');
       return;
     }
     
-    log({ info: 'fetched climate data' });
+    logger(MSG.INFO, 'fetched climate data');
 
     /* crops */
     var pps = [];
     if (!createProcesses(pps, cropsArr)) {
-      log({ error: 'error fetching crop data' });
+      logger(MSG.ERROR, 'error fetching crop data');
       return;
     }
     
-    log({ info: 'fetched crop data' });
+    logger(MSG.INFO, 'fetched crop data');
 
     var env = new Environment(layers, cpp);
     env.general = gp;
@@ -113,7 +113,7 @@ var Configuration = function (outPath, climate, doDebug) {
     //   env.nMinFertiliserPartition = getMineralFertiliserParametersFromMonicaDB(hermes_config->getMineralFertiliserID());
     // }
 
-    log({ info: 'start monica model' });
+    logger(MSG.INFO, 'start monica model');
 
     return runMonica(env, setProgress);
   };
@@ -124,7 +124,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var hs = horizonsArr.length;
     
-    log({ info: 'fetching ' + hs + ' horizons' });
+    logger(MSG.INFO, 'fetching ' + hs + ' horizons');
 
     for (var h = 0; h < hs; ++h ) {
       
@@ -163,15 +163,15 @@ var Configuration = function (outPath, climate, doDebug) {
         /* TODO: hinter readJSON verschieben */ 
         if (!layer.isValid()) {
           ok = false;
-          log({ error: 'error in soil parameters' });
+          logger(MSG.ERROR, 'error in soil parameters');
         }
 
         layers.push(layer);
-        log({ info: 'fetched layer ' + layers.length + ' in horizon ' + h });
+        logger(MSG.INFO, 'fetched layer ' + layers.length + ' in horizon ' + h);
 
       }
 
-      log({ info: 'fetched horizon ' + h });
+      logger(MSG.INFO, 'fetched horizon ' + h);
     }  
 
     return ok;
@@ -182,7 +182,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var cs = cropsArr.length;
     
-    log({ info: 'fetching ' + cs + ' crops' });
+    logger(MSG.INFO, 'fetching ' + cs + ' crops');
 
     for (var c = 0; c < cs; c++) {
 
@@ -202,7 +202,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (cropId < 0 || isNaN(cropId)) {
         ok = false;
-        log({ error: 'invalid crop id: ' + nameAndGenType });
+        logger(MSG.ERROR, 'invalid crop id: ' + nameAndGenType);
       }
 
       var sd = new Date(Date.parse(cropObj.sowingDate));
@@ -214,7 +214,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!sd.isValid() || !hd.isValid()) {
         ok = false;
-        log({ error: 'invalid sowing or harvest date' });
+        logger(MSG.ERROR, 'invalid sowing or harvest date');
       }
 
       var crop = new Crop(cropId, nameAndGenType /*TODO: hermesCropId?*/);
@@ -229,7 +229,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (tillArr) { /* in case no tillage has been added */
         if (!addTillageOperations(pps[c], tillArr)) {
           ok = false;
-          log({ error: 'error adding tillages' });
+          logger(MSG.ERROR, 'error adding tillages');
         }
       }
 
@@ -238,7 +238,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (minFertArr) { /* in case no min fertilizer has been added */
         if (!addFertilizers(pps[c], minFertArr, false)) {
           ok = false;
-          log({ error: 'error adding mineral fertilisers' });
+          logger(MSG.ERROR, 'error adding mineral fertilisers');
         }
       }
 
@@ -247,7 +247,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (orgFertArr) { /* in case no org fertilizer has been added */ 
         if (!addFertilizers(pps[c], orgFertArr, true)) {
           ok = false;
-          log({ error: 'error adding organic fertilisers' });
+          logger(MSG.ERROR, 'error adding organic fertilisers');
         }
       }
 
@@ -256,7 +256,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (irriArr) {  /* in case no irrigation has been added */
         if (!addIrrigations(pps[c], irriArr)) {
           ok = false;
-          log({ error: 'error adding irrigations' });
+          logger(MSG.ERROR, 'error adding irrigations');
         }
       }
 
@@ -265,11 +265,11 @@ var Configuration = function (outPath, climate, doDebug) {
       if (cutArr) { /* in case no tillage has been added */
         if (!addCuttings(pps[c], cutArr)) {
           ok = false;
-          log({ error: 'error adding cuttings' });
+          logger(MSG.ERROR, 'error adding cuttings');
         }
       }
 
-      log({ info: 'fetched crop ' + c + ', nameAndGenType: ' + nameAndGenType + ', id: ' + cropId });
+      logger(MSG.INFO, 'fetched crop ' + c + ', nameAndGenType: ' + nameAndGenType + ', id: ' + cropId);
 
     }
 
@@ -281,7 +281,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var ts = tillArr.length;
 
-    log({ info: 'fetching ' + ts + ' tillages' });
+    logger(MSG.INFO, 'fetching ' + ts + ' tillages');
 
     for (var t = 0; t < ts; ++t) {
 
@@ -289,7 +289,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       /* ignore if any value is null */
       if (tillObj.date === null || tillObj.depth === null || tillObj.method === null) {
-        log({ warn: 'at least one tillage parameter null: tillage ignored' });
+        logger(MSG.WARN, 'at least one tillage parameter null: tillage ' + t + ' ignored');
         continue;
       }
 
@@ -299,12 +299,12 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!tDate.isValid()) {
         ok = false;
-        log({ error: 'invalid tillage date in tillage no. ' + t });
+        logger(MSG.ERROR, 'invalid tillage date in tillage no. ' + t);
       }
 
       pp.addApplication(new TillageApplication(tDate, depth));
 
-      log({ info: 'fetched tillage ' + t });
+      logger(MSG.INFO, 'fetched tillage ' + t);
 
     }
 
@@ -344,7 +344,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var fs = fertArr.length;
 
-    log({ info: 'fetching ' + fs + ' ' + (isOrganic ? 'organic' : 'mineral') + ' fertilisers' });
+    logger(MSG.INFO, 'fetching ' + fs + ' ' + (isOrganic ? 'organic' : 'mineral') + ' fertilisers');
 
     for (var f = 0; f < fs; ++f) {
       
@@ -352,7 +352,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       /* ignore if any value is null */
       if (fertObj.date === null || fertObj.method === null || fertObj.type === null || fertObj.amount === null) {
-        log({ warn: 'at least one fertiliser parameter null: ' + (isOrganic ? 'organic' : 'mineral') + ' fertiliser ' + f + 'ignored' });
+        logger(MSG.WARN, 'at least one fertiliser parameter null: ' + (isOrganic ? 'organic' : 'mineral') + ' fertiliser ' + f + 'ignored');
         continue;
       }
 
@@ -363,7 +363,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!fDate.isValid()) {
         ok = false;
-        log({ error: 'invalid fertilization date in ' + f });
+        logger(MSG.ERROR, 'invalid fertilization date in ' + f);
       }
 
       if (isOrganic)  {
@@ -380,7 +380,7 @@ var Configuration = function (outPath, climate, doDebug) {
           orgId = res[0].values[0][0]; 
     
         if (orgId < 0) {
-          log({ error: 'organic fertilser ' + type + ' not found' });
+          logger(MSG.ERROR, 'organic fertilser ' + type + ' not found');
           ok = false;
         }
 
@@ -400,7 +400,7 @@ var Configuration = function (outPath, climate, doDebug) {
           minId = res[0].values[0][0]; 
         
         if (minId < 0) {
-          log({ error: 'mineral fertilser ' + type + ' not found' });
+          logger(MSG.ERROR, 'mineral fertilser ' + type + ' not found');
           ok = false;
         }
         
@@ -408,7 +408,7 @@ var Configuration = function (outPath, climate, doDebug) {
       
       }
 
-      log({ info: 'fetched ' + (isOrganic ? 'organic' : 'mineral') + ' fertiliser ' + f });
+      logger(MSG.INFO, 'fetched ' + (isOrganic ? 'organic' : 'mineral') + ' fertiliser ' + f);
 
     }
      
@@ -456,7 +456,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
     var is = irriArr.length;
     
-    log({ info: 'fetching ' + is + ' irrigations' });
+    logger(MSG.INFO, 'fetching ' + is + ' irrigations');
 
     for (var i = 0; i < is; ++i) {
       
@@ -465,7 +465,7 @@ var Configuration = function (outPath, climate, doDebug) {
       /* ignore if any value is null */
       if (irriObj.date === null || irriObj.method  === null || irriObj.eventType  === null || irriObj.threshold  === null
           || irriObj.amount === null || irriObj.NConc === null) {
-        log({ warn: 'at least one irrigation parameter null: irrigation ' + i + ' ignored' });
+        logger(MSG.WARN, 'at least one irrigation parameter null: irrigation ' + i + ' ignored');
         continue;
       }
 
@@ -479,12 +479,12 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!iDate.isValid()) {
         ok = false;
-        log({ error: 'invalid irrigation date in ' + i });
+        logger(MSG.ERROR, 'invalid irrigation date in ' + i);
       }
 
       pp.addApplication(new IrrigationApplication(iDate, amount, new IrrigationParameters(NConc, 0.0)));
 
-      log({ info: 'fetched irrigation ' + i });
+      logger(MSG.INFO, 'fetched irrigation ' + i);
 
     }
 
@@ -500,7 +500,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var cs = cutArr.length;
 
-    log({ info: 'fetching ' + cs + ' cuttings' });
+    logger(MSG.INFO, 'fetching ' + cs + ' cuttings');
 
     for (var c = 0; c < cs; ++c) {
       var cutObj = cutArr[c];
@@ -630,7 +630,7 @@ var Configuration = function (outPath, climate, doDebug) {
     if (ENVIRONMENT_IS_WORKER)
       postMessage({ progress: progress });
     else
-      log({ info: progress.date });
+      logger(MSG.INFO, progress.date);
   
   };  
 
