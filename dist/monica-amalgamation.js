@@ -7871,6 +7871,10 @@ var runMonica = function (env, progress_callback) {
   }
 
   logger(MSG.INFO, "returning from runMonica");
+  
+  /* if progress_callback is provided send null i.e. we are done*/
+  if (progress_callback)
+    progress_callback(null);  
 
   return res;
 };
