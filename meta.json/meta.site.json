@@ -113,14 +113,14 @@
         "unit": "m3 m-3",
         "min": 0.0,
         "max": 1.0,
-        "default": 0.6
+        "default": null
       },
       "clay": {
         "desc": "Volume fraction of fine soil (< 2.0 mm particle diameter) occupied by clay (< 2.0 μm particle diameter)",
         "unit": "m3 m-3",
         "min": 0.0,
         "max": 1.0,
-        "default": 0.2
+        "default": null
       },
       "sceleton": {
         "desc": "Volume fraction of total soil matrix occupied by stones (> 2.0 mm particle diameter)",

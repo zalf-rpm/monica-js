@@ -1,19 +1,23 @@
 {
   "crops": [
     {
-      "nameAndGenType": "winter rye",
+      "name": {
+        "id": 3,
+        "name": "winter rye",
+        "gen_type": ""
+      },
       "sowingDate": "1991-10-01",
-      "rowWidth": 5.0,
-      "plantSpace": 5.0,
-      "plantDryWeight": 225.0,
-      "percNTRansplant": 0.0,
+      "rowWidth": 5,
+      "plantSpace": 5,
+      "plantDryWeight": 225,
+      "percNTRansplant": 0.07,
       "finalHarvestDate": "1992-08-01",
-      "residuesRemoval": 85.0,
-      "tillageOps": [
+      "residuesRemoval": 85,
+      "tillageOperations": [
         {
-          "date": "1991-09-15",
+          "date": "1991-09-01",
           "method": "Plough",
-          "depth": 15.0
+          "depth": 30
         }
       ],
       "irrigations": [
@@ -21,26 +25,32 @@
           "date": "1992-06-01",
           "method": "Sprinkler",
           "eventType": "Fixed",
-          "threshold": 30.0,
-          "area": 1.0,
-          "amount": 11.0,
-          "NConc": 0.0
-        }
-      ],
-      "mineralFertilisers": [
-        {
-          "date": "1992-04-01",
-          "method": "Fixed",
-          "type": "Ammonium Nitrate",
-          "amount": 40
+          "threshold": 0.2,
+          "area": 1,
+          "amount": 5,
+          "NConc": 0
         }
       ],
       "organicFertilisers": [
         {
           "date": "1992-05-01",
           "method": "Fixed",
-          "type": "cattle manure",
+          "type": {
+            "id": 3,
+            "om_type": "cattle slurry"
+          },
           "amount": 30
+        }
+      ],
+      "mineralFertilisers": [
+        {
+          "date": "1992-04-01",
+          "method": "Fixed",
+          "type": {
+            "id": 1,
+            "name": "Ammonium Nitrate"
+          },
+          "amount": 40
         }
       ]
     }

@@ -4,8 +4,8 @@ var monica = monica || {};
 var example_config = {
  "sim": {
   "time": {
-   "startYear": 1991,
-   "endYear": 1992
+   "startDate": "1991-01-01",
+   "endDate": "1992-12-31"
   },
   "switch": {
    "useSecondaryYieldOn": false,
@@ -21,20 +21,20 @@ var example_config = {
   }
  },
  "site": {
-  "latitude": 52.809399,
+  "latitude": 52.2,
   "slope": 0,
   "heightNN": 38,
   "atmosphericCO2": 380,
   "windSpeedHeight": 2.5,
   "leachingDepth": 1.5,
-  "NDeposition": 0,
-  "groundwaterDepthMin": null,
-  "groundwaterDepthMax": null,
-  "groundwaterDepthMinMonth": null,
+  "NDeposition": 20,
+  "groundwaterDepthMin": 5,
+  "groundwaterDepthMax": 5,
+  "groundwaterDepthMinMonth": "April",
   "horizons": [
    {
-    "thickness": 0.3,
-    "Corg": 0.8,
+    "thickness": 0.2,
+    "Corg": 0.05,
     "textureClass": "Ls2",
     "sand": 0.15,
     "clay": 0.24,
@@ -47,8 +47,8 @@ var example_config = {
     "bulkDensity": 1400
    },
    {
-    "thickness": 0.1,
-    "Corg": 0.15,
+    "thickness": 0.5,
+    "Corg": 0.05,
     "textureClass": "Ls2",
     "sand": 0.15,
     "clay": 0.24,
@@ -61,7 +61,7 @@ var example_config = {
     "bulkDensity": 1400
    },
    {
-    "thickness": 1.6,
+    "thickness": 2,
     "Corg": 0.05,
     "textureClass": "Ls2",
     "sand": 0.15,
@@ -79,19 +79,23 @@ var example_config = {
  "crop": {
   "crops": [
    {
-    "nameAndGenType": "winter rye",
+    "name": {
+     "id": 3,
+     "name": "winter rye",
+     "gen_type": ""
+    },
     "sowingDate": "1991-10-01",
     "rowWidth": 5,
     "plantSpace": 5,
     "plantDryWeight": 225,
-    "percNTRansplant": 0,
+    "percNTRansplant": 0.07,
     "finalHarvestDate": "1992-08-01",
     "residuesRemoval": 85,
-    "tillageOps": [
+    "tillageOperations": [
      {
-      "date": "1991-09-15",
+      "date": "1991-09-01",
       "method": "Plough",
-      "depth": 15
+      "depth": 30
      }
     ],
     "irrigations": [
@@ -99,26 +103,32 @@ var example_config = {
       "date": "1992-06-01",
       "method": "Sprinkler",
       "eventType": "Fixed",
-      "threshold": 30,
+      "threshold": 0.2,
       "area": 1,
-      "amount": 11,
+      "amount": 5,
       "NConc": 0
-     }
-    ],
-    "mineralFertilisers": [
-     {
-      "date": "1992-04-01",
-      "method": "Fixed",
-      "type": "Ammonium Nitrate",
-      "amount": 40
      }
     ],
     "organicFertilisers": [
      {
       "date": "1992-05-01",
       "method": "Fixed",
-      "type": "cattle manure",
+      "type": {
+       "id": 3,
+       "om_type": "cattle slurry"
+      },
       "amount": 30
+     }
+    ],
+    "mineralFertilisers": [
+     {
+      "date": "1992-04-01",
+      "method": "Fixed",
+      "type": {
+       "id": 1,
+       "name": "Ammonium Nitrate"
+      },
+      "amount": 40
      }
     ]
    }
@@ -14468,7 +14478,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
   var run = function run(simObj, siteObj, cropObj) {
 
-    logger(MSG.INFO, 'fetching parameters from database');
+    logger(MSG.INFO, 'Fetching parameters from database.');
     
     var sp = new SiteParameters();
     var cpp = readUserParameterFromDatabase();
@@ -14496,7 +14506,7 @@ var Configuration = function (outPath, climate, doDebug) {
     cpp.userInitValues.p_initSoilNitrate = simObj.init.soilNitrate;
     cpp.userInitValues.p_initSoilAmmonium = simObj.init.soilAmmonium;
 
-    logger(MSG.INFO, 'fetched sim data');
+    logger(MSG.INFO, 'Fetched sim data.');
     
     /* site */
     sp.vq_NDeposition = siteObj.NDeposition;
@@ -14520,7 +14530,7 @@ var Configuration = function (outPath, climate, doDebug) {
     // TODO: maxMineralisationDepth? (gp ps_MaxMineralisationDepth und ps_MaximumMineralisationDepth?)
     gp.ps_MaxMineralisationDepth = 0.4;
 
-    logger(MSG.INFO, 'fetched site data');
+    logger(MSG.INFO, 'Fetched site data.');
 
     /* soil */
     var lThicknessCm = 100.0 * cpp.userEnvironmentParameters.p_LayerThickness;
@@ -14529,29 +14539,29 @@ var Configuration = function (outPath, climate, doDebug) {
 
     var layers = [];
     if (!createLayers(layers, horizonsArr, lThicknessCm, maxNoOfLayers)) {
-      logger(MSG.ERROR, 'error fetching soil data');
+      logger(MSG.ERROR, 'Error fetching soil data.');
       return;
     }
     
-    logger(MSG.INFO, 'fetched soil data');
+    logger(MSG.INFO, 'Fetched soil data.');
 
     /* weather */
     var da = new DataAccessor(new Date(startYear, 0, 1), new Date(endYear, 11, 31));
     if (!createClimate(da, cpp, sp.vs_Latitude)) {
-      logger(MSG.ERROR, 'error fetching climate data');
+      logger(MSG.ERROR, 'Error fetching climate data.');
       return;
     }
     
-    logger(MSG.INFO, 'fetched climate data');
+    logger(MSG.INFO, 'Fetched climate data.');
 
     /* crops */
     var pps = [];
     if (!createProcesses(pps, cropsArr)) {
-      logger(MSG.ERROR, 'error fetching crop data');
+      logger(MSG.ERROR, 'Error fetching crop data.');
       return;
     }
     
-    logger(MSG.INFO, 'fetched crop data');
+    logger(MSG.INFO, 'Fetched crop data.');
 
     var env = new Environment(layers, cpp);
     env.general = gp;
@@ -14573,7 +14583,7 @@ var Configuration = function (outPath, climate, doDebug) {
     //   env.nMinFertiliserPartition = getMineralFertiliserParametersFromMonicaDB(hermes_config->getMineralFertiliserID());
     // }
 
-    logger(MSG.INFO, 'start monica model');
+    logger(MSG.INFO, 'Start monica model.');
 
     return runMonica(env, setProgress);
   };
@@ -14583,10 +14593,15 @@ var Configuration = function (outPath, climate, doDebug) {
 
     var ok = true;
     var hs = horizonsArr.length;
+    var depth = 0;
     
-    logger(MSG.INFO, 'fetching ' + hs + ' horizons');
+    logger(MSG.INFO, 'Fetching ' + hs + ' horizons.');
 
     for (var h = 0; h < hs; ++h ) {
+
+      debug('lThicknessCm', lThicknessCm);
+      debug('maxNoOfLayers', maxNoOfLayers);
+      debug('depth', depth);
       
       var horizonObj = horizonsArr[h];
 
@@ -14601,6 +14616,14 @@ var Configuration = function (outPath, climate, doDebug) {
         lInHCount += maxNoOfLayers - layers.length - lInHCount;
 
       for (var l = 0; l < lInHCount; l++) {
+
+        /* stop if we reach max. depth */
+        if (depth === maxNoOfLayers * lThicknessCm) {
+          logger(MSG.WARN, 'Maximum soil layer depth (' + (maxNoOfLayers * lThicknessCm) + ' cm) reached. Remaining layers in horizon ' + h + ' ignored.');
+          break;
+        }
+
+        depth += lThicknessCm;
 
         var layer = new SoilParameters();
         layer.set_vs_SoilOrganicCarbon(horizonObj.Corg); //TODO: / 100 ?
@@ -14623,15 +14646,15 @@ var Configuration = function (outPath, climate, doDebug) {
         /* TODO: hinter readJSON verschieben */ 
         if (!layer.isValid()) {
           ok = false;
-          logger(MSG.ERROR, 'error in soil parameters');
+          logger(MSG.ERROR, 'Error in soil parameters.');
         }
 
         layers.push(layer);
-        logger(MSG.INFO, 'fetched layer ' + layers.length + ' in horizon ' + h);
+        logger(MSG.INFO, 'Fetched layer ' + layers.length + ' in horizon ' + h + '.');
 
       }
 
-      logger(MSG.INFO, 'fetched horizon ' + h);
+      logger(MSG.INFO, 'Fetched horizon ' + h + '.');
     }  
 
     return ok;
@@ -14642,54 +14665,53 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var cs = cropsArr.length;
     
-    logger(MSG.INFO, 'fetching ' + cs + ' crops');
+    logger(MSG.INFO, 'Fetching ' + cs + ' crops.');
 
     for (var c = 0; c < cs; c++) {
 
       var cropObj = cropsArr[c];
-      var cropId = -1;
+      var cropId = cropObj.name.id;
 
-      var nameAndGenType = cropObj.nameAndGenType;
+      // var nameAndGenType = cropObj.nameAndGenType;
 
-      var res = db.exec(
-       "SELECT crop_id \
-        FROM view_crop \
-        WHERE name_and_gentype='" + nameAndGenType + "'"
-      );
+      // var res = db.exec(
+      //  "SELECT crop_id \
+      //   FROM view_crop \
+      //   WHERE name_and_gentype='" + nameAndGenType + "'"
+      // );
 
-      if (res.length > 0)
-        cropId = res[0].values[0][0];
+      // if (res.length > 0)
+      //   cropId = res[0].values[0][0];
 
-      if (cropId < 0 || isNaN(cropId)) {
+      if (!cropId || cropId < 0 || isNaN(cropId)) {
         ok = false;
-        logger(MSG.ERROR, 'invalid crop id: ' + nameAndGenType);
+        logger(MSG.ERROR, 'Invalid crop id: ' + cropId + '.');
       }
 
       var sd = new Date(Date.parse(cropObj.sowingDate));
       var hd = new Date(Date.parse(cropObj.finalHarvestDate));
 
-      debug(nameAndGenType, 'nameAndGenType');
       debug(sd, 'sd');
       debug(hd, 'hd');
 
       if (!sd.isValid() || !hd.isValid()) {
         ok = false;
-        logger(MSG.ERROR, 'invalid sowing or harvest date');
+        logger(MSG.ERROR, 'Invalid sowing or harvest date.');
       }
 
-      var crop = new Crop(cropId, nameAndGenType /*TODO: hermesCropId?*/);
+      var crop = new Crop(cropId, cropObj.name.name + ', ' + cropObj.name.gen_type /*TODO: hermesCropId?*/);
       crop.setSeedAndHarvestDate(sd, hd);
       crop.setCropParameters(getCropParameters(crop.id()));
       crop.setResidueParameters(getResidueParameters(crop.id()));
 
-      pps[c] = new ProductionProcess(nameAndGenType, crop);
+      pps[c] = new ProductionProcess(cropObj.name.name + ', ' + cropObj.name.gen_type, crop);
 
       /* tillage */
       var tillArr = cropObj.tillageOperations;
       if (tillArr) { /* in case no tillage has been added */
         if (!addTillageOperations(pps[c], tillArr)) {
           ok = false;
-          logger(MSG.ERROR, 'error adding tillages');
+          logger(MSG.ERROR, 'Error adding tillages.');
         }
       }
 
@@ -14698,7 +14720,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (minFertArr) { /* in case no min fertilizer has been added */
         if (!addFertilizers(pps[c], minFertArr, false)) {
           ok = false;
-          logger(MSG.ERROR, 'error adding mineral fertilisers');
+          logger(MSG.ERROR, 'Error adding mineral fertilisers.');
         }
       }
 
@@ -14707,7 +14729,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (orgFertArr) { /* in case no org fertilizer has been added */ 
         if (!addFertilizers(pps[c], orgFertArr, true)) {
           ok = false;
-          logger(MSG.ERROR, 'error adding organic fertilisers');
+          logger(MSG.ERROR, 'Error adding organic fertilisers.');
         }
       }
 
@@ -14716,7 +14738,7 @@ var Configuration = function (outPath, climate, doDebug) {
       if (irriArr) {  /* in case no irrigation has been added */
         if (!addIrrigations(pps[c], irriArr)) {
           ok = false;
-          logger(MSG.ERROR, 'error adding irrigations');
+          logger(MSG.ERROR, 'Error adding irrigations.');
         }
       }
 
@@ -14725,11 +14747,11 @@ var Configuration = function (outPath, climate, doDebug) {
       if (cutArr) { /* in case no tillage has been added */
         if (!addCuttings(pps[c], cutArr)) {
           ok = false;
-          logger(MSG.ERROR, 'error adding cuttings');
+          logger(MSG.ERROR, 'Error adding cuttings.');
         }
       }
 
-      logger(MSG.INFO, 'fetched crop ' + c + ', nameAndGenType: ' + nameAndGenType + ', id: ' + cropId);
+      logger(MSG.INFO, 'Fetched crop ' + c + ', name: ' + cropObj.name.name + ', id: ' + cropId + '.');
 
     }
 
@@ -14741,7 +14763,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var ts = tillArr.length;
 
-    logger(MSG.INFO, 'fetching ' + ts + ' tillages');
+    logger(MSG.INFO, 'Fetching ' + ts + ' tillages.');
 
     for (var t = 0; t < ts; ++t) {
 
@@ -14749,7 +14771,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       /* ignore if any value is null */
       if (tillObj.date === null || tillObj.depth === null || tillObj.method === null) {
-        logger(MSG.WARN, 'at least one tillage parameter null: tillage ' + t + ' ignored');
+        logger(MSG.WARN, 'At least one tillage parameter null: tillage ' + t + ' ignored.');
         continue;
       }
 
@@ -14759,12 +14781,12 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!tDate.isValid()) {
         ok = false;
-        logger(MSG.ERROR, 'invalid tillage date in tillage no. ' + t);
+        logger(MSG.ERROR, 'Invalid tillage date in tillage no. ' + t + '.');
       }
 
       pp.addApplication(new TillageApplication(tDate, depth));
 
-      logger(MSG.INFO, 'fetched tillage ' + t);
+      logger(MSG.INFO, 'Fetched tillage ' + t + '.');
 
     }
 
@@ -14804,7 +14826,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var fs = fertArr.length;
 
-    logger(MSG.INFO, 'fetching ' + fs + ' ' + (isOrganic ? 'organic' : 'mineral') + ' fertilisers');
+    logger(MSG.INFO, 'Fetching ' + fs + ' ' + (isOrganic ? 'organic' : 'mineral') + ' fertilisers.');
 
     for (var f = 0; f < fs; ++f) {
       
@@ -14812,7 +14834,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
       /* ignore if any value is null */
       if (fertObj.date === null || fertObj.method === null || fertObj.type === null || fertObj.amount === null) {
-        logger(MSG.WARN, 'at least one fertiliser parameter null: ' + (isOrganic ? 'organic' : 'mineral') + ' fertiliser ' + f + 'ignored');
+        logger(MSG.WARN, 'At least one fertiliser parameter null: ' + (isOrganic ? 'organic' : 'mineral') + ' fertiliser ' + f + 'ignored.');
         continue;
       }
 
@@ -14823,24 +14845,24 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!fDate.isValid()) {
         ok = false;
-        logger(MSG.ERROR, 'invalid fertilization date in ' + f);
+        logger(MSG.ERROR, 'Invalid fertilization date in ' + f + '.');
       }
 
       if (isOrganic)  {
 
-        var orgId = -1;
+        var orgId = type.id;
 
-        var res = db.exec(
-         "SELECT id \
-          FROM organic_fertiliser \
-          WHERE om_type='" + type + "'"
-        );
+        // var res = db.exec(
+        //  "SELECT id \
+        //   FROM organic_fertiliser \
+        //   WHERE om_type='" + type + "'"
+        // );
 
-        if (res.length > 0)
-          orgId = res[0].values[0][0]; 
+        // if (res.length > 0)
+        //   orgId = res[0].values[0][0]; 
     
         if (orgId < 0) {
-          logger(MSG.ERROR, 'organic fertilser ' + type + ' not found');
+          logger(MSG.ERROR, 'Organic fertilser ' + type.id + ' not found.');
           ok = false;
         }
 
@@ -14848,19 +14870,19 @@ var Configuration = function (outPath, climate, doDebug) {
       
       } else { // not organic
 
-        var minId = -1;
+        var minId = type.id;
 
-        var res = db.exec(
-         "SELECT id \
-          FROM mineral_fertilisers \
-          WHERE name='" + type + "'"
-        );
+        // var res = db.exec(
+        //  "SELECT id \
+        //   FROM mineral_fertilisers \
+        //   WHERE name='" + type + "'"
+        // );
  
-        if (res.length > 0)
-          minId = res[0].values[0][0]; 
+        // if (res.length > 0)
+        //   minId = res[0].values[0][0]; 
         
         if (minId < 0) {
-          logger(MSG.ERROR, 'mineral fertilser ' + type + ' not found');
+          logger(MSG.ERROR, 'Mineral fertilser ' + type.id + ' not found.');
           ok = false;
         }
         
@@ -14868,7 +14890,7 @@ var Configuration = function (outPath, climate, doDebug) {
       
       }
 
-      logger(MSG.INFO, 'fetched ' + (isOrganic ? 'organic' : 'mineral') + ' fertiliser ' + f);
+      logger(MSG.INFO, 'Fetched ' + (isOrganic ? 'organic' : 'mineral') + ' fertiliser ' + f + '.');
 
     }
      
@@ -14916,7 +14938,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
     var is = irriArr.length;
     
-    logger(MSG.INFO, 'fetching ' + is + ' irrigations');
+    logger(MSG.INFO, 'Fetching ' + is + ' irrigations.');
 
     for (var i = 0; i < is; ++i) {
       
@@ -14925,7 +14947,7 @@ var Configuration = function (outPath, climate, doDebug) {
       /* ignore if any value is null */
       if (irriObj.date === null || irriObj.method  === null || irriObj.eventType  === null || irriObj.threshold  === null
           || irriObj.amount === null || irriObj.NConc === null) {
-        logger(MSG.WARN, 'at least one irrigation parameter null: irrigation ' + i + ' ignored');
+        logger(MSG.WARN, 'At least one irrigation parameter null: irrigation ' + i + ' ignored.');
         continue;
       }
 
@@ -14939,12 +14961,12 @@ var Configuration = function (outPath, climate, doDebug) {
 
       if (!iDate.isValid()) {
         ok = false;
-        logger(MSG.ERROR, 'invalid irrigation date in ' + i);
+        logger(MSG.ERROR, 'Invalid irrigation date in ' + i + '.');
       }
 
       pp.addApplication(new IrrigationApplication(iDate, amount, new IrrigationParameters(NConc, 0.0)));
 
-      logger(MSG.INFO, 'fetched irrigation ' + i);
+      logger(MSG.INFO, 'Fetched irrigation ' + i + '.');
 
     }
 
@@ -14960,7 +14982,7 @@ var Configuration = function (outPath, climate, doDebug) {
     var ok = true;
     var cs = cutArr.length;
 
-    logger(MSG.INFO, 'fetching ' + cs + ' cuttings');
+    logger(MSG.INFO, 'Fetching ' + cs + ' cuttings.');
 
     for (var c = 0; c < cs; ++c) {
       var cutObj = cutArr[c];
@@ -15090,7 +15112,7 @@ var Configuration = function (outPath, climate, doDebug) {
     if (ENVIRONMENT_IS_WORKER)
       postMessage({ progress: progress });
     else
-      logger(MSG.INFO, progress.date);
+      logger(MSG.INFO, pRogress.date);
   
   };  
 
