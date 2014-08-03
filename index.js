@@ -795,8 +795,6 @@ $(function () {
       $('#form-right').html('');
       
       if (data.node.data.meta.prop === 'weather') {
-
-        $('#form-right').html('<a href="weather/weather_example.csv">Download weather example file</a>');
         
         if (weather.data.tmin.length > 0) { /* todo: tmin ?*/
           var html = '';
@@ -1427,6 +1425,12 @@ $(function () {
     monicaWorker.postMessage({ run: config });
     $('#result-msg').html('');
     $('#result-modal').modal('show');
+
+  });
+
+  $('#question-btn').on('click', function () {
+
+    $('#question-modal').modal('show');
 
   });
 

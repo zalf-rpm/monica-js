@@ -107,6 +107,9 @@
               <button id='new-project-btn' class="btn btn-primary">
                 <span class="glyphicon glyphicon-star" title='New Project'></span>
               </button>
+              <button id='question-btn' class="btn btn-primary">
+                <span class="glyphicon glyphicon-question-sign" title='?'></span>
+              </button>
               <button id='debug-btn' type="button" class="btn btn-default" data-toggle="button">Debug</button>
             </div>
             <div class="nav navbar-form navbar-right">
@@ -160,6 +163,22 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             <a id='result-save-a' class="btn btn-primary" href="">Save</a>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div id='question-modal' class="modal fade">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title">Help</h4>
+          </div>
+          <div class="modal-body">
+            <p>Accepted input files: xxx.sim.json, xxx.site.json, xxx.crop.json and (all in one) xxx.monica.json</p>
+            <p>Download example project&nbs;<a href="project.json/example.monica.json">&nbs;file</a>.</p>
+            <p>Download example weather&nbs;<a href="weather/weather_example.csv">&nbs;file</a>.</p>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
