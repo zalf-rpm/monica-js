@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>MONICA-JS</title>
+    <link rel="stylesheet" href="3rdparty/bootstrap-3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="3rdparty/bootstrap-3.2.0/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="3rdparty/jstree/themes/default/style.min.css">
+
+    <script src="3rdparty/jquery-2.1.1.min.js"></script>
+    <script src="3rdparty/bootstrap-3.2.0/js/bootstrap.min.js"></script>
+    <script src="3rdparty/bootstrap-3.2.0/js/bootstrap-filestyle.min.js"></script>
+    <script src="3rdparty/bootstrap-3.2.0/js/bootstrap-select.min.js"></script>
+    <script src="3rdparty/jstree/jstree.js"></script>
+    <script src="3rdparty/flot/jquery.flot.min.js"></script>
+    <script src="dist/sql.js"></script>
+    <script src="index.js"></script>
+
+    <style>
+      .form-group {
+        height: 60px;
+      }
+      .input-group-addon {
+        min-width:100px;
+      }
+      .page-header {
+        margin-top: 0px;
+        margin-bottom: 10px;
+      }
+      #form-header-text {
+        padding-left: 15px;
+        margin-top: 0px;
+      }
+      #form-header {
+        padding-left: 0px !important;
+      }
+      .jstree-default .jstree-clicked {
+        background: whitesmoke;
+      }
+      .grey {
+        color: grey;
+      }
+      #array-btn-group {
+        visibility: hidden;
+      }
+      #tree-container, #form {
+        padding-left: 0px;
+      }
+      #tree {
+        overflow: hidden;
+      }
+      #result-msg {
+        height: 170px;
+        overflow-y:auto;
+        font-size: 85%;
+        background: lightgrey;
+      }
+      #result-msg-panel {
+        background: lightgrey;
+      }
+      .monica-info {
+        color: black;
+      }
+      .monica-warn {
+        color: orange;
+      }
+      .monica-error {
+        color: red;
+      }
+      .monica-debug {
+        color: blue;
+      }
+
+
+    </style>
+
+    <script>
+
+    </script>
+  </head>  
+  <body>
+    <div class='container'>
+
+      <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="javascript:void(null)">MONICA</a>
+          </div>
+
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <div class="nav navbar-form navbar-left">
+              <input id='project-files-load-btn' type='file' multiple class="filestyle" data-input="true" data-buttonText="Project Files" data-buttonName="btn-primary" data-iconName="glyphicon-floppy-open"></input>
+            </div>
+            <div class="nav navbar-form navbar-left">
+              <input id='weather-file-load-btn' type='file' class="filestyle" data-input="true" data-buttonText="Weather File" data-buttonName="btn-primary" data-iconName="glyphicon-floppy-open"></input>
+            </div>
+            <div class="nav navbar-form navbar-left">
+              <button id='save-project-btn' class="btn btn-primary">
+                <span class="glyphicon glyphicon-floppy-save" title='Save Project'></span>
+              </button>
+              <button id='new-project-btn' class="btn btn-primary">
+                <span class="glyphicon glyphicon-star" title='New Project'></span>
+              </button>
+              <button id='debug-btn' type="button" class="btn btn-default" data-toggle="button">Debug</button>
+            </div>
+            <div class="nav navbar-form navbar-right">
+              <button id='run-monica-btn' class="btn btn-success" title='run'>
+                <span class="glyphicon glyphicon-cog"></span>
+              </button>
+            </div>
+          </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+      </nav>      
+
+      <div id='tree-container' class="col-md-3">
+        <div id='tree'></div>
+      </div>
+      <div id='form' class="col-md-9">
+        <div id='form-header' class="col-md-12 page-header">
+            <h4 id='form-header-text' class="col-md-12"></h4>
+          <div id='array-btn-group' class="btn-group col-md-12">
+            <button id='delete-item-btn' class="btn btn-sm btn-primary">
+              <span class="glyphicon glyphicon-minus"></span>
+            </button>
+            <button id='add-item-btn' class="btn btn-sm btn-primary">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <button id='up-item-btn' class="btn btn-sm btn-primary">
+              <span class="glyphicon glyphicon-arrow-up"></span>
+            </button>
+          </div>
+        </div>
+        <div id='form-left' class="col-md-6"></div>
+        <div id='form-right' class="col-md-6"></div>
+      </div>
+
+    </div><!-- /.container -->
+    <div id='result-modal' class="modal fade">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title">Results</h4>
+          </div>
+          <div class="modal-body" style='height: 600px;'>
+            <div id='result-select' class='col-md-3' style='height: 400px;'></div>
+            <div class='col-md-9'>
+              <div id='flot-result' style='height: 400px;'></div>
+            </div>
+            <div id='result-msg-panel' class="panel panel-default col-md-12">
+              <div id='result-msg' class="panel-body"></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <a id='result-save-a' class="btn btn-primary" href="">Save</a>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+  </body>
+</html>
