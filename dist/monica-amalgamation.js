@@ -14626,7 +14626,7 @@ var Configuration = function (outPath, climate, doDebug) {
         depth += lThicknessCm;
 
         var layer = new SoilParameters();
-        layer.set_vs_SoilOrganicCarbon(horizonObj.Corg); //TODO: / 100 ?
+        layer.set_vs_SoilOrganicCarbon(horizonObj.Corg);
         if (horizonObj.bulkDensity)
           layer.set_vs_SoilBulkDensity(horizonObj.bulkDensity);
         layer.vs_SoilSandContent = horizonObj.sand;
