@@ -816,66 +816,47 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
 
   tree = $('#tree').jstree(treeData);
 
-  tree.on('select_node.jstree', function (e, data) {
+  /* make input form on tree node selection */
+  tree.on('select_node.jstree', function (evt, data) {
 
-    // console.log(data.instance.get_json(data.node));
-    // console.log(data.node.data);
-    var form_header_text = data.node.text;
-    var parent = data.instance.get_node(data.instance.get_parent(data.node));
+    var treeInstance = data.instance
+      , node = data.node
+      , params = node.data /* parameter data & meta data stored in each node */
+      ;
+
+    /* breadcrumb */
+    var crumb = node.text;
+    var parent = treeInstance.get_node(treeInstance.get_parent(node));
     while (parent.id != '#') {
-      form_header_text = parent.text + '&nbsp;&#47;&nbsp;' + form_header_text;
-      parent = data.instance.get_node(data.instance.get_parent(parent));
+      crumb = parent.text + '&nbsp;&#47;&nbsp;' + crumb;
+      parent = treeInstance.get_node(treeInstance.get_parent(parent));
     }
-    $('#form-header-text').html(form_header_text);
-
-
-    // if (data.node.data && data.node.data.meta && (data.node.data.meta.parentIsArray || data.node.data.meta.isArray)) {
-    //   var parent = data.instance.get_node(data.instance.get_parent(data.node));
-    //   $('#form-header-text').html(parent.text + ': ' + data.node.text);
-    //   $('#btn-add-array-item').css('visibility', 'visible');
-    // } else {
-    //   $('#form-header-text').html(data.node.text);
-    //   $('#btn-add-array-item').css('visibility', 'hidden');
-    // }
+    $('#form-header-text').html(crumb);
     
+    /* hide or show array edit buttons */
+    $('#array-btn-group').css('visibility', (params.meta.isArray || params.meta.parentIsArray ? 'visible' : 'hidden')); 
 
-    if (data.node.data.meta.isArray || data.node.data.meta.parentIsArray) {
-     $('#array-btn-group').css('visibility', 'visible'); 
-    } else {
-     $('#array-btn-group').css('visibility', 'hidden');
-    }
+    /* enable or disable up/delete buttons */
+    $('#delete-item-btn, #up-item-btn').prop('disabled', (params.meta.parentIsArray ? false : true));
 
-    if (data.node.data.meta.parentIsArray) {
-     $('#delete-item-btn').prop('disabled', false);
-     $('#up-item-btn').prop('disabled', false); 
-    } else {
-     $('#delete-item-btn').prop('disabled', true); 
-     $('#up-item-btn').prop('disabled', true); 
-    }
-
-
-    /* if data empty clear form */
-    var propCount = 0;
-    for (var prop in data.node.data) {
-      if (data.node.data.hasOwnProperty(prop) && prop != 'meta')
-        propCount++;
-    }
-    if (propCount === 0 && data.node.data.meta.prop != 'weather') {
-      $('#form-left').html('');
-      $('#form-right').html('');
-      return;
-    }
-
-    /* make form */
+    /* clear form */
     $('#form-left').html('');
     $('#form-right').html('');
-    
-    if (data.node.data.meta.prop === 'weather') {
-      
-      if (weather.data.tmin.length > 0) { /* todo: tmin ?*/
-        var html = '';
-        // html += '<p>File: '+weather.fileName+'</p>';
 
+    /* check if params defines any parameter */
+    var propCount = 0;
+    for (var prop in params) {
+      if (params.hasOwnProperty(prop) && prop != 'meta')
+        propCount++;
+    }
+
+    /* create weather form */
+    if (propCount === 0 && params.meta.prop === 'weather') {
+
+      /* since tmin is required in any case we use it to check if there is any weather data at all */
+      if (weather.data.tmin.length > 0) {
+
+        var html = '';
         html += '<div class="form-group">'
               + ' <label for="weather-params">Parameter</label>'
               + '   <select class="form-control" name="weather-params">';
@@ -900,209 +881,188 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
 
           $.plot("#weather-flot", [{label: param + ' [' + unit + ']', data: flot_data }]);
 
-
         });
       }
 
-      return;
+    } else if (propCount > 0) { /* create parameter input form */
 
-    }
+      var propIdx = 0;
+      for (var prop in params) {
+        if (params.hasOwnProperty(prop)) {
+          if (prop === 'meta')
+            continue;
 
-    var obj = data.node.data;
-    var count = 0, i = 0;
-    for (var prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        if (prop != 'meta')
-        count++;
-      }
-    }
+          var html = ''
+            , param = params[prop]
+            , label = prop
+            , value = param.hasOwnProperty('value') ? param.value : ''
+            , unit = param.hasOwnProperty('unit') ? param.unit : ''
+            , inputType = 'text'
+            , formType = 'input'
+            , min = param.hasOwnProperty('min') && unit != 'bool' ? (param.min === null ? -Infinity : param.min) : null
+            , max = param.hasOwnProperty('max') && unit != 'bool' ? (param.max === null ? Infinity : param.max) : null
+            , desc = param.desc
+            , isEnum = param.hasOwnProperty('enum')
+            ;
 
-    for (var prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        if (prop === 'meta')
-          continue;
+          /* create a readable lable from camel cased parameter names */
+          if (label.length > 3)
+            label = label.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, function(str){ return str.toUpperCase(); });
 
-        var item = obj[prop];
-        var label = prop;
-        if (label.length > 3)
-          label = label.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, function(str){ return str.toUpperCase(); })
+          if (param.min != null && param.max != null)
+            desc += '. ' + '{ min: ' + param.min + ', max: ' + param.max + ' }';
 
-        var desc = item.desc;
-        if (item.min != null && item.max != null)
-          desc += '. ' + '{ min: ' + item.min + ', max: ' + item.max + ' }';
+          if (param.min != null && param.max != null && unit != 'bool')
+            inputType = 'number';
+          else if (unit === 'date')
+            inputType = 'date';
+          else if (unit === 'bool')
+            inputType = 'checkbox';
 
-        var value = '';
-        if (item.value != undefined)
-          value = item.value;
+          if (!isEnum && unit != 'bool') {
+            html += '<div class="form-group">'
+                  + ' <label for="'+prop+'">'+label+'</label>'
+                  + '   <div class="input-group">'
+                  + '     <input class="form-control" type="'+inputType+'" value="'+value+'" name="'+prop+'" title="'+prop+'" data-content="'+desc+'" data-toggle="popover" data-placement="top"></input>'
+                  + '     <span class="input-group-addon">'+unit+'</span>'
+                  + '   </div>'
+                  + '</div>';
+          } else if (unit === 'bool') {
+            html += '<div class="form-group">'
+                  + ' <label>'
+                  + '     <input type="'+inputType+'" '+(value ? 'checked' : '')+' name="'+prop+'" title="'+prop+'" data-content="'+desc+'" data-toggle="popover" data-placement="top"></input>&nbsp;&nbsp;'+label+'</label>'
+                  + '</div>';
+          } else {
+            var selectedHasBeenSet = false;
+            formType = 'select';
+            html += '<div class="form-group">'
+                  + ' <label for="'+prop+'">'+label+'</label>'
+                  + '   <select class="form-control" name="'+prop+'" title="'+prop+'" data-content="'+desc+'" data-toggle="popover" data-placement="top">';
+            param.enum.forEach(function (e, i) {
+              var selected = '';
+              /* data from db are objects if we have more than one column */
+              if (typeof e === 'object') {
+                if (objEqObj(e, value) && !selectedHasBeenSet) {
+                  selected = 'selected';
+                  selectedHasBeenSet = true;
+                }
+                
+                /* add an empty value first */
+                if (i === 0) {
+                  var data = '';
+                  var texts = [];
+                  for (var prop in e) {
+                    if (e.hasOwnProperty(prop)) {
+                      data += ' data-monica-' + prop + '="" ';
+                    }
+                  }
+                  html += '<option ' + data + ' value=""'+selected+'></option>';
+                }
 
-        var unit = item.unit;
-        if (prop === 'date')
-          unit = 'date'; // TODO: how to change date format in bootstrap
-
-        var type = 'text';
-        if (item.min != null && item.max != null)
-          type = 'number';
-        if (prop === 'date' || unit === 'date')
-          type = 'date';
-        if (unit === 'bool')
-          type = 'checkbox';
-
-        var formType = 'input';
-
-        var html = ''
-        if (!item.enum && unit != 'bool') {
-          html += '<div class="form-group">'
-                + ' <label for="'+prop+'">'+label+'</label>'
-                + '   <div class="input-group">'
-                + '     <input class="form-control" type="'+type+'" value="'+value+'" name="'+prop+'" title="'+prop+'" data-content="'+desc+'" data-toggle="popover" data-placement="top"></input>'
-                + '     <span class="input-group-addon">'+unit+'</span>'
-                + '   </div>'
-                + '</div>';
-        } else if (unit === 'bool') {
-          html += '<div class="form-group">'
-                + ' <label>'
-                + '     <input type="'+type+'" '+(value ? 'checked' : '')+' name="'+prop+'" title="'+prop+'" data-content="'+desc+'" data-toggle="popover" data-placement="top"></input>&nbsp;&nbsp;'+label+'</label>'
-                + '</div>';
-        } else {
-          var selectedHasBeenSet = false;
-          formType = 'select';
-          html += '<div class="form-group">'
-                + ' <label for="'+prop+'">'+label+'</label>'
-                + '   <select class="form-control" name="'+prop+'" title="'+prop+'" data-content="'+desc+'" data-toggle="popover" data-placement="top">';
-          item.enum.forEach(function (e, i) {
-            var selected = '';
-            /* data from db are objects if we have more than one column */
-            if (typeof e === 'object') {
-              if (objEqObj(e, value) && !selectedHasBeenSet) {
-                selected = 'selected';
-                selectedHasBeenSet = true;
-              }
-              
-              /* add an empty value first */
-              if (i === 0) {
                 var data = '';
-                var texts = [];
+                var text = '';
+
                 for (var prop in e) {
                   if (e.hasOwnProperty(prop)) {
-                    data += ' data-monica-' + prop + '="" ';
+                    data += ' data-monica-' + prop + '="' + e[prop] + '" ';
+                    if (typeof e[prop] === 'string' && e[prop].trim().length > 0)
+                      text += (text.length === 0 ? e[prop] : (', ' + e[prop]));
                   }
                 }
-                html += '<option ' + data + ' value=""'+selected+'></option>';
+                html += '<option ' + data + ' value="'+ text +'" '+selected+'>'+text+'</option>';
+              } else {
+                if (e === value)
+                  selected = 'selected';
+                /* add an empty value first  */
+                if (i === 0) html += '<option value=""'+selected+'></option>';
+                html += '<option value="'+e+'"'+selected+'>'+e+'</option>';
               }
 
-              var data = '';
-              var text = '';
+            });
+            html += '   </select>'
+                  + '</div>';
+          }
 
-              for (var prop in e) {
-                if (e.hasOwnProperty(prop)) {
-                  data += ' data-monica-' + prop + '="' + e[prop] + '" ';
-                  if (typeof e[prop] === 'string' && e[prop].trim().length > 0) /* TODO: hide numbers? In most cases it is the database id */
-                    text += (text.length === 0 ? e[prop] : (', ' + e[prop]));
+          if (propIdx > propCount * 0.5 && propCount > 6)
+            $('#form-right').append(html);
+          else
+            $('#form-left').append(html);
+
+          /* remove selectpicker for now: does not work with desc. pop-ups */
+          // if (formType === 'select') {
+          //   $('select[name="'+prop+'"]').selectpicker();
+          //   if (param.enum && item.enum.indexOf(value) >= 0)
+          //     $('select[name="'+prop+'"]').selectpicker('val', value);
+          //   else
+          //     $('select[name="'+prop+'"]').selectpicker('val', null);
+          // }
+
+          $(formType+'[name="'+prop+'"]').change(function () {
+
+            var param = params[$(this).prop('name')];
+
+            if (param.min !== null && param.max != null && param.unit != 'bool') {
+              if (Number($(this).val()) < param.min) 
+                $(this).val(param.min); 
+              else if (Number($(this).val()) > param.max) 
+                $(this).val(param.max);
+              param.value = Number($(this).val());
+            } else if (param.unit === 'bool') {
+              param.value = $(this).prop('checked')
+            } else {
+              param.value = $(this).val();
+            }
+
+            /* if param has db and column > 1 make an object */
+            if (param.hasOwnProperty('db') && param.db.columns.length > 1) {
+              var option = $("option:selected", this);
+              param.value = {};
+              param.db.columns.forEach(function (column) {
+                param.value[column] = option.data('monica-' + column);
+              })
+              /* TODO: hack to set tree display text ... */
+              // param.text = $(this).val();
+            }
+
+            if (params.meta && params.meta.parentIsArray == true) {
+              var count = 0;
+              for (var prop in params) {
+                if (count > 0) break;
+                if (params.hasOwnProperty(prop)) {
+                  if (prop != 'meta')
+                    count++;
+                  /* set node display text to text of the first item in form */
+                  if (params[prop] === param) {
+                    node.text = (typeof param.value === 'string' ? param.value : $(this).val());
+                    $('#tree').jstree().redraw_node(node, false, false);
+                    /* update breadcrumb */
+                    var crumb = node.text;
+                    var parent = treeInstance.get_node(treeInstance.get_parent(node));
+                    while (parent.id != '#') {
+                      crumb = parent.text + '&nbsp;&#47;&nbsp;' + crumb;
+                      parent = treeInstance.get_node(treeInstance.get_parent(parent));
+                    }
+                    $('#form-header-text').html(crumb);
+                  }
                 }
               }
-              html += '<option ' + data + ' value="'+ text +'" '+selected+'>'+text+'</option>';
-            } else {
-              if (e === value)
-                selected = 'selected';
-              /* add an empty value first  */
-              if (i === 0) html += '<option value=""'+selected+'></option>';
-              html += '<option value="'+e+'"'+selected+'>'+e+'</option>';
             }
 
           });
-          html += '   </select>'
-                + '</div>';
-        }
 
-        if (i > count * 0.5 && count > 6)
-          $('#form-right').append(html);
-        else
-          $('#form-left').append(html);
-
-        if (formType === 'select') {
-
-          // $('select[name="'+prop+'"]').selectpicker();
+          /* bind popover to display desc. text */
+          $('input, select').popover({
+            trigger: 'hover'
+          });
           
-          // if (item.enum && item.enum.indexOf(value) >= 0)
-          //   $('select[name="'+prop+'"]').selectpicker('val', value);
-          // else
-          //   $('select[name="'+prop+'"]').selectpicker('val', null);
+          propIdx++;
 
         }
-
-
-        $(formType+'[name="'+prop+'"]').change(function () {
-
-          var item = obj[$(this).prop('name')];
-          // console.log(item);
-
-          // if (item.enum)
-            // console.log($('select[name="' + $(this).prop('name') + '"] option:selected').val());
-          // if (item.unit === 'bool')
-            //console.log($(this).prop('checked'));
-
-          if (item.min != null && Number($(this).val()) < item.min) 
-            $(this).val(item.min); 
-          if (item.max != null && Number($(this).val()) > item.max) 
-            $(this).val(item.max);
-
-          if (item.unit === 'bool')
-            item.value = $(this).prop('checked')
-          else if (item.min != null)
-            item.value = Number($(this).val());
-          else
-            item.value = $(this).val();
-
-          /* if item has db and column > 1 make an object */
-          if (item.hasOwnProperty('db') && item.db.columns.length > 1) {
-            var option = $("option:selected", this);
-            console.log(option);
-            item.value = {};
-            item.db.columns.forEach(function (e) {
-              item.value[e] = option.data('monica-' + e);
-            })
-            /* TODO: hack to set tree display text ... */
-            item.text = $(this).val();
-          }
-
-
-          if (data.node.data.meta && data.node.data.meta.parentIsArray == true) {
-            var count = 0;
-            for (var prop in obj) {
-              if (count > 0) break;
-              if (obj.hasOwnProperty(prop)) {
-                if (prop != 'meta')
-                  count++;
-                if (obj[prop] === item) {
-                  data.node.text = (typeof item.value === 'string' ? item.value : item.text);
-                  $('#tree').jstree().redraw_node(data.node, false, false);
-                  var form_header_text = data.node.text;
-                  var parent = data.instance.get_node(data.instance.get_parent(data.node));
-                  while (parent.id != '#') {
-                    form_header_text = parent.text + '&nbsp;&#47;&nbsp;' + form_header_text;
-                    parent = data.instance.get_node(data.instance.get_parent(parent));
-                  }
-                  $('#form-header-text').html(form_header_text);
-                }
-              }
-            }
-          }
-
-        });
-
-
-
-        $('input, select').popover({
-          trigger: 'hover'
-        })
-        
-        i++;
-
       }
     }
 
-  });
-}
+  }); /* tree.on('select_node.jstree') */
+} /* makeTree */
 
 
 /* jquery event bindings */
