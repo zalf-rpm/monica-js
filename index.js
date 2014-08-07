@@ -1003,19 +1003,11 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
 
           $(formType+'[name="'+prop+'"]').change(function () {
 
-            var param = params[$(this).prop('name')];
+            var value = $(this).val()
+              , param = params[$(this).prop('name')]
+              ;
 
-            if (param.min !== null && param.max != null && param.unit != 'bool') {
-              if (Number($(this).val()) < param.min) 
-                $(this).val(param.min); 
-              else if (Number($(this).val()) > param.max) 
-                $(this).val(param.max);
-              param.value = Number($(this).val());
-            } else if (param.unit === 'bool') {
-              param.value = $(this).prop('checked')
-            } else {
-              param.value = $(this).val();
-            }
+            // console.log('value ' + value);  
 
             /* if param has db and column > 1 make an object */
             if (param.hasOwnProperty('db') && param.db.columns.length > 1) {
@@ -1024,9 +1016,25 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
               param.db.columns.forEach(function (column) {
                 param.value[column] = option.data('monica-' + column);
               })
-              /* TODO: hack to set tree display text ... */
-              // param.text = $(this).val();
+            } else {
+              if (param.min !== null && param.max != null && param.unit != 'bool') {
+                if (typeof value === 'string') {
+                  param.value = null;
+                } else {
+                  if (Number(value) < param.min) 
+                    $(this).val(param.min); 
+                  else if (Number(value) > param.max) 
+                    $(this).val(param.max);
+                  param.value = Number(value);
+                }
+              } else if (param.unit === 'bool') {
+                param.value = $(this).prop('checked')
+              } else {
+                param.value = (value === '' ? null: value);
+              }
             }
+
+            // console.log('param.value ' + param.value);
 
             if (params.meta && params.meta.parentIsArray == true) {
               var count = 0;
@@ -1037,7 +1045,7 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
                     count++;
                   /* set node display text to text of the first item in form */
                   if (params[prop] === param) {
-                    node.text = (typeof param.value === 'string' ? param.value : $(this).val());
+                    node.text = (typeof param.value === 'string' ? param.value : value);
                     $('#tree').jstree().redraw_node(node, false, false);
                     /* update breadcrumb */
                     var crumb = node.text;
