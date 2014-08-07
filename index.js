@@ -855,7 +855,7 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
     }
 
     /* create weather form */
-    if (propCount === 0 && params.meta.prop === 'weather') {
+    if (params.meta.prop === 'weather') {
 
       /* since tmin is required in any case we use it to check if there is any weather data at all */
       if (weather.data.tmin.length > 0) {
