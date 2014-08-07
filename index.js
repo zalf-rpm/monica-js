@@ -127,8 +127,48 @@ MONICA.onmessage = function (evt) {
     } else {
 
       var html = ''
+        , csv = ''
         , data = results.data
+        , units = results.units
+        , units_csv = ''
         ;
+
+      /* create result csv file URL */
+
+      /* blob needs to be released */
+      window.URL.revokeObjectURL(resultFileURL);
+
+      /* write header */
+      for (var prop in data) {
+        if (data.hasOwnProperty(prop)) {
+          csv += prop + ';';
+          units_csv += units[prop].replace(/;/, '|') + ';';
+        }
+      }
+      
+      csv += '\n' + units_csv + '\n';
+
+      /* write data */
+      for (var d = 0, ds = data.date.length; d < ds; d++) {
+        for (var prop in data) {
+          if (data.hasOwnProperty(prop)) {
+            csv += data[prop][d] + ';';
+          }
+        }
+        csv += '\n';
+      }
+
+      /* set file name as date and replace whitespace */
+      var dateTimeStr = new Date().toDateString().replace(/\s/g, '-') + '-' + new Date().toTimeString().replace(/\s/g, '-');
+      resultFileURL = window.URL.createObjectURL(new Blob([csv], { type : 'text/csv' }));
+      /* may not work in safari */
+      $('#result-save-a').attr({
+        href: resultFileURL,
+        download: 'MONICA-' + dateTimeStr + '.csv'
+      });
+
+
+      /* set result dialog html */
       $('#result-select').html('');
       html += '<select multiple class="form-control" name="result-params" size=20">';
       for (var prop in data) {
@@ -148,7 +188,7 @@ MONICA.onmessage = function (evt) {
         var flotData = [];
         for (var p = 0, ps = params.length; p < ps; p++) {
           var values = data[params[p]];
-          flotData[p] = { label: params[p] + ' ' + results.units[prop], data: [] };
+          flotData[p] = { label: params[p] + ' ' + results.units[params[p]], data: [] };
           for (var d = 0, ds = values.length; d < ds; d++)
             flotData[p].data.push([d, values[d]]);
         }
@@ -1328,7 +1368,7 @@ $('#run-monica-btn').on('click', function () {
 
   console.log(config);
   /* reset results */
-  results = {};
+  results = { data: {}, units: {} };
 
   MONICA.postMessage({ run: config });
   $('#result-msg').html('');
@@ -1339,40 +1379,6 @@ $('#run-monica-btn').on('click', function () {
 $('#question-btn').on('click', function () {
 
   $('#question-modal').modal('show');
-
-});
-
-$('#result-save-a').on('click', function () {
-  
-  /* blob needs to be released */
-  window.URL.revokeObjectURL(resultFileURL);
-
-  var csv = '';
-
-  /* write header */
-  for (var prop in results) {
-    if (results.hasOwnProperty(prop))
-      csv += prop + ';';
-  }
-
-  csv += '\n';
-
-  /* write data */
-  for (var d = 0, ds = results.date.length; d < ds; d++) {
-    for (var prop in results) {
-      if (results.hasOwnProperty(prop)) {
-        csv += results[prop][d] + ';';
-      }
-    }
-    csv += '\n';
-  }
-
-  /* set file name as date and replace whitespace */
-  var dateTimeStr = new Date().toDateString().replace(/\s/g, '-') + '-' + new Date().toTimeString().replace(/\s/g, '-');
-  resultFileURL = window.URL.createObjectURL(new Blob([csv], { type : 'text/csv' }));
-  /* may not work in safari */
-  $(this).attr("href", resultFileURL);
-  $(this).attr("download", 'MONICA-' + dateTimeStr + '.csv');
 
 });
 
