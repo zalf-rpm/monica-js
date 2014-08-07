@@ -1093,9 +1093,29 @@ $('#new-project-btn').on('click', function () {
 
 $('#save-project-btn').on('click', function () {
 
-  var treeJSON = $(tree).jstree().get_json();
-  var obj = projectFromTree(treeJSON);
-  window.open("data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj, null, 2)));
+  var obj = projectFromTree($(tree).jstree().get_json());
+
+  $('#download-project-a', '#download-modal').attr({
+    href: "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj, null, 2)),
+    download: "project.monica.json"
+  });
+
+  $('#download-site-a', '#download-modal').attr({
+    href: "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj.site, null, 2)),
+    download: "project.site.json"
+  });
+
+  $('#download-crop-a', '#download-modal').attr({
+    href: "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj.crop, null, 2)),
+    download: "project.crop.json"
+  });
+
+  $('#download-sim-a', '#download-modal').attr({
+    href: "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj.sim, null, 2)),
+    download: "project.sim.json"
+  });
+
+  $('#download-modal').modal('show');
 
 });
 

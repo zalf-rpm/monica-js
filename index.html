@@ -184,8 +184,25 @@
           </div>
           <div class="modal-body">
             <p>Accepted input files: xxx.sim.json, xxx.site.json, xxx.crop.json and (all in one) xxx.monica.json</p>
-            <p>Download example project file:&nbsp;<a href="project.json/example.monica.json">example.monica.json</a></p>
-            <p>Download example weather file:&nbsp;<a href="weather/weather_example.csv">weather_example.csv</a></p>
+            <p>Download example project file:&nbsp;<a href="project.json/example.monica.json" type="application/json">example.monica.json</a></p>
+            <p>Download example weather file:&nbsp;<a href="weather/weather_example.csv" type="text/csv">weather_example.csv</a></p>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div id='download-modal' class="modal fade">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title">Download</h4>
+          </div>
+          <div class="modal-body">
+            <p>Complete project file:&nbsp;<a id='download-project-a' href="javascript:void(null)" type="application/json">project.monica.json</a></p>
+            <p>Site:&nbsp;<a id='download-site-a' href="javascript:void(null)" type="text/csv">project.site.json</a></p>
+            <p>Rotation:&nbsp;<a id='download-crop-a' href="javascript:void(null)" type="text/csv">project.crop.json</a></p>
+            <p>Simulation:&nbsp;<a id='download-sim-a' href="javascript:void(null)" type="text/csv">project.sim.json</a></p>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
