@@ -447,7 +447,7 @@ function objIsParameter(obj) {
     return false;
   }
 
-   false;
+   return false;
 }
 
 /* compare two objects (only values not properties) */
