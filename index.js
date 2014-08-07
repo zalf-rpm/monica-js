@@ -27,7 +27,10 @@ var meta = {}
   }
   , resultFileURL = null
   , db = null
+  , spinner = new Spinner();
   ;
+
+spinner.spin($('#main-container')[0]); 
 
 /* load meta files and make tree */
 function init() {
@@ -50,6 +53,7 @@ function init() {
         meta = { site: site, crop: crop, sim: sim };
         project = newProject();
         makeTree(project);
+        spinner.stop();
         
       }).fail(function () {
         console.log('loading meta.json failed');
@@ -443,7 +447,7 @@ function objIsParameter(obj) {
     return false;
   }
 
-  return false;
+   false;
 }
 
 /* compare two objects (only values not properties) */
