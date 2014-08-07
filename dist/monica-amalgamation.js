@@ -14963,7 +14963,7 @@ var Configuration = function (outPath, climate, doDebug) {
         ;
 
       progress = {
-          date: { value: currentDate.toLocaleDateString(), unit: '[date]' }
+          date: { value: date.toLocaleDateString(), unit: '[date]' }
         , CropName: { value: isCropPlanted ? mcg.get_CropName() : '', unit: '-' }
         , TranspirationDeficit: { value: isCropPlanted ? mcg.get_TranspirationDeficit() : 0, unit: '[0;1]' }
         , ActualTranspiration: { value: isCropPlanted ? mcg.get_ActualTranspiration() : 0, unit: '[mm]' } 
