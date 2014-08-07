@@ -10,7 +10,7 @@ $(function () {
 var meta = {}
   , tree = {}
   , project = {}
-  , results = {}
+  , results = { data: {}, units: {} }
   , weather = { 
       fileName: ''
     , data: {
@@ -108,25 +108,31 @@ MONICA.onmessage = function (evt) {
 
   if (evt.data.hasOwnProperty('progress')) {
 
+    if (evt.data.progress != null) {
     /* store progress at each MONICA timestep */ 
     var result = evt.data.progress;
     for (var prop in result) {
       if (result.hasOwnProperty(prop)) {
-        if (!results[prop]) /* init array */
-          results[prop] = [result[prop]];
+        /* store units, only once */
+        if (results.units[prop] === undefined)
+          results.units[prop] = result[prop].unit;
+        if (!results.data[prop]) /* init array */
+          results.data[prop] = [result[prop].value];
         else
-          results[prop].push(result[prop])
+          results.data[prop].push(result[prop].value)
       }
     }
 
     /* display results if simulation is done */
-    if (evt.data.progress === null) {
+    } else {
 
+      var html = ''
+        , data = results.data
+        ;
       $('#result-select').html('');
-      var html = '';
       html += '<select multiple class="form-control" name="result-params" size=20">';
-      for (var prop in results) {
-        if (results.hasOwnProperty(prop)) {
+      for (var prop in data) {
+        if (data.hasOwnProperty(prop)) {
           html += '<option value="'+prop+'">'+prop+'</option>';
         }
       }
@@ -135,13 +141,14 @@ MONICA.onmessage = function (evt) {
       $('#result-select').append(html);
       $('select[name="result-params"]').change(function () {
 
-        var params = $(this).val();
-        var unit = '?';
+        var params = $(this).val()
+          , data = results.data
+          ;
 
         var flotData = [];
         for (var p = 0, ps = params.length; p < ps; p++) {
-          var values = results[params[p]];
-          flotData[p] = { label: params[p] + ' [' + unit + ']', data: [] };
+          var values = data[params[p]];
+          flotData[p] = { label: params[p] + ' ' + results.units[prop], data: [] };
           for (var d = 0, ds = values.length; d < ds; d++)
             flotData[p].data.push([d, values[d]]);
         }
