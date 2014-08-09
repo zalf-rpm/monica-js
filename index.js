@@ -1,8 +1,8 @@
 /*
   TODO: 
-    - add units to results
     - missing weather data
     - fix return value isValidMonicaInput
+    - check in uploaded project files if value is in min/max range
 */
 
 $(function () {
