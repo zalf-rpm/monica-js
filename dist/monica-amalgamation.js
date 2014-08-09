@@ -90,7 +90,7 @@ var example_config = {
     "plantDryWeight": 225,
     "percNTRansplant": 0.07,
     "finalHarvestDate": "1992-08-01",
-    "residuesRemoval": 85,
+    "residuesRemoval": 0.85,
     "tillageOperations": [
      {
       "date": "1991-09-01",
@@ -7895,7 +7895,7 @@ var runMonica = function (env, progress_callback) {
  */
 var initializeFoutHeader = function (foutFileName) {
 
-  var outLayers = 20;
+  var outLayers = 20, numberOfOrgans = 5;
   var fout = "", endl = '\n';
   fout += "Datum     ";
   fout += "\tCrop";
@@ -7915,11 +7915,17 @@ var initializeFoutHeader = function (foutFileName) {
   fout += "\tIncFruit";
 
   fout += "\tRelDev";
+  fout += "\tAbBiom";
+  
   fout += "\tRoot";
-  fout += "\tLeaf";
+  fout += "\tLeaf"; 
   fout += "\tShoot";
   fout += "\tFruit";
+  fout += "\tStruct";
+  fout += "\tSugar";
+
   fout += "\tYield";
+  fout += "\tSumYield";
 
   fout += "\tGroPhot";
   fout += "\tNetPhot";
@@ -7929,22 +7935,27 @@ var initializeFoutHeader = function (foutFileName) {
   fout += "\tHeight";
   fout += "\tLAI";
   fout += "\tRootDep";
-  fout += "\tAbBiom";
+  fout += "\tEffRootDep";
 
   fout += "\tNBiom";
   fout += "\tSumNUp";
   fout += "\tActNup";
   fout += "\tPotNup";
+  fout += "\tNFixed";
   fout += "\tTarget";
 
   fout += "\tCritN";
   fout += "\tAbBiomN";
+  fout += "\tYieldN";
+  fout += "\tProtein";
 
   fout += "\tNPP";
   fout += "\tNPPRoot";
   fout += "\tNPPLeaf";
   fout += "\tNPPShoot";
   fout += "\tNPPFruit";
+  fout += "\tNPPStruct";
+  fout += "\tNPPSugar";
 
   fout += "\tGPP";
   fout += "\tRa";
@@ -7952,6 +7963,8 @@ var initializeFoutHeader = function (foutFileName) {
   fout += "\tRaLeaf";
   fout += "\tRaShoot";
   fout += "\tRaFruit";
+  fout += "\tRaStruct";
+  fout += "\tRaSugar";
 
   for (var i_Layer = 0; i_Layer < outLayers; i_Layer++) {
     fout += "\tMois" + i_Layer;
@@ -8060,13 +8073,15 @@ var initializeFoutHeader = function (foutFileName) {
   fout += "\t[kg/ha]";  // OrganGrowthIncrement shoot
   fout += "\t[kg/ha]";  // OrganGrowthIncrement fruit
 
-  fout += "\t[0;1]";        // RelativeTotalDevelopment
+  fout += "\t[0;1]";    // RelativeTotalDevelopment
+  fout += "\t[kg/ha]";  // AbovegroundBiomass
 
-  fout += "\t[kgDM/ha]";    // get_OrganBiomass(0)
-  fout += "\t[kgDM/ha]";    // get_OrganBiomass(1)
-  fout += "\t[kgDM/ha]";    // get_OrganBiomass(2)
-  fout += "\t[kgDM/ha]";    // get_OrganBiomass(3)
+  for (var i = 0; i < 6; i++) {
+    fout += "\t[kgDM/ha]"; // get_OrganBiomass(i)
+  }
+
   fout += "\t[kgDM/ha]";    // get_PrimaryCropYield(3)
+  fout += "\t[kgDM/ha]";    // get_AccumulatedPrimaryCropYield(3)
 
   fout += "\t[kgCH2O/ha]";  // GrossPhotosynthesisHaRate
   fout += "\t[kgCH2O/ha]";  // NetPhotosynthesis
@@ -8076,22 +8091,26 @@ var initializeFoutHeader = function (foutFileName) {
   fout += "\t[m]";          // CropHeight
   fout += "\t[m2/m2]";      // LeafAreaIndex
   fout += "\t[layer]";      // RootingDepth
-  fout += "\t[kg/ha]";       // AbovegroundBiomass
+  fout += "\t[m]";          // Effective RootingDepth
 
   fout += "\t[kgN/ha]";     // TotalBiomassNContent
   fout += "\t[kgN/ha]";     // SumTotalNUptake
   fout += "\t[kgN/ha]";     // ActNUptake
   fout += "\t[kgN/ha]";     // PotNUptake
+  fout += "\t[kgN/ha]";     // NFixed
   fout += "\t[kgN/kg]";     // TargetNConcentration
-
   fout += "\t[kgN/kg]";     // CriticalNConcentration
   fout += "\t[kgN/kg]";     // AbovegroundBiomassNConcentration
+  fout += "\t[kgN/kg]";     // PrimaryYieldNConcentration
+  fout += "\t[kg/kg]";      // RawProteinConcentration
 
   fout += "\t[kg C ha-1]";   // NPP
   fout += "\t[kg C ha-1]";   // NPP root
   fout += "\t[kg C ha-1]";   // NPP leaf
   fout += "\t[kg C ha-1]";   // NPP shoot
   fout += "\t[kg C ha-1]";   // NPP fruit
+  fout += "\t[kg C ha-1]";   // NPP struct
+  fout += "\t[kg C ha-1]";   // NPP sugar
 
   fout += "\t[kg C ha-1]";   // GPP
   fout += "\t[kg C ha-1]";   // Ra
@@ -8099,7 +8118,8 @@ var initializeFoutHeader = function (foutFileName) {
   fout += "\t[kg C ha-1]";   // Ra leaf
   fout += "\t[kg C ha-1]";   // Ra shoot
   fout += "\t[kg C ha-1]";   // Ra fruit
-
+  fout += "\t[kg C ha-1]";   // Ra struct
+  fout += "\t[kg C ha-1]";   // Ra sugar
 
   for (var i_Layer = 0; i_Layer < outLayers; i_Layer++) {
     fout += "\t[m3/m3]"; // Soil moisture content
@@ -8387,17 +8407,22 @@ var writeCropResults = function (mcg, foutFileName, goutFileName, crop_is_plante
     fout += "\t" + fixed(10, mcg.get_VernalisationFactor());
     fout += "\t" + fixed(10, mcg.get_DaylengthFactor());
     fout += "\t" + fixed(10, mcg.get_OrganGrowthIncrement(0));
-
     fout += "\t" + fixed(10, mcg.get_OrganGrowthIncrement(1));
     fout += "\t" + fixed(10, mcg.get_OrganGrowthIncrement(2));
     fout += "\t" + fixed(10, mcg.get_OrganGrowthIncrement(3));
     
     fout += "\t" + fixed(10, mcg.get_RelativeTotalDevelopment());
-    fout += "\t" + fixed(10, mcg.get_OrganBiomass(0));
-    fout += "\t" + fixed(10, mcg.get_OrganBiomass(1));
-    fout += "\t" + fixed(10, mcg.get_OrganBiomass(2));
-    fout += "\t" + fixed(10, mcg.get_OrganBiomass(3));
+    fout += "\t" + fixed(10, mcg.get_AbovegroundBiomass());
+
+    for (var i = 0, is = mcg.get_NumberOfOrgans(); i < is; i++)
+      fout += "\t" + fixed(10, mcg.get_OrganBiomass(i)); // biomass organs, [kg C ha-1]
+
+    for (var i = 0, is = (6 - mcg.get_NumberOfOrgans()); i < is; i++)
+      fout += "\t" + 0.0; // adding zero fill if biomass organs < 6,
+
+    /* TODO: implement mcg.get_AccumulatedPrimaryCropYield() */
     fout += "\t" + fixed(10, mcg.get_PrimaryCropYield());
+    fout += "\t" + 0.0/* fixed(10, mcg.get_AccumulatedPrimaryCropYield())*/;
 
     fout += "\t" + fixed(10, mcg.get_GrossPhotosynthesisHaRate()); // [kg CH2O ha-1 d-1]
     fout += "\t" + fixed(10, mcg.get_NetPhotosynthesis());  // [kg CH2O ha-1 d-1]
@@ -8409,25 +8434,29 @@ var writeCropResults = function (mcg, foutFileName, goutFileName, crop_is_plante
     fout += "\t" + fixed(10, mcg.get_CropHeight());// [m]
     fout += "\t" + fixed(10, mcg.get_LeafAreaIndex()); //[m2 m-2]
     fout += "\t" + fixed(10, mcg.get_RootingDepth()); //[layer]
-    fout += "\t" + fixed(10, mcg.get_AbovegroundBiomass()); //[kg ha-1]
+    fout += "\t" + fixed(10, mcg.getEffectiveRootingDepth()); //[m]
 
     fout += "\t" + fixed(10, mcg.get_TotalBiomassNContent());
     fout += "\t" + fixed(10, mcg.get_SumTotalNUptake());
     fout += "\t" + fixed(10, mcg.get_ActNUptake()); // [kg N ha-1]
     fout += "\t" + fixed(10, mcg.get_PotNUptake()); // [kg N ha-1]
+    /* TODO: implement get_BiologicalNFixation */
+    fout += "\t" + 0.0/*fixed(10, mcg.get_BiologicalNFixation())*/; // [kg N ha-1]
     fout += "\t" + fixed(10, mcg.get_TargetNConcentration());//[kg N kg-1]
 
     fout += "\t" + fixed(10, mcg.get_CriticalNConcentration());//[kg N kg-1]
     fout += "\t" + fixed(10, mcg.get_AbovegroundBiomassNConcentration());//[kg N kg-1]
+    fout += "\t" + fixed(10, mcg.get_PrimaryYieldNConcentration());//[kg N kg-1]
+    fout += "\t" + fixed(10, mcg.get_RawProteinConcentration());//[kg N kg-1]
+    fout += "\t" + fixed(10, mcg.get_NetPrimaryProduction());//[kg N kg-1]
 
-    fout += "\t" + fixed(10, mcg.get_NetPrimaryProduction()); // NPP, [kg C ha-1]
     for (var i=0; i<mcg.get_NumberOfOrgans(); i++) {
         fout += "\t" + fixed(10, mcg.get_OrganSpecificNPP(i)); // NPP organs, [kg C ha-1]
     }
     // if there less than 4 organs we have to fill the column that
     // was added in the output header of rmout; in this header there
     // are statically 4 columns initialised for the organ NPP
-    for (var i=mcg.get_NumberOfOrgans(); i<4; i++) {
+    for (var i=mcg.get_NumberOfOrgans(); i<6; i++) {
         fout += "\t0.0"; // NPP organs, [kg C ha-1]
     }
 
@@ -8440,7 +8469,7 @@ var writeCropResults = function (mcg, foutFileName, goutFileName, crop_is_plante
     // if there less than 4 organs we have to fill the column that
     // was added in the output header of rmout; in this header there
     // are statically 4 columns initialised for the organ RA
-    for (var i=mcg.get_NumberOfOrgans(); i<4; i++) {
+    for (var i=mcg.get_NumberOfOrgans(); i<6; i++) {
         fout += "\t0.0";
     }
 
@@ -8486,11 +8515,15 @@ var writeCropResults = function (mcg, foutFileName, goutFileName, crop_is_plante
     fout += "\t0.00";   // OrganGrowthIncrement fruit
     fout += "\t0.00";   // RelativeTotalDevelopment
 
+    fout += "\t0.0";    // AbovegroundBiomass
     fout += "\t0.0";    // get_OrganBiomass(0)
     fout += "\t0.0";    // get_OrganBiomass(1)
     fout += "\t0.0";    // get_OrganBiomass(2)
     fout += "\t0.0";    // get_OrganBiomass(3)
+    fout += "\t0.0";    // get_OrganBiomass(4)
+    fout += "\t0.0";    // get_OrganBiomass(5)
     fout += "\t0.0";    // get_PrimaryCropYield(3)
+    fout += "\t0.0";    // get_AccumulatedPrimaryCropYield(3)
 
     fout += "\t0.000";  // GrossPhotosynthesisHaRate
     fout += "\t0.00";   // NetPhotosynthesis
@@ -8500,22 +8533,26 @@ var writeCropResults = function (mcg, foutFileName, goutFileName, crop_is_plante
     fout += "\t0.00";   // CropHeight
     fout += "\t0.00";   // LeafAreaIndex
     fout += "\t0";      // RootingDepth
-    fout += "\t0.0";    // AbovegroundBiomass
+    fout += "\t0.0";    // EffectiveRootingDepth
 
     fout += "\t0.0";    // TotalBiomassNContent
     fout += "\t0.00";   // SumTotalNUptake
     fout += "\t0.00";   // ActNUptake
     fout += "\t0.00";   // PotNUptake
+    fout += "\t0.00";   // NFixed
     fout += "\t0.000";  // TargetNConcentration
-
     fout += "\t0.000";  // CriticalNConcentration
     fout += "\t0.000";  // AbovegroundBiomassNConcentration
-    fout += "\t0.0"; // NetPrimaryProduction
+    fout += "\t0.000";  // PrimaryYieldNConcentration
+    fout += "\t0.000";  // RawProteinConcentration
 
+    fout += "\t0.0";    // NetPrimaryProduction
     fout += "\t0.0"; // NPP root
     fout += "\t0.0"; // NPP leaf
     fout += "\t0.0"; // NPP shoot
     fout += "\t0.0"; // NPP fruit
+    fout += "\t0.0"; // NPP struct
+    fout += "\t0.0"; // NPP sugar
 
     fout += "\t0.0"; // GrossPrimaryProduction
     fout += "\t0.0"; // Ra - VcRespiration
@@ -8523,6 +8560,8 @@ var writeCropResults = function (mcg, foutFileName, goutFileName, crop_is_plante
     fout += "\t0.0"; // Ra leaf - OrganSpecificTotalRespired
     fout += "\t0.0"; // Ra shoot - OrganSpecificTotalRespired
     fout += "\t0.0"; // Ra fruit - OrganSpecificTotalRespired
+    fout += "\t0.0"; // Ra struct - OrganSpecificTotalRespired
+    fout += "\t0.0"; // Ra sugar - OrganSpecificTotalRespired
 
     gout += "\t";       // Crop Name
     gout += "\t0";      // DevelopmentalStage
