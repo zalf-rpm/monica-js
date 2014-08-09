@@ -950,8 +950,6 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
             , unit = param.hasOwnProperty('unit') ? param.unit : ''
             , inputType = 'text'
             , formType = 'input'
-            , min = param.hasOwnProperty('min') && unit != 'bool' ? (param.min === null ? -Infinity : param.min) : null
-            , max = param.hasOwnProperty('max') && unit != 'bool' ? (param.max === null ? Infinity : param.max) : null
             , desc = param.desc
             , isEnum = param.hasOwnProperty('enum')
             ;
@@ -963,7 +961,7 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
           if (param.min != null && param.max != null)
             desc += '. ' + '{ min: ' + param.min + ', max: ' + param.max + ' }';
 
-          if (param.min != null && param.max != null && unit != 'bool')
+          if ((param.min != null || param.max != null || (param.default && typeof param.default === 'number')) && unit != 'bool')
             inputType = 'number';
           else if (unit === 'date')
             inputType = 'date';
@@ -1069,12 +1067,12 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
                   if (value === '') {
                     param.value = null;
                   } else {
-                    if (Number(value) < param.min) 
+                    if (param.min != null && Number(value) < param.min) 
                       $(this).val(param.min); 
-                    else if (Number(value) > param.max) 
+                    else if (param.max != null && Number(value) > param.max) 
                       $(this).val(param.max);
                     param.value = Number($(this).val());
-                    value = $(this).val();
+                    value = param.value;
                   }
                 } else if (param.unit === 'bool') {
                   param.value = $(this).prop('checked')
