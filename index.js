@@ -940,7 +940,7 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
       var propIdx = 0;
       for (var prop in params) {
         if (params.hasOwnProperty(prop)) {
-          if (prop === 'meta')
+          if (prop === 'meta' || params[prop].advanced) /* hide if advanced === true */
             continue;
 
           var html = ''
@@ -956,7 +956,7 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
             , isEnum = param.hasOwnProperty('enum')
             ;
 
-          /* create a readable lable from camel cased parameter names */
+          /* create a readable label from camel cased parameter names */
           if (label.length > 3)
             label = label.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, function(str){ return str.toUpperCase(); });
 
@@ -980,8 +980,8 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
                   + '</div>';
           } else if (unit === 'bool') {
             html += '<div class="form-group">'
-                  + ' <label>'
-                  + '     <input type="'+inputType+'" '+(value ? 'checked' : '')+' name="'+prop+'" title="'+prop+'" data-content="'+desc+'" data-toggle="popover" data-placement="top"></input>&nbsp;&nbsp;'+label+'</label>'
+                  + ' <label title="'+prop+'" data-content="'+desc+'" data-toggle="popover" data-placement="top">'
+                  + '     <input type="'+inputType+'" '+(value ? 'checked' : '')+' name="'+prop+'"></input>&nbsp;&nbsp;'+label+'</label>'
                   + '</div>';
           } else {
             var selectedHasBeenSet = false;
@@ -1048,69 +1048,73 @@ makeTree = function (rootObj, input /* { site: site, crop: crop, sim: sim } */) 
           //     $('select[name="'+prop+'"]').selectpicker('val', null);
           // }
 
-          $(formType+'[name="'+prop+'"]').change(function () {
+          (function(p, name) {
 
-            var value = $(this).val()
-              , param = params[$(this).prop('name')]
-              ;
+            $(formType+'[name="'+name+'"]').change(function () {
 
-            // console.log('value ' + value);  
+              var value = $(this).val()
+                , param = p
+                , type = $(this).attr('type')
+                ;
 
-            /* if param has db and column > 1 make an object */
-            if (param.hasOwnProperty('db') && param.db.columns.length > 1) {
-              var option = $("option:selected", this);
-              param.value = {};
-              param.db.columns.forEach(function (column) {
-                param.value[column] = option.data('monica-' + column);
-              })
-            } else {
-              if (param.min !== null && param.max != null && param.unit != 'bool') {
-                if (typeof value === 'string') {
-                  param.value = null;
-                } else {
-                  if (Number(value) < param.min) 
-                    $(this).val(param.min); 
-                  else if (Number(value) > param.max) 
-                    $(this).val(param.max);
-                  param.value = Number(value);
-                }
-              } else if (param.unit === 'bool') {
-                param.value = $(this).prop('checked')
+              /* if param has db and column > 1 make an object */
+              if (param.hasOwnProperty('db') && param.db.columns.length > 1) {
+                var option = $("option:selected", this);
+                param.value = {};
+                param.db.columns.forEach(function (column) {
+                  param.value[column] = option.data('monica-' + column);
+                })
               } else {
-                param.value = (value === '' ? null: value);
+                if (type === 'number') {
+                  if (value === '') {
+                    param.value = null;
+                  } else {
+                    if (Number(value) < param.min) 
+                      $(this).val(param.min); 
+                    else if (Number(value) > param.max) 
+                      $(this).val(param.max);
+                    param.value = Number($(this).val());
+                    value = $(this).val();
+                  }
+                } else if (param.unit === 'bool') {
+                  param.value = $(this).prop('checked')
+                } else {
+                  param.value = (value === '' ? null : value);
+                }
               }
-            }
 
-            // console.log('param.value ' + param.value);
+              // console.log('param.value ' + param.value);
 
-            if (params.meta && params.meta.parentIsArray == true) {
-              var count = 0;
-              for (var prop in params) {
-                if (count > 0) break;
-                if (params.hasOwnProperty(prop)) {
-                  if (prop != 'meta')
-                    count++;
-                  /* set node display text to text of the first item in form */
-                  if (params[prop] === param) {
-                    node.text = (typeof param.value === 'string' ? param.value : value);
-                    $('#tree').jstree().redraw_node(node, false, false);
-                    /* update breadcrumb */
-                    var crumb = node.text;
-                    var parent = treeInstance.get_node(treeInstance.get_parent(node));
-                    while (parent.id != '#') {
-                      crumb = parent.text + '&nbsp;&#47;&nbsp;' + crumb;
-                      parent = treeInstance.get_node(treeInstance.get_parent(parent));
+              if (params.meta && params.meta.parentIsArray == true) {
+                var count = 0;
+                for (var prop in params) {
+                  if (count > 0) break;
+                  if (params.hasOwnProperty(prop)) {
+                    if (prop != 'meta')
+                      count++;
+                    /* set node display text to text of the first item in form */
+                    if (params[prop] === param) {
+                      node.text = (typeof param.value === 'string' ? param.value : value);
+                      $('#tree').jstree().redraw_node(node, false, false);
+                      /* update breadcrumb */
+                      var crumb = node.text;
+                      var parent = treeInstance.get_node(treeInstance.get_parent(node));
+                      while (parent.id != '#') {
+                        crumb = parent.text + '&nbsp;&#47;&nbsp;' + crumb;
+                        parent = treeInstance.get_node(treeInstance.get_parent(parent));
+                      }
+                      $('#form-header-text').html(crumb);
                     }
-                    $('#form-header-text').html(crumb);
                   }
                 }
               }
-            }
 
-          });
+            });
+
+          }(param, prop));
 
           /* bind popover to display desc. text */
-          $('input, select').popover({
+          $('input, select, label').popover({
             trigger: 'hover'
           });
           
