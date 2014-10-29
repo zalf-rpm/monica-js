@@ -17,6 +17,7 @@
     <script src="3rdparty/bootstrap-3.2.0/js/bootstrap-select.min.js"></script>
     <script src="3rdparty/jstree/jstree.js"></script>
     <script src="3rdparty/flot/jquery.flot.min.js"></script>
+    <script src="3rdparty/flot/jquery.flot.time.min.js"></script>
     <script src="3rdparty/spin.min.js"></script>
     <script src="dist/sql.js"></script>
     <script src="index.js"></script>
@@ -62,6 +63,9 @@
       }
       #result-msg-panel {
         background: lightgrey;
+      }
+      .modal-lg {
+        width: 90%;
       }
       .monica-info {
         color: black;
@@ -170,7 +174,7 @@
     </div><!-- /.modal -->
 
     <div id='question-modal' class="modal fade">
-      <div class="modal-dialog modal-lg">
+      <div class="modal-dialog modal-md">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -186,7 +190,7 @@
     </div><!-- /.modal -->
 
     <div id='download-modal' class="modal fade">
-      <div class="modal-dialog modal-sm">
+      <div class="modal-dialog modal-md">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>

@@ -185,16 +185,24 @@ MONICA.onmessage = function (evt) {
           , data = results.data
           ;
 
+        /* expects date string format from MONICA output is ISO date */
         var flotData = [];
         for (var p = 0, ps = params.length; p < ps; p++) {
           var values = data[params[p]];
           flotData[p] = { label: params[p] + ' ' + results.units[params[p]], data: [] };
           for (var d = 0, ds = values.length; d < ds; d++)
-            flotData[p].data.push([d, values[d]]);
+            flotData[p].data.push([Date.parse(data.date[d]), values[d]]);
         }
 
-        $.plot("#flot-result", flotData);
-
+        $.plot('#flot-result', flotData, { 
+          xaxis: {
+            mode: 'time',
+            tickSize: [2, 'month'],
+            timeformat: '%m/%y',
+            min: Date.parse(data.date[0]),
+            max: Date.parse(data.date[data.date.length - 1])
+          }
+        });
 
       });
 
