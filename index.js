@@ -685,8 +685,6 @@ function makeChildren(prop, obj, parent, parentIsArray, input) {
           
         /* try to add a meaningful name for each array item 
           TODO: this might not work very well since JSON is an unordered set: find a better solution */  
-        var nameOfArrayItem = getnameOfArrayItem(input[i], i.toString(), 1);
-
         function getnameOfArrayItem(obj, def, no) {
           var count = 0;
           /* use the "first" property */
@@ -705,6 +703,8 @@ function makeChildren(prop, obj, parent, parentIsArray, input) {
           /* by default we use the index */
           return def;
         }
+        
+        var nameOfArrayItem = getnameOfArrayItem(input[i], i.toString(), 1);
 
         makeChildren(/*i.toString()*/ nameOfArrayItem, /* make copy of item */ JSON.parse(JSON.stringify(item)), child, true, input[i]);
       }
