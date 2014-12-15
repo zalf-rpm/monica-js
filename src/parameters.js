@@ -56,7 +56,8 @@ var IrrigationParameters = function (n, s) {
 
 var AutomaticIrrigationParameters = function (a, t, n, s) {
   
-  this.amount = a || 17; 
+  /* TODO: x || y evaluates to y if x = 0. This is not a problem if default (y) is 0 */
+  this.amount = a || 17;
   this.threshold = t || 0.35;
   this.nitrateConcentration = n || 0;
   this.sulfateConcentration = s || 0;
@@ -438,14 +439,14 @@ var GeneralParameters = function (
   pc_EmergenceMoistureControlOn
 ) {
 
-  this._ps_LayerThickness = _ps_LayerThickness || 0.1,
-  this.ps_ProfileDepth = ps_ProfileDepth || 2.0,
-  this.ps_LayerThickness  = new Float64Array(int(this.ps_ProfileDepth / this._ps_LayerThickness)),
-  this.ps_MaxMineralisationDepth = ps_MaximumMineralisationDepth || 0.4,
-  this.pc_NitrogenResponseOn = pc_NitrogenResponseOn || true,
-  this.pc_WaterDeficitResponseOn = pc_WaterDeficitResponseOn || true,
-  this.pc_EmergenceFloodingControlOn = pc_EmergenceFloodingControlOn || true,
-  this.pc_EmergenceMoistureControlOn = pc_EmergenceMoistureControlOn || true;
+  this._ps_LayerThickness = _ps_LayerThickness || 0.1;
+  this.ps_ProfileDepth = ps_ProfileDepth || 2.0;
+  this.ps_LayerThickness  = new Float64Array(int(this.ps_ProfileDepth / this._ps_LayerThickness));
+  this.ps_MaxMineralisationDepth = ps_MaximumMineralisationDepth || 0.4;
+  this.pc_NitrogenResponseOn = pc_NitrogenResponseOn || false;
+  this.pc_WaterDeficitResponseOn = pc_WaterDeficitResponseOn || false;
+  this.pc_EmergenceFloodingControlOn = pc_EmergenceFloodingControlOn || false;
+  this.pc_EmergenceMoistureControlOn = pc_EmergenceMoistureControlOn || false;
 
   for (var i = 0; i < this.ps_LayerThickness.length; i++)
     this.ps_LayerThickness[i] = this._ps_LayerThickness;
