@@ -667,10 +667,11 @@ var SoilParameters = function () {
 
 var MineralFertiliserParameters = function (name, carbamid, no3, nh4) {
 
-  var name = name,
-      vo_Carbamid = carbamid,
-      vo_NH4 = nh4,
-      vo_NO3 = no3;
+  var _name = name
+    , _vo_Carbamid = carbamid
+    , _vo_NH4 = nh4
+    , _vo_NO3 = no3
+    ;
 
   return {
     /**
@@ -678,56 +679,56 @@ var MineralFertiliserParameters = function (name, carbamid, no3, nh4) {
      * @return Name
      */
     getName: function () { 
-      return name; 
+      return _name; 
     },
     /**
      * @brief Returns carbamid part in percentage of fertiliser.
      * @return Carbamid in percent
      */
     getCarbamid: function () { 
-      return vo_Carbamid; 
+      return _vo_Carbamid; 
     },
     /**
      * @brief Returns ammonium part of fertliser.
      * @return Ammonium in percent
      */
     getNH4: function () { 
-      return vo_NH4; 
+      return _vo_NH4; 
     },
     /**
      * @brief Returns nitrat part of fertiliser
      * @return Nitrat in percent
      */
     getNO3: function () { 
-      return vo_NO3; 
+      return _vo_NO3; 
     },
     /**
      * @brief Sets name of fertiliser
      * @param name
      */
-    setName: function (_name) { 
-      name = name_; 
+    setName: function (name) { 
+      _name = name; 
     },
     /**
      * Sets carbamid part of fertilisers
      * @param vo_Carbamid percent
      */
-    setCarbamid: function (_vo_Carbamid) {
-      vo_Carbamid = _vo_Carbamid;
+    setCarbamid: function (vo_Carbamid) {
+      _vo_Carbamid = vo_Carbamid;
     },
     /**
      * @brief Sets nitrat part of fertiliser.
      * @param vo_NH4
      */
-    setNH4: function (_vo_NH4) { 
-      vo_NH4 = _vo_NH4; 
+    setNH4: function (vo_NH4) { 
+      _vo_NH4 = vo_NH4; 
     },
     /**
      * @brief Sets nitrat part of fertiliser.
      * @param vo_NO3
      */
-    setNO3: function (_vo_NO3) { 
-      vo_NO3 = _vo_NO3; 
+    setNO3: function (vo_NO3) { 
+      _vo_NO3 = vo_NO3; 
     }
   };
 
