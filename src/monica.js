@@ -1073,7 +1073,7 @@ var runMonica = function (env, progress_callback) {
         ppci++;
 
         //start anew if we reached the end of the crop rotation
-        if(ppci == env.cropRotation.length)
+        if(ppci == env.cropRotation.length - 1)
           ppci = 0;
 
         currentPP = env.cropRotation[ppci];
