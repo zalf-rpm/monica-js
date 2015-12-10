@@ -62,13 +62,13 @@ var Model = function (env, da) {
       logger(MSG.INFO, "seedDate: " + _currentCrop.seedDate().toString()
           + " harvestDate: " + _currentCrop.harvestDate().toString());
 
-      if(_env.useNMinMineralFertilisingMethod && _currentCrop.seedDate().dayOfYear() <=
-         _currentCrop.harvestDate().dayOfYear())
+      if(_currentCrop.useNMinMethod()
+         && _currentCrop.seedDate().dayOfYear() <= _currentCrop.harvestDate().dayOfYear())
       {
         logger(MSG.INFO, "nMin fertilising summer crop");
         var fert_amount = applyMineralFertiliserViaNMinMethod
-            (_env.nMinFertiliserPartition,
-             NMinCropParameters(cps.pc_SamplingDepth,
+            (_currentCrop.nMinFertiliserPartition(),
+             new NMinCropParameters(cps.pc_SamplingDepth,
                                 cps.pc_TargetNSamplingDepth,
                                 cps.pc_TargetN30));
         addDailySumFertiliser(fert_amount);
@@ -162,7 +162,7 @@ var Model = function (env, da) {
    * @todo Nothing implemented yet.
    */
   var applyMineralFertiliser = function (partition, amount) {
-    if(!_env.useNMinMineralFertilisingMethod) {
+    if(!_currentCrop || !_currentCrop.useNMinMethod()) {
       _soilColumn.applyMineralFertiliser(partition, amount);
       addDailySumFertiliser(amount);
     }
@@ -269,15 +269,15 @@ var Model = function (env, da) {
     addDailySumFertiliser(delayed_fert_amount);
 
     if(_currentCrop && _currentCrop.isValid() &&
-       _env.useNMinMineralFertilisingMethod
+       _currentCrop.useNMinMethod()
        && _currentCrop.seedDate().dayOfYear() > _currentCrop.harvestDate().dayOfYear()
       && _dataAccessor.julianDayForStep(stepNo) == pc_JulianDayAutomaticFertilising)
       {
       logger(MSG.INFO, "nMin fertilising winter crop");
       var cps = _currentCrop.cropParameters();
       var fert_amount = applyMineralFertiliserViaNMinMethod
-          (_env.nMinFertiliserPartition,
-           NMinCropParameters(cps.pc_SamplingDepth,
+          (_currentCrop.nMinFertiliserPartition(),
+           new NMinCropParameters(cps.pc_SamplingDepth,
                               cps.pc_TargetNSamplingDepth,
                               cps.pc_TargetN30));
       addDailySumFertiliser(fert_amount);
@@ -329,10 +329,10 @@ var Model = function (env, da) {
     that._currentCropGrowth.step(tavg, tmax, tmin, globrad, sunhours, julday,
                              (relhumid / 100.0), wind, vw_WindSpeedHeight,
                              that.vw_AtmosphericCO2Concentration, precip);
-    if(_env.useAutomaticIrrigation)
+    if(_currentCrop.useAutomaticIrrigation())
     {
-      var aips = _env.autoIrrigationParams;
-      if(_soilColumn.applyIrrigationViaTrigger(aips.treshold, aips.amount,
+      var aips = _currentCrop.autoIrrigationParams();
+      if(_soilColumn.applyIrrigationViaTrigger(aips.threshold, aips.amount,
                                                aips.nitrateConcentration))
       {
         _soilOrganic.addIrrigationWater(aips.amount);

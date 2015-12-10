@@ -100,12 +100,9 @@ var Configuration = function (outPath, climate, doDebug) {
     env.site = sp;
     env.da = da;
     env.cropRotation = pps;
-   
-    // TODO: implement and test useAutomaticIrrigation & useNMinFertiliser
-    // if (hermes_config->useAutomaticIrrigation()) {
-    //   env.useAutomaticIrrigation = true;
-    //   env.autoIrrigationParams = hermes_config->getAutomaticIrrigationParameters();
-    // }
+
+    var nmups = simObj["nMinUserParams"];
+    env.nMinUserParams = new NMinUserParameters(nmups["min"], nmups["max"], nmups["delayInDays"]);
 
     // if (hermes_config->useNMinFertiliser()) {
     //   env.useNMinMineralFertilisingMethod = true;
@@ -378,6 +375,11 @@ var Configuration = function (outPath, climate, doDebug) {
         logger(MSG.ERROR, 'Invalid fertilization date in ' + f + '.');
       }
 
+      if (method == "Automated"){
+        pp.crop().setUseNMinMethod(true);
+        logger(MSG.INFO, "Using NMin method for fertilizing crop " + pp.crop().name());
+      }
+
       if (isOrganic)  {
 
         var orgId = type.id;
@@ -416,7 +418,11 @@ var Configuration = function (outPath, climate, doDebug) {
           ok = false;
         }
         
-        pp.addApplication(new MineralFertiliserApplication(fDate, getMineralFertiliserParameters(minId), amount));
+        if(method == "Automated"){
+          pp.crop().setNMinFertiliserPartition(getMineralFertiliserParameters(minId));
+        } else {
+          pp.addApplication(new MineralFertiliserApplication(fDate, getMineralFertiliserParameters(minId), amount));
+        }
       
       }
 
@@ -494,7 +500,13 @@ var Configuration = function (outPath, climate, doDebug) {
         logger(MSG.ERROR, 'Invalid irrigation date in ' + i + '.');
       }
 
-      pp.addApplication(new IrrigationApplication(iDate, amount, new IrrigationParameters(NConc, 0.0)));
+      if (eventType == "Content"){
+        pp.crop().setUseAutomaticIrrigation(true);
+        pp.crop().setAutoIrrigationParams(new AutomaticIrrigationParameters(amount, threshold, NConc, 0));
+        logger(MSG.INFO, "Using automatic irrigation for crop " + pp.crop().name());
+      } else {
+        pp.addApplication(new IrrigationApplication(iDate, amount, new IrrigationParameters(NConc, 0.0)));
+      }
 
       logger(MSG.INFO, 'Fetched irrigation ' + i + '.');
 

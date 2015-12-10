@@ -58,5 +58,28 @@
       "max": null,
       "default": 0.0001
     }
+  },
+  "nMinUserParams": {
+    "min": {
+      "desc": "minimal N use",
+      "unit": "kg N",
+      "min": 0,
+      "max": null,
+      "default": 0
+    },
+    "max": {
+      "desc": "maximal N use",
+      "unit": "kg N",
+      "min": 0,
+      "max": null,
+      "default": 0
+    },
+    "delayInDays": {
+      "desc": "the delay in days for next dressing if calculated amount couldn't be used up in top dressing",
+      "unit": "d",
+      "min": 0,
+      "max": null,
+      "default": 0
+    }
   }
 }

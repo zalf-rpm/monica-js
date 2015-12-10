@@ -25,6 +25,10 @@ var Crop = function (id, name) {
     , _seedDate = crop ? crop._seedDate : new Date(Infinity)
     , _sumTotalNUptake = crop ? crop._sumTotalNUptake : 0
     , _cuttingYieldsDM = []
+    , _useNMinMethod = false
+    , _nMinFertiliserPartition
+    , _useAutomaticIrrigation = false
+    , _autoIrrigationParams = {}
     ;
 
   // eva2_typeUsage = new_crop.eva2_typeUsage;
@@ -128,6 +132,30 @@ var Crop = function (id, name) {
     },
     cropHeight: function () { 
       return _cropHeight; 
+    },
+    useNMinMethod: function() {
+      return _useNMinMethod;
+    },
+    setUseNMinMethod: function(use){
+      _useNMinMethod = use;
+    },
+    nMinFertiliserPartition: function() {
+      return _nMinFertiliserPartition;
+    },
+    setNMinFertiliserPartition: function(fp){
+      _nMinFertiliserPartition = fp;
+    },
+    useAutomaticIrrigation: function() {
+      return _useAutomaticIrrigation;
+    },
+    setUseAutomaticIrrigation: function(use){
+      _useAutomaticIrrigation = use;
+    },
+    autoIrrigationParams: function() {
+      return _autoIrrigationParams;
+    },
+    setAutoIrrigationParams: function(aips){
+      _autoIrrigationParams = aips;
     },
     reset: function () {
       _primaryYield = _secondaryYield = _appliedAmountIrrigation = 0;

@@ -1,5 +1,21 @@
 /* math, constants and helper functions */
 
+Date.prototype.isLeapYear = function() {
+    var year = this.getFullYear();
+    if((year & 3) != 0) return false;
+    return ((year % 100) != 0 || (year % 400) == 0);
+};
+
+// Get Day of Year
+Date.prototype.dayOfYear = function() {
+    var dayCount = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    var mn = this.getMonth();
+    var dn = this.getDate();
+    var dayOfYear = dayCount[mn] + dn;
+    if(mn > 1 && this.isLeapYear()) dayOfYear++;
+    return dayOfYear;
+};
+
 var ENVIRONMENT_IS_NODE = typeof process === 'object' && typeof require === 'function'
   , ENVIRONMENT_IS_WEB = typeof window === 'object'
   , ENVIRONMENT_IS_WORKER = typeof importScripts === 'function'
@@ -241,9 +257,9 @@ Date.prototype.isValid = function () {
   return (this.toDateString() !== 'Invalid Date'); 
 };
 
-Date.prototype.isLeapYear = function () { 
-  return (ceil((new Date(this.getFullYear() + 1, 0, 1) - new Date(this.getFullYear(), 0, 1)) / (24 * 60 * 60 * 1000)) === 366); 
-};
+//Date.prototype.isLeapYear = function () {
+//  return (ceil((new Date(this.getFullYear() + 1, 0, 1) - new Date(this.getFullYear(), 0, 1)) / (24 * 60 * 60 * 1000)) === 366);
+//};
 
 /* log function */
 var logger = function (type, msg) {
