@@ -9611,7 +9611,6 @@ var SoilColumn = function (gps, sp, cpp) {
 
     // JS: soilLayer(x) === this[x]
 
-
     //is actually only called from cropStep and thus there should always
     //be a crop
     if (that.cropGrowth === null)
@@ -9645,7 +9644,7 @@ var SoilColumn = function (gps, sp, cpp) {
       this.applyIrrigation(vi_IrrigationAmount, vi_IrrigationNConcentration);
 
       logger(MSG.INFO, 
-        "applying automatic irrigation treshold: " + vi_IrrigationThreshold +
+        "applying automatic irrigation threshold: " + vi_IrrigationThreshold +
         " amount: " + vi_IrrigationAmount +
         " N concentration: " + vi_IrrigationNConcentration
       );
@@ -12809,8 +12808,6 @@ var SoilMoisture = function (sc, stps, mm, cpp) {
   };
 
   var fm_GroundwaterReplenishment = function () {
-    
-    var vm_StartLayer;
 
     // do nothing if groundwater is not within profile
     if (vm_GroundwaterTable > vs_NumberOfLayers) {
@@ -12818,7 +12815,7 @@ var SoilMoisture = function (sc, stps, mm, cpp) {
     }
 
     // Auffuellschleife von GW-Oberflaeche in Richtung Oberflaeche
-    vm_StartLayer = vm_GroundwaterTable;
+    var vm_StartLayer = vm_GroundwaterTable;
 
     if (vm_StartLayer > vm_NumberOfLayers - 2) {
       vm_StartLayer = vm_NumberOfLayers - 2;
@@ -12852,6 +12849,22 @@ var SoilMoisture = function (sc, stps, mm, cpp) {
       }
 
     } // for
+
+      // added implementation to test if groundwater table is lower than leaching depth
+      // to avoid high recharge rates in those cases
+      if(pm_LeachingDepthLayer > vm_GroundwaterTable - 1)
+      {
+        // groundwater is lower than currently defined leaching depth
+        // so user water flux of layer directly above groundwater to calculate
+        // the recharge values
+        vm_FluxAtLowerBoundary = vm_WaterFlux[vm_GroundwaterTable - 1];
+      }
+      else
+      {
+        // leaching depth is not affected by groundwater so use water flux
+        // at leaching depth layer
+        vm_FluxAtLowerBoundary = vm_WaterFlux[pm_LeachingDepthLayer];
+      }
   };
 
   var fm_PercolationWithoutGroundwater = function () {
