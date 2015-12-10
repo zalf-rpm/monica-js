@@ -103,7 +103,7 @@ req.onload = function (evt) {
 };
 req.send(null);
 
-var MONICA = new Worker('dist/monica-amalgamation.min.js');
+var MONICA = new Worker('dist/monica-amalgamation.js');
 MONICA.onmessage = function (evt) {
 
   if (evt.data.hasOwnProperty('progress')) {

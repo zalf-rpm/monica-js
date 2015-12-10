@@ -18,7 +18,12 @@ var example_config = {
    "percentageFC": 1,
    "soilNitrate": 0.001,
    "soilAmmonium": 0.0001
-  }
+  },
+  "nMinUserParams": {
+       "min": 1,
+       "max": 2,
+       "delayInDays": 3
+     }
  },
  "site": {
   "latitude": 52.2,
@@ -136,6 +141,22 @@ var example_config = {
  }
 };
 /* math, constants and helper functions */
+
+Date.prototype.isLeapYear = function() {
+    var year = this.getFullYear();
+    if((year & 3) != 0) return false;
+    return ((year % 100) != 0 || (year % 400) == 0);
+};
+
+// Get Day of Year
+Date.prototype.dayOfYear = function() {
+    var dayCount = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    var mn = this.getMonth();
+    var dn = this.getDate();
+    var dayOfYear = dayCount[mn] + dn;
+    if(mn > 1 && this.isLeapYear()) dayOfYear++;
+    return dayOfYear;
+};
 
 var ENVIRONMENT_IS_NODE = typeof process === 'object' && typeof require === 'function'
   , ENVIRONMENT_IS_WEB = typeof window === 'object'
@@ -378,9 +399,9 @@ Date.prototype.isValid = function () {
   return (this.toDateString() !== 'Invalid Date'); 
 };
 
-Date.prototype.isLeapYear = function () { 
-  return (ceil((new Date(this.getFullYear() + 1, 0, 1) - new Date(this.getFullYear(), 0, 1)) / (24 * 60 * 60 * 1000)) === 366); 
-};
+//Date.prototype.isLeapYear = function () {
+//  return (ceil((new Date(this.getFullYear() + 1, 0, 1) - new Date(this.getFullYear(), 0, 1)) / (24 * 60 * 60 * 1000)) === 366);
+//};
 
 /* log function */
 var logger = function (type, msg) {
@@ -1030,7 +1051,7 @@ var AutomaticIrrigationParameters = function (a, t, n, s) {
   this.sulfateConcentration = s || 0;
 
   this.toString = function () {
-    return "amount: " + this.amount + " treshold: " + this.treshold + " " + this.prototype.toString();
+    return "amount: " + this.amount + " threshold: " + this.threshold + " " + this.prototype.toString();
   };
 
 };
@@ -2623,6 +2644,10 @@ var Crop = function (id, name) {
     , _seedDate = crop ? crop._seedDate : new Date(Infinity)
     , _sumTotalNUptake = crop ? crop._sumTotalNUptake : 0
     , _cuttingYieldsDM = []
+    , _useNMinMethod = false
+    , _nMinFertiliserPartition = {}
+    , _useAutomaticIrrigation = false
+    , _autoIrrigationParams = {}
     ;
 
   // eva2_typeUsage = new_crop.eva2_typeUsage;
@@ -2726,6 +2751,30 @@ var Crop = function (id, name) {
     },
     cropHeight: function () { 
       return _cropHeight; 
+    },
+    useNMinMethod: function() {
+      return _useNMinMethod;
+    },
+    setUseNMinMethod: function(use){
+      _useNMinMethod = use;
+    },
+    nMinFertiliserPartition: function() {
+      return _nMinFertiliserPartition;
+    },
+    setNMinFertiliserPartition: function(fp){
+      _nMinFertiliserPartition = fp;
+    },
+    useAutomaticIrrigation: function() {
+      return _useAutomaticIrrigation;
+    },
+    setUseAutomaticIrrigation: function(use){
+      _useAutomaticIrrigation = use;
+    },
+    autoIrrigationParams: function() {
+      return _autoIrrigationParams;
+    },
+    setAutoIrrigationParams: function(aips){
+      _autoIrrigationParams = aips;
     },
     reset: function () {
       _primaryYield = _secondaryYield = _appliedAmountIrrigation = 0;
@@ -5038,7 +5087,7 @@ var CropGrowth = function (sc, gps, cps, stps, cpp) {
           vc_CropWaterUptakeFromGroundwater = (vc_Transpiration[i_Layer] / 1000.0) / vs_LayerThickness; //[m3 m-3]
         }
 
-      }      
+      }
 
       if (vc_PotentialTranspiration > 0) {
         vc_TranspirationDeficit = vc_ActualTranspiration / vc_PotentialTranspiration;
@@ -5887,13 +5936,13 @@ var Model = function (env, da) {
       logger(MSG.INFO, "seedDate: " + _currentCrop.seedDate().toString()
           + " harvestDate: " + _currentCrop.harvestDate().toString());
 
-      if(_env.useNMinMineralFertilisingMethod && _currentCrop.seedDate().dayOfYear() <=
-         _currentCrop.harvestDate().dayOfYear())
+      if(_currentCrop.useNMinMethod()
+         && _currentCrop.seedDate().dayOfYear() <= _currentCrop.harvestDate().dayOfYear())
       {
         logger(MSG.INFO, "nMin fertilising summer crop");
         var fert_amount = applyMineralFertiliserViaNMinMethod
-            (_env.nMinFertiliserPartition,
-             NMinCropParameters(cps.pc_SamplingDepth,
+            (_currentCrop.nMinFertiliserPartition(),
+             new NMinCropParameters(cps.pc_SamplingDepth,
                                 cps.pc_TargetNSamplingDepth,
                                 cps.pc_TargetN30));
         addDailySumFertiliser(fert_amount);
@@ -5987,7 +6036,7 @@ var Model = function (env, da) {
    * @todo Nothing implemented yet.
    */
   var applyMineralFertiliser = function (partition, amount) {
-    if(!_env.useNMinMineralFertilisingMethod) {
+    if(!_currentCrop || !_currentCrop.useNMinMethod()) {
       _soilColumn.applyMineralFertiliser(partition, amount);
       addDailySumFertiliser(amount);
     }
@@ -6094,15 +6143,15 @@ var Model = function (env, da) {
     addDailySumFertiliser(delayed_fert_amount);
 
     if(_currentCrop && _currentCrop.isValid() &&
-       _env.useNMinMineralFertilisingMethod
+       _currentCrop.useNMinMethod()
        && _currentCrop.seedDate().dayOfYear() > _currentCrop.harvestDate().dayOfYear()
       && _dataAccessor.julianDayForStep(stepNo) == pc_JulianDayAutomaticFertilising)
       {
       logger(MSG.INFO, "nMin fertilising winter crop");
       var cps = _currentCrop.cropParameters();
       var fert_amount = applyMineralFertiliserViaNMinMethod
-          (_env.nMinFertiliserPartition,
-           NMinCropParameters(cps.pc_SamplingDepth,
+          (_currentCrop.nMinFertiliserPartition(),
+           new NMinCropParameters(cps.pc_SamplingDepth,
                               cps.pc_TargetNSamplingDepth,
                               cps.pc_TargetN30));
       addDailySumFertiliser(fert_amount);
@@ -6154,9 +6203,9 @@ var Model = function (env, da) {
     that._currentCropGrowth.step(tavg, tmax, tmin, globrad, sunhours, julday,
                              (relhumid / 100.0), wind, vw_WindSpeedHeight,
                              that.vw_AtmosphericCO2Concentration, precip);
-    if(_env.useAutomaticIrrigation)
+    if(_currentCrop.useAutomaticIrrigation())
     {
-      var aips = _env.autoIrrigationParams;
+      var aips = _currentCrop.autoIrrigationParams();
       if(_soilColumn.applyIrrigationViaTrigger(aips.treshold, aips.amount,
                                                aips.nitrateConcentration))
       {
@@ -9554,7 +9603,7 @@ var SoilColumn = function (gps, sp, cpp) {
    * @param vi_IrrigationThreshold
    * @return could irrigation be applied
    */
-  soilColumnArray.soilColumnArrayapplyIrrigationViaTrigger = function (
+  soilColumnArray.applyIrrigationViaTrigger = function (
     vi_IrrigationThreshold,
     vi_IrrigationAmount,
     vi_IrrigationNConcentration
@@ -9580,7 +9629,7 @@ var SoilColumn = function (gps, sp, cpp) {
     var vi_ActualPlantAvailableWater = 0.0;
     var vi_MaxPlantAvailableWater = 0.0;
     var vi_PlantAvailableWaterFraction = 0.0;
-    var vi_CriticalMoistureLayer = int(ceil(vi_CriticalMoistureDepth / that[0].vs_LayerThickness));
+    var vi_CriticalMoistureLayer = int(ceil(vi_CriticalMoistureDepth / this[0].vs_LayerThickness));
 
     for (var i_Layer = 0; i_Layer < vi_CriticalMoistureLayer; i_Layer++){
       vi_ActualPlantAvailableWater += (this[i_Layer].get_Vs_SoilMoisture_m3()
@@ -14444,12 +14493,9 @@ var Configuration = function (outPath, climate, doDebug) {
     env.site = sp;
     env.da = da;
     env.cropRotation = pps;
-   
-    // TODO: implement and test useAutomaticIrrigation & useNMinFertiliser
-    // if (hermes_config->useAutomaticIrrigation()) {
-    //   env.useAutomaticIrrigation = true;
-    //   env.autoIrrigationParams = hermes_config->getAutomaticIrrigationParameters();
-    // }
+
+    var nmups = simObj["nMinUserParams"];
+    env.nMinUserParams = new NMinUserParameters(nmups["min"], nmups["max"], nmups["delayInDays"]);
 
     // if (hermes_config->useNMinFertiliser()) {
     //   env.useNMinMineralFertilisingMethod = true;
@@ -14722,6 +14768,11 @@ var Configuration = function (outPath, climate, doDebug) {
         logger(MSG.ERROR, 'Invalid fertilization date in ' + f + '.');
       }
 
+      if (method == "Automated"){
+        pp.crop().setUseNMinMethod(true);
+        logger(MSG.INFO, "Using NMin method for fertilizing crop " + pp.crop().name());
+      }
+
       if (isOrganic)  {
 
         var orgId = type.id;
@@ -14759,8 +14810,13 @@ var Configuration = function (outPath, climate, doDebug) {
           logger(MSG.ERROR, 'Mineral fertilser ' + type.id + ' not found.');
           ok = false;
         }
-        
-        pp.addApplication(new MineralFertiliserApplication(fDate, getMineralFertiliserParameters(minId), amount));
+
+        if(method == "Automated"){
+          pp.crop().setNMinFertiliserPartition(getMineralFertiliserParameters(minId));
+        } else {
+          pp.addApplication(new MineralFertiliserApplication(fDate, getMineralFertiliserParameters(minId), amount));
+        }
+
       
       }
 
@@ -14838,7 +14894,13 @@ var Configuration = function (outPath, climate, doDebug) {
         logger(MSG.ERROR, 'Invalid irrigation date in ' + i + '.');
       }
 
-      pp.addApplication(new IrrigationApplication(iDate, amount, new IrrigationParameters(NConc, 0.0)));
+      if (eventType == "Content"){
+        pp.crop().setUseAutomaticIrrigation(true);
+        pp.crop().setAutoIrrigationParams(new AutomaticIrrigationParameters(amount, threshold, NConc, 0));
+        logger(MSG.INFO, "Using automatic irrigation for crop " + pp.crop().name());
+      } else {
+        pp.addApplication(new IrrigationApplication(iDate, amount, new IrrigationParameters(NConc, 0.0)));
+      }
 
       logger(MSG.INFO, 'Fetched irrigation ' + i + '.');
 
