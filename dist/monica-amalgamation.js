@@ -18,12 +18,7 @@ var example_config = {
    "percentageFC": 1,
    "soilNitrate": 0.001,
    "soilAmmonium": 0.0001
-  },
-  "nMinUserParams": {
-       "min": 1,
-       "max": 2,
-       "delayInDays": 3
-     }
+  }
  },
  "site": {
   "latitude": 52.2,
@@ -133,7 +128,10 @@ var example_config = {
        "id": 1,
        "name": "Ammonium Nitrate"
       },
-      "amount": 40
+      "amount": 40,
+      "min": 0,
+      "max": 0,
+      "delayInDays": 0
      }
     ]
    }
@@ -2763,6 +2761,12 @@ var Crop = function (id, name) {
     },
     setNMinFertiliserPartition: function(fp){
       _nMinFertiliserPartition = fp;
+    },
+    nMinUserParams: function() {
+      return _nMinUserParams;
+    },
+    setNMinUserParams: function(up){
+      _nMinUserParams = up;
     },
     useAutomaticIrrigation: function() {
       return _useAutomaticIrrigation;
@@ -5797,8 +5801,8 @@ var Environment = function (sps, cpp) {
     this.soilParams = env.soilParams;
     this.noOfLayers = env.noOfLayers;
     this.layerThickness = env.layerThickness;
-    this.useNMinMineralFertilisingMethod = env.useNMinMineralFertilisingMethod;
-    this.useAutomaticIrrigation = env.useAutomaticIrrigation;
+    //this.useNMinMineralFertilisingMethod = env.useNMinMineralFertilisingMethod;
+    //this.useAutomaticIrrigation = env.useAutomaticIrrigation;
     this.useSecondaryYields = env.useSecondaryYields;
 
     this.windSpeedHeight = env.windSpeedHeight;
@@ -5814,9 +5818,9 @@ var Environment = function (sps, cpp) {
     this.general = env.general;
     this.organic = env.organic;
 
-    this.nMinFertiliserPartition = env.nMinFertiliserPartition;
-    this.nMinUserParams = env.nMinUserParams;
-    this.autoIrrigationParams = env.autoIrrigationParams;
+    //this.nMinFertiliserPartition = env.nMinFertiliserPartition;
+    //this.nMinUserParams = env.nMinUserParams;
+    //this.autoIrrigationParams = env.autoIrrigationParams;
     this.centralParameterProvider = env.centralParameterProvider;
 
     this.pathToOutputDir = env.pathToOutputDir;
@@ -5834,8 +5838,8 @@ var Environment = function (sps, cpp) {
 
     this.noOfLayers = this.user_env.p_NumberOfLayers;
     this.layerThickness = this.user_env.p_LayerThickness;
-    this.useNMinMineralFertilisingMethod = this.user_env.p_UseNMinMineralFertilisingMethod;
-    this.useAutomaticIrrigation = this.user_env.p_UseAutomaticIrrigation;
+    //this.useNMinMineralFertilisingMethod = this.user_env.p_UseNMinMineralFertilisingMethod;
+    //this.useAutomaticIrrigation = this.user_env.p_UseAutomaticIrrigation;
     this.useSecondaryYields = this.user_env.p_UseSecondaryYields;
 
     this.cropRotation = null; 
@@ -6053,7 +6057,7 @@ var Model = function (env, da) {
     // TODO: implement
     //AddFertiliserAmountsCallback x(_sumFertiliser, _dailySumFertiliser);
 
-    var ups = _env.nMinUserParams;
+    var ups = _currentCrop.nMinUserParams();
 
     var fert_amount = _soilColumn.applyMineralFertiliserViaNMinMethod(partition, cps.samplingDepth, cps.nTarget, cps.nTarget30,
          ups.min, ups.max, ups.delayInDays);
@@ -6064,7 +6068,7 @@ var Model = function (env, da) {
 
   var applyIrrigation = function (amount, nitrateConcentration /*, sulfateConcentration*/) {
     //if the production process has still some defined manual irrigation dates
-    if(!_env.useAutomaticIrrigation)
+    if(!_currentCrop.useAutomaticIrrigation())
     {
       _soilOrganic.addIrrigationWater(amount);
       _soilColumn.applyIrrigation(amount, nitrateConcentration);
@@ -14497,15 +14501,6 @@ var Configuration = function (outPath, climate, doDebug) {
     env.da = da;
     env.cropRotation = pps;
 
-    var nmups = simObj["nMinUserParams"];
-    env.nMinUserParams = new NMinUserParameters(nmups["min"], nmups["max"], nmups["delayInDays"]);
-
-    // if (hermes_config->useNMinFertiliser()) {
-    //   env.useNMinMineralFertilisingMethod = true;
-    //   env.nMinUserParams = hermes_config->getNMinUserParameters();
-    //   env.nMinFertiliserPartition = getMineralFertiliserParametersFromMonicaDB(hermes_config->getMineralFertiliserID());
-    // }
-
     logger(MSG.INFO, 'Start monica model.');
 
     return runMonica(env, setProgress);
@@ -14765,6 +14760,9 @@ var Configuration = function (outPath, climate, doDebug) {
       var method = fertObj.method;
       var type = fertObj.type;
       var amount = fertObj.amount;
+      var min = fertObj.min;
+      var max = fertObj.max;
+      var delayInDays = fertObj.delayInDays;
 
       if (!fDate.isValid()) {
         ok = false;
@@ -14816,6 +14814,7 @@ var Configuration = function (outPath, climate, doDebug) {
 
         if(method == "Automated"){
           pp.crop().setNMinFertiliserPartition(getMineralFertiliserParameters(minId));
+          pp.crop().setNMinUserParams(new NMinUserParameters(min, max, delayInDays));
         } else {
           pp.addApplication(new MineralFertiliserApplication(fDate, getMineralFertiliserParameters(minId), amount));
         }

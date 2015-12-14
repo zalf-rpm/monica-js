@@ -50,7 +50,10 @@
             "id": 1,
             "name": "Ammonium Nitrate"
           },
-          "amount": 40
+          "amount": 40,
+          "min": 0,
+          "max": 0,
+          "delayInDays": 0
         }
       ]
     }
