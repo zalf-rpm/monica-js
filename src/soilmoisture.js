@@ -586,11 +586,6 @@ var SoilMoisture = function (sc, stps, mm, cpp) {
 
   var fm_GroundwaterReplenishment = function () {
 
-    // do nothing if groundwater is not within profile
-    if (vm_GroundwaterTable > vs_NumberOfLayers) {
-      return;
-    }
-
     // Auffuellschleife von GW-Oberflaeche in Richtung Oberflaeche
     var vm_StartLayer = vm_GroundwaterTable;
 
@@ -627,21 +622,16 @@ var SoilMoisture = function (sc, stps, mm, cpp) {
 
     } // for
 
-    // added implementation to test if groundwater table is lower than leaching depth
-      // to avoid high recharge rates in those cases
-      if(pm_LeachingDepthLayer > vm_GroundwaterTable - 1)
-      {
-        // groundwater is lower than currently defined leaching depth
-        // so user water flux of layer directly above groundwater to calculate
-        // the recharge values
-        vm_FluxAtLowerBoundary = vm_WaterFlux[vm_GroundwaterTable - 1];
+    if (pm_LeachingDepthLayer>vm_GroundwaterTable-1) {
+      if (vm_GroundwaterTable-1 < 0){
+        vm_FluxAtLowerBoundary = 0.0;
+      } else {
+        vm_FluxAtLowerBoundary = vm_WaterFlux[vm_GroundwaterTable-1];
       }
-      else
-      {
-        // leaching depth is not affected by groundwater so use water flux
-        // at leaching depth layer
-        vm_FluxAtLowerBoundary = vm_WaterFlux[pm_LeachingDepthLayer];
-      }
+    } else {
+      vm_FluxAtLowerBoundary = vm_WaterFlux[pm_LeachingDepthLayer];
+    }
+    //cout << "GWN: " << vm_FluxAtLowerBoundary << endl;
   };
 
   var fm_PercolationWithoutGroundwater = function () {
