@@ -10,8 +10,8 @@ var Environment = function (sps, cpp) {
     this.soilParams = env.soilParams;
     this.noOfLayers = env.noOfLayers;
     this.layerThickness = env.layerThickness;
-    this.useNMinMineralFertilisingMethod = env.useNMinMineralFertilisingMethod;
-    this.useAutomaticIrrigation = env.useAutomaticIrrigation;
+    //this.useNMinMineralFertilisingMethod = env.useNMinMineralFertilisingMethod;
+    //this.useAutomaticIrrigation = env.useAutomaticIrrigation;
     this.useSecondaryYields = env.useSecondaryYields;
 
     this.windSpeedHeight = env.windSpeedHeight;
@@ -27,9 +27,9 @@ var Environment = function (sps, cpp) {
     this.general = env.general;
     this.organic = env.organic;
 
-    this.nMinFertiliserPartition = env.nMinFertiliserPartition;
-    this.nMinUserParams = env.nMinUserParams;
-    this.autoIrrigationParams = env.autoIrrigationParams;
+    //this.nMinFertiliserPartition = env.nMinFertiliserPartition;
+    //this.nMinUserParams = env.nMinUserParams;
+    //this.autoIrrigationParams = env.autoIrrigationParams;
     this.centralParameterProvider = env.centralParameterProvider;
 
     this.pathToOutputDir = env.pathToOutputDir;
@@ -47,8 +47,8 @@ var Environment = function (sps, cpp) {
 
     this.noOfLayers = this.user_env.p_NumberOfLayers;
     this.layerThickness = this.user_env.p_LayerThickness;
-    this.useNMinMineralFertilisingMethod = this.user_env.p_UseNMinMineralFertilisingMethod;
-    this.useAutomaticIrrigation = this.user_env.p_UseAutomaticIrrigation;
+    //this.useNMinMineralFertilisingMethod = this.user_env.p_UseNMinMineralFertilisingMethod;
+    //this.useAutomaticIrrigation = this.user_env.p_UseAutomaticIrrigation;
     this.useSecondaryYields = this.user_env.p_UseSecondaryYields;
 
     this.cropRotation = null; 

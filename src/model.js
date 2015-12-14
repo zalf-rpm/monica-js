@@ -179,7 +179,7 @@ var Model = function (env, da) {
     // TODO: implement
     //AddFertiliserAmountsCallback x(_sumFertiliser, _dailySumFertiliser);
 
-    var ups = _env.nMinUserParams;
+    var ups = _currentCrop.nMinUserParams();
 
     var fert_amount = _soilColumn.applyMineralFertiliserViaNMinMethod(partition, cps.samplingDepth, cps.nTarget, cps.nTarget30,
          ups.min, ups.max, ups.delayInDays);
@@ -190,7 +190,7 @@ var Model = function (env, da) {
 
   var applyIrrigation = function (amount, nitrateConcentration /*, sulfateConcentration*/) {
     //if the production process has still some defined manual irrigation dates
-    if(!_env.useAutomaticIrrigation)
+    if(!_currentCrop.useAutomaticIrrigation())
     {
       _soilOrganic.addIrrigationWater(amount);
       _soilColumn.applyIrrigation(amount, nitrateConcentration);

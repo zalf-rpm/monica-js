@@ -27,6 +27,7 @@ var Crop = function (id, name) {
     , _cuttingYieldsDM = []
     , _useNMinMethod = false
     , _nMinFertiliserPartition
+    , _nMinUserParams = {}
     , _useAutomaticIrrigation = false
     , _autoIrrigationParams = {}
     ;
@@ -144,6 +145,12 @@ var Crop = function (id, name) {
     },
     setNMinFertiliserPartition: function(fp){
       _nMinFertiliserPartition = fp;
+    },
+    nMinUserParams: function() {
+      return _nMinUserParams;
+    },
+    setNMinUserParams: function(up){
+      _nMinUserParams = up;
     },
     useAutomaticIrrigation: function() {
       return _useAutomaticIrrigation;

@@ -101,15 +101,6 @@ var Configuration = function (outPath, climate, doDebug) {
     env.da = da;
     env.cropRotation = pps;
 
-    var nmups = simObj["nMinUserParams"];
-    env.nMinUserParams = new NMinUserParameters(nmups["min"], nmups["max"], nmups["delayInDays"]);
-
-    // if (hermes_config->useNMinFertiliser()) {
-    //   env.useNMinMineralFertilisingMethod = true;
-    //   env.nMinUserParams = hermes_config->getNMinUserParameters();
-    //   env.nMinFertiliserPartition = getMineralFertiliserParametersFromMonicaDB(hermes_config->getMineralFertiliserID());
-    // }
-
     logger(MSG.INFO, 'Start monica model.');
 
     return runMonica(env, setProgress);
@@ -369,6 +360,9 @@ var Configuration = function (outPath, climate, doDebug) {
       var method = fertObj.method;
       var type = fertObj.type;
       var amount = fertObj.amount;
+      var min = fertObj.min;
+      var max = fertObj.max;
+      var delayInDays = fertObj.delayInDays;
 
       if (!fDate.isValid()) {
         ok = false;
@@ -420,6 +414,7 @@ var Configuration = function (outPath, climate, doDebug) {
         
         if(method == "Automated"){
           pp.crop().setNMinFertiliserPartition(getMineralFertiliserParameters(minId));
+          pp.crop().setNMinUserParams(new NMinUserParameters(min, max, delayInDays));
         } else {
           pp.addApplication(new MineralFertiliserApplication(fDate, getMineralFertiliserParameters(minId), amount));
         }
