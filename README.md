@@ -13,5 +13,3 @@ Features not yet implemented or tested:
 
   - emergenceMoistureControlOn
   - emergenceFloodingControlOn
-  - useAutomaticIrrigation
-  - useNMinFertiliser
