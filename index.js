@@ -171,8 +171,9 @@ MONICA.onmessage = function (evt) {
       /* set result dialog html */
       $('#result-select').html('');
       html += '<select multiple class="form-control" name="result-params" size=20">';
+      var exclude = ["date", "CropName"];
       for (var prop in data) {
-        if (data.hasOwnProperty(prop)) {
+        if (data.hasOwnProperty(prop) && exclude.indexOf(prop) == -1) {
           html += '<option value="'+prop+'">'+prop+'</option>';
         }
       }
