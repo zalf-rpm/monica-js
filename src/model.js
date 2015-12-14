@@ -20,6 +20,7 @@ var Model = function (env, da) {
     , _dailySumFertiliser = 0
     , _dailySumIrrigationWater = 0
     , _dataAccessor = da
+    , _currentStepNo = 0
     , centralParameterProvider = _env.centralParameterProvider
     , p_daysWithCrop = 0
     , p_accuNStress = 0.0
@@ -217,6 +218,7 @@ var Model = function (env, da) {
    */
   var generalStep = function (stepNo) {
 
+    _currentStepNo = stepNo;
     var startDate = _dataAccessor.startDate();
     var currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + stepNo);
     var julday = _dataAccessor.julianDayForStep(stepNo);
@@ -701,6 +703,12 @@ var Model = function (env, da) {
   };
 
   return {
+      dataAccessor: function() {
+        return _dataAccessor;
+      },
+      currentStepNo: function() {
+       return _currentStepNo;
+      },
       cropGrowth: this.cropGrowth,
       generalStep: generalStep,
       cropStep: cropStep,
