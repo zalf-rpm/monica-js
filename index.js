@@ -188,9 +188,22 @@ MONICA.onmessage = function (evt) {
 
         /* expects date string format from MONICA output is ISO date */
         var flotData = [];
+        var usedUnits = [];
+        var yaxes_ = [];
         for (var p = 0, ps = params.length; p < ps; p++) {
           var values = data[params[p]];
-          flotData[p] = { label: params[p] + ' ' + results.units[params[p]], data: [] };
+          var unit = results.units[params[p]];
+          var axisNo = usedUnits.indexOf(unit) + 1;
+          if(axisNo == 0){
+            usedUnits.push(unit);
+            axisNo = usedUnits.length;
+            if((axisNo - 1) % 2 == 0){
+              yaxes_.push({});
+            } else {
+              yaxes_.push({ position: "right" });
+            }
+          }
+          flotData[p] = { label: params[p] + ' ' + unit, data: [], yaxis: axisNo};
           for (var d = 0, ds = values.length; d < ds; d++)
             flotData[p].data.push([Date.parse(data.date[d]), values[d]]);
         }
@@ -202,7 +215,8 @@ MONICA.onmessage = function (evt) {
             timeformat: '%m/%y',
             min: Date.parse(data.date[0]),
             max: Date.parse(data.date[data.date.length - 1])
-          }
+          },
+          yaxes: yaxes_
         });
 
       });
