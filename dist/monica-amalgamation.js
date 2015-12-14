@@ -5898,6 +5898,7 @@ var Model = function (env, da) {
     , _dailySumFertiliser = 0
     , _dailySumIrrigationWater = 0
     , _dataAccessor = da
+    , _currentStepNo = 0
     , centralParameterProvider = _env.centralParameterProvider
     , p_daysWithCrop = 0
     , p_accuNStress = 0.0
@@ -6095,6 +6096,7 @@ var Model = function (env, da) {
    */
   var generalStep = function (stepNo) {
 
+    _currentStepNo = stepNo;
     var startDate = _dataAccessor.startDate();
     var currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + stepNo);
     var julday = _dataAccessor.julianDayForStep(stepNo);
@@ -6579,6 +6581,12 @@ var Model = function (env, da) {
   };
 
   return {
+      dataAccessor: function() {
+        return _dataAccessor;
+      },
+      currentStepNo: function() {
+        return _currentStepNo;
+      },
       cropGrowth: this.cropGrowth,
       generalStep: generalStep,
       cropStep: cropStep,
@@ -15153,6 +15161,14 @@ var Configuration = function (outPath, climate, doDebug) {
       for(var i_Layer = 0; i_Layer < 6; i_Layer++)
         progress['SoilOrganicCarbon_' + i_Layer] = { value: msc.soilLayer(i_Layer).vs_SoilOrganicCarbon(), unit: '[kg (C) kg-1]' };
 
+      progress["tmin"] = { value: model.dataAccessor().dataForTimestep(Climate.tmin, model.currentStepNo()), unit: "[°C]" };
+      progress["tavg"] = { value: model.dataAccessor().dataForTimestep(Climate.tavg, model.currentStepNo()), unit: "[°C]" };
+      progress["tmax"] = { value: model.dataAccessor().dataForTimestep(Climate.tmax, model.currentStepNo()), unit: "[°C]" };
+      progress["precip"] = { value: model.dataAccessor().dataForTimestep(Climate.precip, model.currentStepNo()), unit: "[mm]" };
+      progress["wind"] = { value: model.dataAccessor().dataForTimestep(Climate.wind, model.currentStepNo()), unit: "[m s-1]" };
+      progress["globrad"] = { value: model.dataAccessor().dataForTimestep(Climate.globrad, model.currentStepNo()), unit: "[MJ m-2 d-1]" };
+      progress["relhumid"] = { value: model.dataAccessor().dataForTimestep(Climate.relhumid, model.currentStepNo()), unit: "[m3 m-3]" };
+      progress["sunhours"] = { value: model.dataAccessor().dataForTimestep(Climate.sunhours, model.currentStepNo()), unit: "[h]" };
     }
   
     if (ENVIRONMENT_IS_WORKER)
