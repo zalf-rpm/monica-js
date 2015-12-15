@@ -170,7 +170,7 @@ var Model = function (env, da) {
   };
 
   var applyOrganicFertiliser = function (params, amount, incorporation) {
-    logger(MSG.INFO, "MONICA model: applyOrganicFertiliser:\t" + amount + "\t" + params.vo_NConcentration);
+    logger(MSG.INFO, "MONICA model: applyOrganicFertiliser: " + amount + " nc: " + params.vo_NConcentration + " incorp: " + incorporation);
     _soilOrganic.setIncorporation(incorporation);
     _soilOrganic.addOrganicMatter(params, amount, params.vo_NConcentration);
     addDailySumFertiliser(amount * params.vo_NConcentration);

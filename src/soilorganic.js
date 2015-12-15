@@ -146,6 +146,7 @@ var SoilOrganic = function (sc, gps, stps, cpp) {
     nConcentration
     )
   {
+    //logger(MSG.WARN, "addOrganicMatter params: " + params.toString() + " amount: " + amount + " nc: " + nConcentration);
     debug("SoilOrganic: addOrganicMatter: " + params.toString());
     var vo_AddedOrganicMatterAmount = amount;
     // TODO: nConcentration is immer 0. Warum?
