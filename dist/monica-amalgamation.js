@@ -1471,6 +1471,7 @@ var SoilParameters = function () {
   this.vs_SoilTexture = ''; // JS! add initialization
   this.vs_SoilAmmonium = -1;
   this.vs_SoilNitrate = -1;
+  this.vs_Soil_CN_Ratio = 10;
 
   this._vs_SoilRawDensity = -1;
   this._vs_SoilBulkDensity = -1;
@@ -8951,6 +8952,7 @@ var SoilLayer = function (vs_LayerThickness, sps, cpp) {
     this.vs_SoilSandContent = 0.90;
     this.vs_SoilClayContent = 0.05;
     this.vs_SoilStoneContent = 0;
+    this.vs_Soil_CN_Ratio = 10.0;
     this.vs_SoilTexture = "Ss";
     this.vs_SoilpH = 7;
     this.vs_SoilMoistureOld_m3 = 0.25;
@@ -8992,6 +8994,7 @@ var SoilLayer = function (vs_LayerThickness, sps, cpp) {
     this.vs_SoilSandContent = sps.vs_SoilSandContent;
     this.vs_SoilClayContent = sps.vs_SoilClayContent;
     this.vs_SoilStoneContent = sps.vs_SoilStoneContent;
+    this.vs_Soil_CN_Ratio = sps.vs_Soil_CN_Ratio;
     this.vs_SoilTexture = sps.vs_SoilTexture;
     this.vs_SoilpH = sps.vs_SoilpH;
     this.vs_SoilMoistureOld_m3 = 0.25; // QUESTION - Warum wird hier mit 0.25 initialisiert?
@@ -9399,6 +9402,7 @@ var SoilLayer = function (vs_LayerThickness, sps, cpp) {
     vs_SoilSandContent: this.vs_SoilSandContent, /**< Soil layer's sand content [kg kg-1] */
     vs_SoilSiltContent: vs_SoilSiltContent,
     vs_SoilStoneContent: this.vs_SoilStoneContent, /**< Soil layer's stone content in soil [kg kg-1] */
+    vs_Soil_CN_Ratio: this.vs_Soil_CN_Ratio,
     vs_SoilTexture: this.vs_SoilTexture,
     vs_SoilWaterFlux: this.vs_SoilWaterFlux, /**< Water flux at the upper boundary of the soil layer [l m-2] */
     vs_SOM_Fast: this.vs_SOM_Fast, /**< C content of soil organic matter fast pool size [kg C m-3] */
@@ -10556,10 +10560,10 @@ var SoilOrganic = function (sc, gps, stps, cpp) {
       vo_CBalance[i] = 0.0;
 
     // C to N ratio of slowly decomposing soil organic matter []
-    var vo_CN_Ratio_SOM_Slow;
+    //var vo_CN_Ratio_SOM_Slow;
 
     // C to N ratio of rapidly decomposing soil organic matter []
-    var vo_CN_Ratio_SOM_Fast;
+    //var vo_CN_Ratio_SOM_Fast;
 
     // N balance of each layer [kg N m-3]
     var vo_NBalance = [];
@@ -10787,10 +10791,15 @@ var SoilOrganic = function (sc, gps, stps, cpp) {
     } // for i_Layer
 
     // Calculation of N balance
-    vo_CN_Ratio_SOM_Slow = siteParams.vs_Soil_CN_Ratio;
-    vo_CN_Ratio_SOM_Fast = siteParams.vs_Soil_CN_Ratio;
+    //vo_CN_Ratio_SOM_Slow = siteParams.vs_Soil_CN_Ratio;
+    //vo_CN_Ratio_SOM_Fast = siteParams.vs_Soil_CN_Ratio;
+
+    //logger(MSG.INFO, "soil-cn: " + soilColumn[0].vs_Soil_CN_Ratio);
 
     for (var i_Layer = 0; i_Layer < nools; i_Layer++) {
+
+      var vo_CN_Ratio_SOM_Slow = soilColumn[i_Layer].vs_Soil_CN_Ratio;
+      var vo_CN_Ratio_SOM_Fast = vo_CN_Ratio_SOM_Slow;
 
       vo_NBalance[i_Layer] = -(vo_SMB_SlowDelta[i_Layer] / po_CN_Ratio_SMB)
           - (vo_SMB_FastDelta[i_Layer] / po_CN_Ratio_SMB)
@@ -10827,6 +10836,9 @@ var SoilOrganic = function (sc, gps, stps, cpp) {
     vo_NetNMineralisation = 0.0;
 
     for (var i_Layer = 0; i_Layer < nools; i_Layer++) {
+
+       var vo_CN_Ratio_SOM_Slow = soilColumn[i_Layer].vs_Soil_CN_Ratio;
+       var vo_CN_Ratio_SOM_Fast = vo_CN_Ratio_SOM_Slow;
 
       if (vo_NBalance[i_Layer] < 0.0) {
 
@@ -14569,6 +14581,7 @@ var Configuration = function (outPath, climate, doDebug) {
         layer.vs_SoilSandContent = horizonObj.sand;
         layer.vs_SoilClayContent = horizonObj.clay;
         layer.vs_SoilStoneContent = horizonObj.sceleton; //TODO: / 100 ?
+        layer.vs_Soil_CN_Ratio = horizonObj.CN;
         layer.vs_Lambda = Tools.texture2lambda(layer.vs_SoilSandContent, layer.vs_SoilClayContent);
         // TODO: Wo wird textureClass verwendet?
         layer.vs_SoilTexture = horizonObj.textureClass;
