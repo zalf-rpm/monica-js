@@ -6212,12 +6212,10 @@ var Model = function (env, da) {
                              that.vw_AtmosphericCO2Concentration, precip);
     if(_currentCrop.useAutomaticIrrigation())
     {
-      logger(MSG.INFO, "cropStep useAutomaticIrrigation = true");
       var aips = _currentCrop.autoIrrigationParams();
-      if(_soilColumn.applyIrrigationViaTrigger(aips.treshold, aips.amount,
+      if(_soilColumn.applyIrrigationViaTrigger(aips.threshold, aips.amount,
                                                aips.nitrateConcentration))
       {
-        logger(MSG.INFO, "cropStep applyIrrigationViaTrigger = true");
         _soilOrganic.addIrrigationWater(aips.amount);
         _currentCrop.addAppliedIrrigationWater(aips.amount);
         _dailySumIrrigationWater += aips.amount;
@@ -9635,7 +9633,8 @@ var SoilColumn = function (gps, sp, cpp) {
     var e = that.cropGrowth.get_HeatSumIrrigationEnd();
     var cts = that.cropGrowth.get_CurrentTemperatureSum();
 
-    if (cts < s || cts > e) return false;
+    if (cts < s || cts > e)
+      return false;
 
     var vi_CriticalMoistureDepth = that.centralParameterProvider.userSoilMoistureParameters.pm_CriticalMoistureDepth;
 
@@ -9655,6 +9654,11 @@ var SoilColumn = function (gps, sp, cpp) {
       vi_PlantAvailableWaterFraction = vi_ActualPlantAvailableWater
                                          / vi_MaxPlantAvailableWater; // []
     }
+
+    //logger(MSG.INFO, "applyIrrigationViaTrigger s: " + s + " e: " + e + " cts: " + cts +
+    //" PlantAvailableWaterFraction: " + vi_PlantAvailableWaterFraction +
+    //" IrrigationThreshold: " + vi_IrrigationThreshold);
+
     if (vi_PlantAvailableWaterFraction <= vi_IrrigationThreshold) {
       this.applyIrrigation(vi_IrrigationAmount, vi_IrrigationNConcentration);
 
