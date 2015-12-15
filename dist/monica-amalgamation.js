@@ -6145,9 +6145,10 @@ var Model = function (env, da) {
 
     _soilColumn.deleteAOMPool();
 
-    _soilColumn.applyPossibleDelayedFerilizer();
-    var delayed_fert_amount = _soilColumn.applyPossibleTopDressing();
-    addDailySumFertiliser(delayed_fert_amount);
+    var delayedFertilizerAmount = _soilColumn.applyPossibleDelayedFertilizer();
+    addDailySumFertiliser(delayedFertilizerAmount);
+    var topDressingAmount = _soilColumn.applyPossibleTopDressing();
+    addDailySumFertiliser(topDressingAmount);
 
     if(_currentCrop && _currentCrop.isValid() &&
        _currentCrop.useNMinMethod()
@@ -7827,12 +7828,12 @@ var runMonica = function (env, progress_callback) {
     // writes crop results to output file
     if (write_output_files)
       writeCropResults(model.cropGrowth(), foutFileName, goutFileName, model.isCropPlanted());
-    
+
+    model.generalStep(d);
+
     /* if progress_callback is provided */
     if (progress_callback)
       progress_callback(currentDate, model);
-
-    model.generalStep(d);
 
     // write special outputs at 31.03.
     if(currentDate.getDate() == 31 && currentDate.getMonth() == 3) {
@@ -9470,10 +9471,13 @@ var SoilColumn = function (gps, sp, cpp) {
   soilColumnArray.applyPossibleTopDressing = function () {
     // do nothing if there is no active delay time
     if (that._vf_TopDressingDelay > 0) {
-      // if there is a delay time, decrement this value for this time step
+      //logger(MSG.INFO, "applyPossibleTopDressing TopDressingDelay: " + that._vf_TopDressingDelay);
+          // if there is a delay time, decrement this value for this time step
       that._vf_TopDressingDelay--;
       // test if now is the correct time for applying top dressing
       if (that._vf_TopDressingDelay == 0) {
+        //logger(MSG.INFO, "applyPossibleTopDressing TopDressingDelay: " + that._vf_TopDressingDelay
+        //  + " TopDressing: " + that._vf_TopDressing);
         var amount = that._vf_TopDressing;
         this.applyMineralFertiliser(that._vf_TopDressingPartition, amount);
         that._vf_TopDressing = 0;
@@ -9488,16 +9492,16 @@ var SoilColumn = function (gps, sp, cpp) {
    * Calls function for applying delayed fertilizer and
    * then removes the first fertilizer item in list.
    */
-  soilColumnArray.applyPossibleDelayedFerilizer = function () {
-    var delayedApps = that._delayedNMinApplications;
+  soilColumnArray.applyPossibleDelayedFertilizer = function () {
+    var delayedApps = that._delayedNMinApplications.slice();
     var n_amount = 0.0;
-    while(!delayedApps.length === 0) {
-      n_amount += delayedApps[0].func.apply(this, delayedApps[0].args);
-      delayedApps.shift();
-      // JS: delayedApps === _delayedNMinApplications
-      if (DEBUG && delayedApps != _delayedNMinApplications)
-        throw delayedApps;
-      // _delayedNMinApplications.shift();
+    if(delayedApps.length > 0){
+      //logger(MSG.INFO, "applyPossibleDelayedFertilizer delayedApps.length: " + delayedApps.length);
+      that._delayedNMinApplications = [];
+      for(var i in delayedApps) {
+        n_amount += delayedApps[i].func.apply(this, delayedApps[i].args);
+      }
+      //logger(MSG.INFO, "applied n_amount: " + n_amount);
     }
     return n_amount;
   };
@@ -9544,8 +9548,7 @@ var SoilColumn = function (gps, sp, cpp) {
     var vf_Layer30cm = this.getLayerNumberForDepth(0.3);
 
     // JS
-    var i_Layers = ceil(vf_SamplingDepth / this[i_Layer].vs_LayerThickness);
-    for (var i_Layer = 0; i_Layer < i_Layers; i_Layer++) {
+    for (var i_Layer = 0; i_Layer < ceil(vf_SamplingDepth / this[i_Layer].vs_LayerThickness); i_Layer++) {
       //vf_TargetLayer is in cm. We want number of layers
       vf_SoilNO3Sum += this[i_Layer].vs_SoilNO3; //! [kg N m-3]
       vf_SoilNH4Sum += this[i_Layer].vs_SoilNH4; //! [kg N m-3]
@@ -9590,8 +9593,8 @@ var SoilColumn = function (gps, sp, cpp) {
       vf_FertiliserRecommendation = vf_FertiliserMaxApplication;
       logger(MSG.WARN, 
         "Fertiliser demand above maximum application value. " +
-        "A top dressing of " + _vf_TopDressing + " " + 
-        "will be applied from now on day" + vf_TopDressingDelay + "."
+        "A top dressing of " + that._vf_TopDressing + " " +
+        "will be applied from now on in " + vf_TopDressingDelay + " day(s)."
        );
     }
 
