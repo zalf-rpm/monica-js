@@ -485,6 +485,7 @@ var SoilParameters = function () {
   this.vs_SoilTexture = ''; // JS! add initialization
   this.vs_SoilAmmonium = -1;
   this.vs_SoilNitrate = -1;
+  this.vs_Soil_CN_Ratio = 10;
 
   this._vs_SoilRawDensity = -1;
   this._vs_SoilBulkDensity = -1;

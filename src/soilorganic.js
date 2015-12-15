@@ -511,10 +511,10 @@ var SoilOrganic = function (sc, gps, stps, cpp) {
       vo_CBalance[i] = 0.0;
 
     // C to N ratio of slowly decomposing soil organic matter []
-    var vo_CN_Ratio_SOM_Slow;
+    //var vo_CN_Ratio_SOM_Slow;
 
     // C to N ratio of rapidly decomposing soil organic matter []
-    var vo_CN_Ratio_SOM_Fast;
+    //var vo_CN_Ratio_SOM_Fast;
 
     // N balance of each layer [kg N m-3]
     var vo_NBalance = [];
@@ -742,10 +742,13 @@ var SoilOrganic = function (sc, gps, stps, cpp) {
     } // for i_Layer
 
     // Calculation of N balance
-    vo_CN_Ratio_SOM_Slow = siteParams.vs_Soil_CN_Ratio;
-    vo_CN_Ratio_SOM_Fast = siteParams.vs_Soil_CN_Ratio;
+    //vo_CN_Ratio_SOM_Slow = siteParams.vs_Soil_CN_Ratio;
+    //vo_CN_Ratio_SOM_Fast = siteParams.vs_Soil_CN_Ratio;
 
     for (var i_Layer = 0; i_Layer < nools; i_Layer++) {
+
+      var vo_CN_Ratio_SOM_Slow = soilColumn[i_Layer].vs_Soil_CN_Ratio;
+      var vo_CN_Ratio_SOM_Fast = vo_CN_Ratio_SOM_Slow;
 
       vo_NBalance[i_Layer] = -(vo_SMB_SlowDelta[i_Layer] / po_CN_Ratio_SMB)
           - (vo_SMB_FastDelta[i_Layer] / po_CN_Ratio_SMB)
@@ -782,6 +785,9 @@ var SoilOrganic = function (sc, gps, stps, cpp) {
     vo_NetNMineralisation = 0.0;
 
     for (var i_Layer = 0; i_Layer < nools; i_Layer++) {
+
+      var vo_CN_Ratio_SOM_Slow = soilColumn[i_Layer].vs_Soil_CN_Ratio;
+      var vo_CN_Ratio_SOM_Fast = vo_CN_Ratio_SOM_Slow;
 
       if (vo_NBalance[i_Layer] < 0.0) {
 

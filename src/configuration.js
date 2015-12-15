@@ -150,6 +150,7 @@ var Configuration = function (outPath, climate, doDebug) {
         layer.vs_SoilSandContent = horizonObj.sand;
         layer.vs_SoilClayContent = horizonObj.clay;
         layer.vs_SoilStoneContent = horizonObj.sceleton; //TODO: / 100 ?
+        layer.vs_Soil_CN_Ratio = horizonObj.CN;
         layer.vs_Lambda = Tools.texture2lambda(layer.vs_SoilSandContent, layer.vs_SoilClayContent);
         // TODO: Wo wird textureClass verwendet?
         layer.vs_SoilTexture = horizonObj.textureClass;

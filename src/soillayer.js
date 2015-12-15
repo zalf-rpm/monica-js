@@ -11,6 +11,7 @@ var SoilLayer = function (vs_LayerThickness, sps, cpp) {
     this.vs_SoilSandContent = 0.90;
     this.vs_SoilClayContent = 0.05;
     this.vs_SoilStoneContent = 0;
+    this.vs_Soil_CN_Ratio = 10.0;
     this.vs_SoilTexture = "Ss";
     this.vs_SoilpH = 7;
     this.vs_SoilMoistureOld_m3 = 0.25;
@@ -52,6 +53,7 @@ var SoilLayer = function (vs_LayerThickness, sps, cpp) {
     this.vs_SoilSandContent = sps.vs_SoilSandContent;
     this.vs_SoilClayContent = sps.vs_SoilClayContent;
     this.vs_SoilStoneContent = sps.vs_SoilStoneContent;
+    this.vs_Soil_CN_Ratio = sps.vs_Soil_CN_Ratio;
     this.vs_SoilTexture = sps.vs_SoilTexture;
     this.vs_SoilpH = sps.vs_SoilpH;
     this.vs_SoilMoistureOld_m3 = 0.25; // QUESTION - Warum wird hier mit 0.25 initialisiert?
@@ -459,6 +461,7 @@ var SoilLayer = function (vs_LayerThickness, sps, cpp) {
     vs_SoilSandContent: this.vs_SoilSandContent, /**< Soil layer's sand content [kg kg-1] */
     vs_SoilSiltContent: vs_SoilSiltContent,
     vs_SoilStoneContent: this.vs_SoilStoneContent, /**< Soil layer's stone content in soil [kg kg-1] */
+    vs_Soil_CN_Ratio: this.vs_Soil_CN_Ratio,
     vs_SoilTexture: this.vs_SoilTexture,
     vs_SoilWaterFlux: this.vs_SoilWaterFlux, /**< Water flux at the upper boundary of the soil layer [l m-2] */
     vs_SOM_Fast: this.vs_SOM_Fast, /**< C content of soil organic matter fast pool size [kg C m-3] */
