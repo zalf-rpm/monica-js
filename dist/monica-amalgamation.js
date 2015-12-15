@@ -6048,7 +6048,7 @@ var Model = function (env, da) {
   };
 
   var applyOrganicFertiliser = function (params, amount, incorporation) {
-    logger(MSG.INFO, "MONICA model: applyOrganicFertiliser:\t" + amount + "\t" + params.vo_NConcentration);
+    logger(MSG.INFO, "MONICA model: applyOrganicFertiliser: " + amount + " nc: " + params.vo_NConcentration + " incorp: " + incorporation);
     _soilOrganic.setIncorporation(incorporation);
     _soilOrganic.addOrganicMatter(params, amount, params.vo_NConcentration);
     addDailySumFertiliser(amount * params.vo_NConcentration);
@@ -10191,6 +10191,7 @@ var SoilOrganic = function (sc, gps, stps, cpp) {
     nConcentration
     )
   {
+    //logger(MSG.WARN, "addOrganicMatter params: " + params.toString() + " amount: " + amount + " nc: " + nConcentration);
     debug("SoilOrganic: addOrganicMatter: " + params.toString());
     var vo_AddedOrganicMatterAmount = amount;
     // TODO: nConcentration is immer 0. Warum?
@@ -14809,6 +14810,8 @@ var Configuration = function (outPath, climate, doDebug) {
           logger(MSG.ERROR, 'Organic fertilser ' + type.id + ' not found.');
           ok = false;
         }
+
+        //logger(MSG.INFO, "organic fertiliser amount: " + amount);
 
         pp.addApplication(new OrganicFertiliserApplication(fDate, getOrganicFertiliserParameters(orgId), amount, true));
       
