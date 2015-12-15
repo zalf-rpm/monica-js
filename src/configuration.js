@@ -752,6 +752,35 @@ var Configuration = function (outPath, climate, doDebug) {
       for(var i_Layer = 0; i_Layer < 6; i_Layer++)
         progress['SoilOrganicCarbon_' + i_Layer] = { value: msc.soilLayer(i_Layer).vs_SoilOrganicCarbon(), unit: '[kg (C) kg-1]' };
 
+      for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+        progress['AOMf_' + i_Layer] = { value: mso.get_AOM_FastSum(i_Layer), unit: '[kg (C) m-3]' };
+
+      for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+        progress['AOMs_' + i_Layer] = { value: mso.get_AOM_SlowSum(i_Layer), unit: '[kg (C) m-3]' };
+
+      for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+        progress['SMBf_' + i_Layer] = { value: mso.get_SMB_Fast(i_Layer), unit: '[kg (C) m-3]' };
+
+      for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+        progress['SMBs_' + i_Layer] = { value: mso.get_SMB_Slow(i_Layer), unit: '[kg (C) m-3]' };
+
+      for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+        progress['SOMf_' + i_Layer] = { value: mso.get_SOM_Fast(i_Layer), unit: '[kg (C) m-3]' };
+
+      for(var i_Layer = 0; i_Layer < 1; i_Layer++)
+        progress['SOMs_' + i_Layer] = { value: mso.get_SOM_Slow(i_Layer), unit: '[kg (C) m-3]' };
+
+      for(var i_Layer = 0; i_Layer < 3; i_Layer++)
+        progress['Nmin_' + i_Layer] = { value: mso.get_NetNMineralisationRate(i_Layer), unit: '[kg (N) ha-1]' };
+
+      progress['Denit'] = { value: mso.get_Denitrification(), unit: '[kg (N) ha-1]' };
+
+      progress['N20'] = { value: mso.get_N2O_Produced(), unit: '[kg (N) ha-1]' };
+
+      progress['NH3'] = { value: mso.get_NH3_Volatilised(), unit: '[kg (N) ha-1]' };
+
+      progress['NFert'] = { value: model.dailySumFertiliser(), unit: '[kg (N) ha-1]' };
+
       progress["tmin"] = { value: model.dataAccessor().dataForTimestep(Climate.tmin, model.currentStepNo()), unit: "[°C]" };
     progress["tavg"] = { value: model.dataAccessor().dataForTimestep(Climate.tavg, model.currentStepNo()), unit: "[°C]" };
     progress["tmax"] = { value: model.dataAccessor().dataForTimestep(Climate.tmax, model.currentStepNo()), unit: "[°C]" };
