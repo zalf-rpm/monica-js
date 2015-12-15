@@ -1110,12 +1110,12 @@ var runMonica = function (env, progress_callback) {
     // writes crop results to output file
     if (write_output_files)
       writeCropResults(model.cropGrowth(), foutFileName, goutFileName, model.isCropPlanted());
-    
+
+    model.generalStep(d);
+
     /* if progress_callback is provided */
     if (progress_callback)
       progress_callback(currentDate, model);
-
-    model.generalStep(d);
 
     // write special outputs at 31.03.
     if(currentDate.getDate() == 31 && currentDate.getMonth() == 3) {

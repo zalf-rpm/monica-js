@@ -266,9 +266,10 @@ var Model = function (env, da) {
 
     _soilColumn.deleteAOMPool();
 
-    _soilColumn.applyPossibleDelayedFerilizer();
-    var delayed_fert_amount = _soilColumn.applyPossibleTopDressing();
-    addDailySumFertiliser(delayed_fert_amount);
+    var delayedFertilizerAmount = _soilColumn.applyPossibleDelayedFertilizer();
+    addDailySumFertiliser(delayedFertilizerAmount);
+    var topDressingAmount = _soilColumn.applyPossibleTopDressing();
+    addDailySumFertiliser(topDressingAmount);
 
     if(_currentCrop && _currentCrop.isValid() &&
        _currentCrop.useNMinMethod()
