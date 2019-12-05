@@ -7,7 +7,7 @@ monica-js
 The acronym MONICA is derived from „Model of Nitrogen and Carbon dynamics in Agro-ecosystems”._"
 (quote http://monica.agrosystem-models.com/)
 
-A test GUI is available at [http://zalf-lsa.github.io/monica-js](http://zalf-lsa.github.io/monica-js/). It seems to work with most browsers, however, using Chrome is recommended.
+A test GUI is available at [http://zalf-rpm.github.io/monica-js](http://zalf-rpm.github.io/monica-js/). It seems to work with most browsers, however, using Chrome is recommended.
 
 Features not yet implemented or tested:
 
